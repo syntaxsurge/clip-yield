@@ -1,0 +1,87 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useAppSelector } from "@/app/store";
+import type { MediaType } from "@/app/types";
+import UploadMedia from "../AddButtons/UploadMedia";
+import MediaList from "./MediaList";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { Search } from "lucide-react";
+
+type LibraryFilter = "all" | Exclude<MediaType, "unknown">;
+
+const filters: { id: LibraryFilter; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "video", label: "Video" },
+  { id: "image", label: "Images" },
+  { id: "audio", label: "Audio" },
+];
+
+export default function LibraryPanel() {
+  const totalFiles = useAppSelector(
+    (state) => state.projectState.filesID?.length ?? 0,
+  );
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<LibraryFilter>("all");
+
+  const normalizedQuery = useMemo(() => query.trim(), [query]);
+
+  return (
+    <div className="space-y-4">
+      <div className="min-w-0 space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-sm font-semibold text-white">Library</h2>
+          <div className="text-xs text-white/50 tabular-nums">
+            {totalFiles} item{totalFiles === 1 ? "" : "s"}
+          </div>
+        </div>
+        <p className="text-xs text-white/50">
+          Upload and drag media onto the timeline.
+        </p>
+      </div>
+
+      <UploadMedia variant="dropzone" className="py-3" />
+
+      <div className="space-y-2 rounded-xl border border-white/10 bg-black/20 p-3">
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40"
+            aria-hidden="true"
+          />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search media…"
+            className="border-white/10 bg-black/30 pl-9 text-white placeholder:text-white/40 focus-visible:ring-white/30 focus-visible:ring-offset-0"
+            aria-label="Search media library"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {filters.map((f) => (
+            <Button
+              key={f.id}
+              type="button"
+              size="sm"
+              variant={filter === f.id ? "secondary" : "ghost"}
+              onClick={() => setFilter(f.id)}
+              className={cn(
+                "h-8 rounded-full px-3",
+                filter === f.id ? null : "text-white/70 hover:text-white",
+              )}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <MediaList
+        query={normalizedQuery}
+        typeFilter={filter === "all" ? undefined : filter}
+      />
+    </div>
+  );
+}

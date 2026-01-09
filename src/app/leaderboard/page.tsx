@@ -1,0 +1,204 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import MainLayout from "@/app/layouts/MainLayout";
+import useGetLatestLeaderboard from "@/app/hooks/useGetLatestLeaderboard";
+import type { LeaderboardSnapshot } from "@/app/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatShortHash } from "@/lib/utils";
+import BoostPassClaimCard from "@/features/boost-pass/components/BoostPassClaimCard";
+import { formatUnits } from "viem";
+
+export default function LeaderboardPage() {
+  const [snapshot, setSnapshot] = useState<LeaderboardSnapshot | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setStatus("loading");
+    setError(null);
+
+    (async () => {
+      try {
+        const result = await useGetLatestLeaderboard();
+        if (!isMounted) return;
+        setSnapshot(result);
+        setStatus("ready");
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err instanceof Error ? err.message : "Failed to load leaderboard.");
+        setStatus("error");
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formattedCreators = useMemo(() => {
+    if (!snapshot) return [];
+    return snapshot.topCreators.map((entry) => {
+      const sponsored = BigInt(entry.sponsoredWei);
+      const boost = BigInt(entry.boostWei);
+      return {
+        creatorId: entry.creatorId,
+        sponsored,
+        boost,
+        total: sponsored + boost,
+      };
+    });
+  }, [snapshot]);
+
+  const formattedBoosters = useMemo(() => {
+    if (!snapshot) return [];
+    return snapshot.topBoosters.map((entry) => ({
+      wallet: entry.wallet,
+      boost: BigInt(entry.boostWei),
+    }));
+  }, [snapshot]);
+
+  const formatWei = (value: bigint) => {
+    try {
+      return formatUnits(value, 18);
+    } catch {
+      return value.toString();
+    }
+  };
+
+  return (
+    <MainLayout>
+      <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+        <div className="mx-auto w-full max-w-5xl space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">Boost leaderboards</h1>
+            <p className="text-sm text-muted-foreground">
+              Ranked by confirmed on-chain boosts and sponsorships.
+            </p>
+          </div>
+
+          <BoostPassClaimCard snapshot={snapshot} />
+
+          {status === "error" && (
+            <Alert variant="destructive">
+              <AlertTitle>Unable to load leaderboard</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {status === "loading" && (
+            <Alert variant="info">
+              <AlertTitle>Loading leaderboard</AlertTitle>
+              <AlertDescription>Aggregating confirmed vault activity.</AlertDescription>
+            </Alert>
+          )}
+
+          {status === "ready" && !snapshot && (
+            <Alert variant="warning">
+              <AlertTitle>No leaderboard yet</AlertTitle>
+              <AlertDescription>
+                We&apos;ll populate rankings after the first confirmed boosts.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {status === "ready" && snapshot && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top creators</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Updated {new Date(snapshot.ts).toLocaleString()}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-hidden rounded-lg border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                        <tr>
+                          <th className="px-3 py-2">Creator</th>
+                          <th className="px-3 py-2">Sponsored (WMNT)</th>
+                          <th className="px-3 py-2">Boosted (WMNT)</th>
+                          <th className="px-3 py-2">Total (WMNT)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {formattedCreators.map((entry) => (
+                          <tr key={entry.creatorId} className="border-t">
+                            <td className="px-3 py-2 font-mono text-xs">
+                              {formatShortHash(entry.creatorId)}
+                            </td>
+                            <td className="px-3 py-2">{formatWei(entry.sponsored)}</td>
+                            <td className="px-3 py-2">{formatWei(entry.boost)}</td>
+                            <td className="px-3 py-2 font-semibold">
+                              {formatWei(entry.total)}
+                            </td>
+                          </tr>
+                        ))}
+                        {!formattedCreators.length && (
+                          <tr>
+                            <td
+                              className="px-3 py-4 text-center text-muted-foreground"
+                              colSpan={4}
+                            >
+                              No confirmed boosts yet.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top boosters</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Ranked by total confirmed boosts.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-hidden rounded-lg border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                        <tr>
+                          <th className="px-3 py-2">Wallet</th>
+                          <th className="px-3 py-2">Total boosted (WMNT)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {formattedBoosters.map((entry) => (
+                          <tr key={entry.wallet} className="border-t">
+                            <td className="px-3 py-2 font-mono text-xs">
+                              {formatShortHash(entry.wallet)}
+                            </td>
+                            <td className="px-3 py-2 font-semibold">
+                              {formatWei(entry.boost)}
+                            </td>
+                          </tr>
+                        ))}
+                        {!formattedBoosters.length && (
+                          <tr>
+                            <td
+                              className="px-3 py-4 text-center text-muted-foreground"
+                              colSpan={2}
+                            >
+                              No confirmed boosters yet.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </div>
+    </MainLayout>
+  );
+}

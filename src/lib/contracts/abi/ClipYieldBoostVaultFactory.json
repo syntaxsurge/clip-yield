@@ -1,0 +1,16 @@
+[
+  {
+    "type": "function",
+    "name": "vaultOf",
+    "stateMutability": "view",
+    "inputs": [{ "name": "creator", "type": "address" }],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "createVault",
+    "stateMutability": "nonpayable",
+    "inputs": [{ "name": "creator", "type": "address" }],
+    "outputs": [{ "name": "vaultAddr", "type": "address" }]
+  }
+]

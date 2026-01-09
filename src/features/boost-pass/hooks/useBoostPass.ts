@@ -1,0 +1,71 @@
+"use client";
+
+import { useAccount, useChainId, useReadContract, useWriteContract } from "wagmi";
+import type { Address } from "viem";
+import boostPassAbi from "@/lib/contracts/abi/ClipYieldBoostPass.json";
+import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
+
+export function useBoostPass() {
+  const { address } = useAccount();
+  const chainId = useChainId();
+  const { writeContractAsync, isPending } = useWriteContract();
+
+  const boostPassAddress = mantleSepoliaContracts.boostPass as Address;
+  const isOnMantle = chainId === mantleSepoliaContracts.chainId;
+
+  const { data: currentEpoch } = useReadContract({
+    address: boostPassAddress,
+    abi: boostPassAbi,
+    functionName: "currentEpoch",
+    query: { enabled: isOnMantle },
+  });
+
+  const epochValue = typeof currentEpoch === "bigint" ? currentEpoch : null;
+  const canQuery = Boolean(address && epochValue !== null && isOnMantle);
+
+  const { data: eligible } = useReadContract({
+    address: boostPassAddress,
+    abi: boostPassAbi,
+    functionName: "eligible",
+    args: address && epochValue !== null ? [epochValue, address] : undefined,
+    query: { enabled: canQuery },
+  });
+
+  const { data: claimed } = useReadContract({
+    address: boostPassAddress,
+    abi: boostPassAbi,
+    functionName: "claimed",
+    args: address && epochValue !== null ? [epochValue, address] : undefined,
+    query: { enabled: canQuery },
+  });
+
+  const { data: balance } = useReadContract({
+    address: boostPassAddress,
+    abi: boostPassAbi,
+    functionName: "balanceOf",
+    args: address && epochValue !== null ? [address, epochValue] : undefined,
+    query: { enabled: canQuery },
+  });
+
+  const claim = async (epoch: bigint) => {
+    return await writeContractAsync({
+      address: boostPassAddress,
+      abi: boostPassAbi,
+      functionName: "claim",
+      args: [epoch],
+    });
+  };
+
+  return {
+    address,
+    boostPassAddress,
+    currentEpoch: epochValue,
+    eligible: Boolean(eligible),
+    claimed: Boolean(claimed),
+    balance: typeof balance === "bigint" ? balance : null,
+    hasPass: typeof balance === "bigint" ? balance > 0n : false,
+    claim,
+    isClaimPending: isPending,
+    isOnMantle,
+  };
+}

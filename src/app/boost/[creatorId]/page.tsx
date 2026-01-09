@@ -1,0 +1,164 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { isAddress } from "viem";
+import MainLayout from "@/app/layouts/MainLayout";
+import useGetCreatorVaultByWallet from "@/app/hooks/useGetCreatorVaultByWallet";
+import useGetProfileByUserId from "@/app/hooks/useGetProfileByUserId";
+import type { CreatorVaultRecord, Profile } from "@/app/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { formatShortHash } from "@/lib/utils";
+import YieldPanel from "@/features/yield/components/YieldPanel";
+
+type BoostPageProps = {
+  params: { creatorId: string };
+};
+
+export default function BoostPage({ params }: BoostPageProps) {
+  const { creatorId } = params;
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [vaultRecord, setVaultRecord] = useState<CreatorVaultRecord | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!creatorId || !isAddress(creatorId)) {
+      setError("Invalid creator address.");
+      setStatus("error");
+      return;
+    }
+
+    let isMounted = true;
+    setStatus("loading");
+    setError(null);
+
+    (async () => {
+      try {
+        const [profileResult, vaultResult] = await Promise.all([
+          useGetProfileByUserId(creatorId),
+          useGetCreatorVaultByWallet(creatorId),
+        ]);
+
+        if (!isMounted) return;
+
+        setProfile(profileResult);
+        setVaultRecord(vaultResult);
+        setStatus("ready");
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err instanceof Error ? err.message : "Failed to load creator vault.");
+        setStatus("error");
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [creatorId]);
+
+  const creatorLabel = profile?.name ?? formatShortHash(creatorId);
+
+  return (
+    <MainLayout>
+      <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+        <div className="mx-auto w-full max-w-5xl space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">Boost {creatorLabel}</h1>
+            <p className="text-sm text-muted-foreground">
+              Deposit WMNT into this creator's boost vault. Yield is streamed
+              to the creator while your principal stays withdrawable.
+            </p>
+          </div>
+
+          {status === "error" && (
+            <Alert variant="destructive">
+              <AlertTitle>Unable to load boost vault</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {status === "loading" && (
+            <Alert variant="info">
+              <AlertTitle>Loading boost vault</AlertTitle>
+              <AlertDescription>
+                Fetching creator profile and vault status from Convex.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {status === "ready" && !vaultRecord && (
+            <Alert variant="warning">
+              <AlertTitle>Vault not ready</AlertTitle>
+              <AlertDescription>
+                This creator hasn&apos;t completed KYC yet. Vaults are
+                auto-provisioned immediately after verification.
+              </AlertDescription>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Button asChild variant="outline">
+                  <Link
+                    href={`/kyc?returnTo=${encodeURIComponent(
+                      `/boost/${creatorId}`,
+                    )}`}
+                  >
+                    Start KYC
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link href={`/profile/${creatorId}`}>Back to profile</Link>
+                </Button>
+              </div>
+            </Alert>
+          )}
+
+          {status === "ready" && vaultRecord && (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Boost vault details</CardTitle>
+                  <CardDescription>
+                    Vaults are created on Mantle Sepolia after a creator is
+                    verified.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Creator wallet</span>
+                    <span className="font-mono text-xs">
+                      {formatShortHash(creatorId)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Vault address</span>
+                    <span className="font-mono text-xs">
+                      {formatShortHash(vaultRecord.vault)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <YieldPanel
+                vaultAddress={vaultRecord.vault as `0x${string}`}
+                title={`Boost ${creatorLabel}`}
+                description="KYC-gated vault for creator boosts on Mantle Sepolia."
+                returnTo={`/boost/${creatorId}`}
+                receiptKind="boostDeposit"
+                receiptCreatorId={creatorId}
+                receiptTitle="Boost receipt"
+                receiptDescription="Latest boost deposit for this creator."
+              />
+            </>
+          )}
+        </div>
+      </div>
+    </MainLayout>
+  );
+}

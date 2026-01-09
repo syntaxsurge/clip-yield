@@ -1,0 +1,105 @@
+[
+  {
+    "type": "event",
+    "name": "EpochPublished",
+    "anonymous": false,
+    "inputs": [
+      { "name": "epoch", "type": "uint256", "indexed": true },
+      { "name": "walletCount", "type": "uint256", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "Claimed",
+    "anonymous": false,
+    "inputs": [
+      { "name": "epoch", "type": "uint256", "indexed": true },
+      { "name": "wallet", "type": "address", "indexed": true }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "MANAGER_ROLE",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32" }]
+  },
+  {
+    "type": "function",
+    "name": "hasRole",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "role", "type": "bytes32" },
+      { "name": "account", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool" }]
+  },
+  {
+    "type": "function",
+    "name": "kyc",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "currentEpoch",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "eligible",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "", "type": "uint256" },
+      { "name": "", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool" }]
+  },
+  {
+    "type": "function",
+    "name": "claimed",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "", "type": "uint256" },
+      { "name": "", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool" }]
+  },
+  {
+    "type": "function",
+    "name": "publishEpoch",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "epoch", "type": "uint256" },
+      { "name": "wallets", "type": "address[]" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "claim",
+    "stateMutability": "nonpayable",
+    "inputs": [{ "name": "epoch", "type": "uint256" }],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "balanceOf",
+    "stateMutability": "view",
+    "inputs": [
+      { "name": "account", "type": "address" },
+      { "name": "id", "type": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "stateMutability": "view",
+    "inputs": [{ "name": "interfaceId", "type": "bytes4" }],
+    "outputs": [{ "name": "", "type": "bool" }]
+  }
+]

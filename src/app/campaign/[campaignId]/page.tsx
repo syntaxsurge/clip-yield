@@ -1,0 +1,224 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import MainLayout from "@/app/layouts/MainLayout";
+import useGetCampaignReceiptById from "@/app/hooks/useGetCampaignReceiptById";
+import type { CampaignReceipt } from "@/app/types";
+import { MantleFinalityPanel } from "@/components/data-display/MantleFinalityPanel";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { formatShortHash } from "@/lib/utils";
+import { explorerTxUrl } from "@/lib/web3/mantleConfig";
+import { formatUnits } from "viem";
+
+type CampaignPageProps = {
+  params: { campaignId: string };
+};
+
+const statusStyles: Record<CampaignReceipt["status"], string> = {
+  pending: "bg-amber-100 text-amber-800",
+  confirmed: "bg-emerald-100 text-emerald-800",
+  failed: "bg-rose-100 text-rose-800",
+};
+
+export default function CampaignReceiptPage({ params }: CampaignPageProps) {
+  const { campaignId } = params;
+  const [receipt, setReceipt] = useState<CampaignReceipt | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setStatus("loading");
+    setError(null);
+
+    (async () => {
+      try {
+        if (!campaignId) throw new Error("Missing campaign receipt.");
+        const result = await useGetCampaignReceiptById(campaignId);
+        if (!result) throw new Error("Campaign receipt not found.");
+        if (!isMounted) return;
+        setReceipt(result);
+        setStatus("ready");
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err instanceof Error ? err.message : "Failed to load receipt.");
+        setStatus("error");
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [campaignId]);
+
+  const formattedAssets = useMemo(() => {
+    if (!receipt) return "0";
+    try {
+      return formatUnits(BigInt(receipt.assetsWei), 18);
+    } catch {
+      return receipt.assetsWei;
+    }
+  }, [receipt]);
+
+  return (
+    <MainLayout>
+      <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+        <div className="mx-auto w-full max-w-5xl space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">Campaign receipt</h1>
+            <p className="text-sm text-muted-foreground">
+              Immutable sponsorship terms + on-chain proof for Mantle RealFi.
+            </p>
+          </div>
+
+          {status === "error" && (
+            <Alert variant="destructive">
+              <AlertTitle>Unable to load receipt</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {status === "loading" && (
+            <Alert variant="info">
+              <AlertTitle>Loading receipt</AlertTitle>
+              <AlertDescription>Fetching on-chain campaign details.</AlertDescription>
+            </Alert>
+          )}
+
+          {status === "ready" && receipt && (
+            <div className="space-y-6">
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Receipt details</CardTitle>
+                    <CardDescription>Campaign ID: {campaignId}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Status</span>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[receipt.status]}`}
+                      >
+                        {receipt.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Sponsor</span>
+                      <span className="font-mono text-xs">
+                        {formatShortHash(receipt.sponsorAddress)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Creator</span>
+                      <span className="font-mono text-xs">
+                        {formatShortHash(receipt.creatorId)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Boost vault</span>
+                      <span className="font-mono text-xs">
+                        {formatShortHash(receipt.boostVault)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Amount</span>
+                      <span>{formattedAssets} WMNT</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-muted-foreground">Terms hash</div>
+                      <div className="break-all font-mono text-xs">
+                        {receipt.termsHash}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-muted-foreground">Transaction</div>
+                      <a
+                        className="break-all font-mono text-xs underline underline-offset-2"
+                        href={explorerTxUrl(receipt.txHash)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {receipt.txHash}
+                      </a>
+                    </div>
+                    {receipt.confirmedAt && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Confirmed</span>
+                        <span>
+                          {new Date(receipt.confirmedAt).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Campaign terms</CardTitle>
+                    <CardDescription>
+                      Signed off-chain and hashed on-chain.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div>
+                      <div className="text-muted-foreground">Sponsor name</div>
+                      <div>{receipt.sponsorName}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Objective</div>
+                      <div>{receipt.objective}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Deliverables</div>
+                      <ul className="list-disc space-y-1 pl-5">
+                        {receipt.deliverables.map((item, index) => (
+                          <li key={`${item}-${index}`}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <div className="text-muted-foreground">Start date</div>
+                        <div>{new Date(receipt.startDateIso).toLocaleDateString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">End date</div>
+                        <div>{new Date(receipt.endDateIso).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Disclosure</div>
+                      <div>{receipt.disclosure}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Alert variant="info">
+                <AlertTitle>Batch context</AlertTitle>
+                <AlertDescription>
+                  Mantle batches L2 transactions before submitting them to L1. In
+                  the explorer, the L1 State Data section includes the Batch Index
+                  and the L1 submission hash that links this batch to Ethereum.
+                </AlertDescription>
+              </Alert>
+
+              <MantleFinalityPanel
+                txHash={receipt.txHash as `0x${string}`}
+                l2BlockNumber={receipt.l2BlockNumber ?? null}
+                l2TimestampIso={receipt.l2TimestampIso ?? null}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </MainLayout>
+  );
+}
