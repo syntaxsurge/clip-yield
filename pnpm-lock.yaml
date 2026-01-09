@@ -95,6 +95,9 @@ importers:
       idb:
         specifier: ^8.0.2
         version: 8.0.3
+      lit:
+        specifier: ^3.3.2
+        version: 3.3.2
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -4480,6 +4483,9 @@ packages:
 
   lit@3.3.0:
     resolution: {integrity: sha512-DGVsqsOIHBww2DqnuZzW7QsuCdahp50ojuDaBPC7jUDRpYoH0z7kHBBYZewRzer75FwtrkmkKk7iOAwSaWdBmw==}
+
+  lit@3.3.2:
+    resolution: {integrity: sha512-NF9zbsP79l4ao2SNrH3NkfmFgN/hBYSQo90saIVI1o5GpjAdCPVstVzO1MrLOakHoEhYkrtRjPK6Ob521aoYWQ==}
 
   locate-path@5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
@@ -12032,6 +12038,12 @@ snapshots:
       '@types/trusted-types': 2.0.7
 
   lit@3.3.0:
+    dependencies:
+      '@lit/reactive-element': 2.1.2
+      lit-element: 4.2.2
+      lit-html: 3.3.2
+
+  lit@3.3.2:
     dependencies:
       '@lit/reactive-element': 2.1.2
       lit-element: 4.2.2
