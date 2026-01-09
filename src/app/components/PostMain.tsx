@@ -10,9 +10,15 @@ import { PostMainCompTypes } from "../types"
 import useGetSponsorCampaignByPostId from "../hooks/useGetSponsorCampaignByPostId"
 import { isSponsorCampaignActive } from "@/features/sponsor/utils"
 import type { SponsorCampaign } from "@/app/types"
+import { useUser } from "@/app/context/user"
+import useIsFollowing from "@/app/hooks/useIsFollowing"
+import useToggleFollow from "@/app/hooks/useToggleFollow"
 
 export default function PostMain({ post }: PostMainCompTypes) {
+    const contextUser = useUser()
     const [sponsorCampaign, setSponsorCampaign] = useState<SponsorCampaign | null>(null)
+    const [isFollowing, setIsFollowing] = useState(false)
+    const [isFollowLoading, setIsFollowLoading] = useState(false)
 
     useEffect(() => {
         const video = document.getElementById(`video-${post?.id}`) as HTMLVideoElement
@@ -51,6 +57,50 @@ export default function PostMain({ post }: PostMainCompTypes) {
         }
     }, [post?.id])
 
+    useEffect(() => {
+        let isMounted = true
+
+        const loadFollowState = async () => {
+            if (!contextUser?.user?.id || contextUser.user.id === post.profile.user_id) {
+                setIsFollowing(false)
+                return
+            }
+
+            try {
+                const result = await useIsFollowing(contextUser.user.id, post.profile.user_id)
+                if (!isMounted) return
+                setIsFollowing(result)
+            } catch {
+                if (!isMounted) return
+                setIsFollowing(false)
+            }
+        }
+
+        loadFollowState()
+
+        return () => {
+            isMounted = false
+        }
+    }, [contextUser?.user?.id, post.profile.user_id])
+
+    const handleFollow = async () => {
+        if (!contextUser?.user?.id) {
+            await contextUser?.openConnect()
+            return
+        }
+        if (contextUser.user.id === post.profile.user_id) return
+
+        try {
+            setIsFollowLoading(true)
+            const nextState = await useToggleFollow(contextUser.user.id, post.profile.user_id)
+            setIsFollowing(nextState)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setIsFollowLoading(false)
+        }
+    }
+
     const isSponsored = useMemo(() => {
         return isSponsorCampaignActive(sponsorCampaign)
     }, [sponsorCampaign])
@@ -86,9 +136,20 @@ export default function PostMain({ post }: PostMainCompTypes) {
                             >
                                 Sponsor
                             </Link>
-                            <button className="border text-[15px] px-[21px] py-0.5 border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] font-semibold rounded-md">
-                                Follow
-                            </button>
+                            {contextUser?.user?.id === post.profile.user_id ? null : (
+                                <button
+                                    onClick={() => void handleFollow()}
+                                    disabled={isFollowLoading}
+                                    aria-pressed={isFollowing}
+                                    className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
+                                        isFollowing
+                                            ? "border-gray-200 text-gray-700 hover:bg-gray-100"
+                                            : "border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2]"
+                                    }`}
+                                >
+                                    {isFollowing ? "Following" : "Follow"}
+                                </button>
+                            )}
                         </div>
                     </div>
                     <p className="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px]">{post.text}</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
 import useGetCampaignReceiptById from "@/app/hooks/useGetCampaignReceiptById";
 import type { CampaignReceipt } from "@/app/types";
@@ -18,7 +18,7 @@ import { explorerTxUrl } from "@/lib/web3/mantleConfig";
 import { formatUnits } from "viem";
 
 type CampaignPageProps = {
-  params: { campaignId: string };
+  params: Promise<{ campaignId: string }>;
 };
 
 const statusStyles: Record<CampaignReceipt["status"], string> = {
@@ -28,7 +28,7 @@ const statusStyles: Record<CampaignReceipt["status"], string> = {
 };
 
 export default function CampaignReceiptPage({ params }: CampaignPageProps) {
-  const { campaignId } = params;
+  const { campaignId } = use(params);
   const [receipt, setReceipt] = useState<CampaignReceipt | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState<string | null>(null);

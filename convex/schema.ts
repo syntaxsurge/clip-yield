@@ -40,6 +40,15 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_post_and_user", ["postId", "userId"]),
 
+  follows: defineTable({
+    followerId: v.string(),
+    followingId: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_follower", ["followerId"])
+    .index("by_following", ["followingId"])
+    .index("by_follower_following", ["followerId", "followingId"]),
+
   projects: defineTable({
     wallet: v.string(),
     localId: v.string(),

@@ -20,7 +20,10 @@ export default function MenuItem({ iconString, colorString, sizeString }: MenuIt
 
                     {icons()}
 
-                    <p className={`lg:block hidden pl-[9px] mt-0.5 font-semibold text-[17px] text-[${colorString}]`}>
+                    <p
+                        className="lg:block hidden pl-[9px] mt-0.5 font-semibold text-[17px]"
+                        style={{ color: colorString || "inherit" }}
+                    >
                         {iconString}
                     </p>
                 </div>

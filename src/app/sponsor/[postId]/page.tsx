@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import MainLayout from "@/app/layouts/MainLayout";
 import useGetPostById from "@/app/hooks/useGetPostById";
@@ -22,11 +22,11 @@ import { isSponsorCampaignActive } from "@/features/sponsor/utils";
 import { formatUnits } from "viem";
 
 type SponsorPageProps = {
-  params: { postId: string };
+  params: Promise<{ postId: string }>;
 };
 
 export default function SponsorPage({ params }: SponsorPageProps) {
-  const { postId } = params;
+  const { postId } = use(params);
   const [post, setPost] = useState<PostWithProfile | null>(null);
   const [vaultRecord, setVaultRecord] = useState<CreatorVaultRecord | null>(null);
   const [campaign, setCampaign] = useState<SponsorCampaign | null>(null);

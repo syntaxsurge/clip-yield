@@ -3,18 +3,19 @@
 import Comments from "@/app/components/post/Comments"
 import CommentsHeader from "@/app/components/post/CommentsHeader"
 import Link from "next/link"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 import { AiOutlineClose } from "react-icons/ai"
 import { BiChevronDown, BiChevronUp } from "react-icons/bi"
 import { useRouter } from "next/navigation"
 import ClientOnly from "@/app/components/ClientOnly"
-import { Post, PostPageTypes } from "@/app/types"
+import { PostPageTypes } from "@/app/types"
 import { usePostStore } from "@/app/stores/post"
 import { useLikeStore } from "@/app/stores/like"
 import { useCommentStore } from "@/app/stores/comment"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
 
 export default function Post({ params }: PostPageTypes) {
+    const { postId, userId } = use(params)
 
     let { postById, postsByUser, setPostById, setPostsByUser } = usePostStore()
     let { setLikesByPost } = useLikeStore()
@@ -23,24 +24,24 @@ export default function Post({ params }: PostPageTypes) {
     const router = useRouter()
 
     useEffect(() => { 
-        setPostById(params.postId)
-        setCommentsByPost(params.postId) 
-        setLikesByPost(params.postId)
-        setPostsByUser(params.userId) 
-    }, [])
+        setPostById(postId)
+        setCommentsByPost(postId) 
+        setLikesByPost(postId)
+        setPostsByUser(userId) 
+    }, [postId, setCommentsByPost, setLikesByPost, setPostById, setPostsByUser, userId])
 
     const loopThroughPostsUp = () => {
         postsByUser.forEach(post => {
-            if (post.id > params.postId) {
-                router.push(`/post/${post.id}/${params.userId}`)
+            if (post.id > postId) {
+                router.push(`/post/${post.id}/${userId}`)
             }
         });
     }
 
     const loopThroughPostsDown = () => {
         postsByUser.forEach(post => {
-            if (post.id < params.postId) {
-                router.push(`/post/${post.id}/${params.userId}`)
+            if (post.id < postId) {
+                router.push(`/post/${post.id}/${userId}`)
             }
         });
     }
@@ -53,7 +54,7 @@ export default function Post({ params }: PostPageTypes) {
             >
                 <div className="lg:w-[calc(100%-540px)] h-full relative">
                     <Link
-                        href={`/profile/${params?.userId}`}
+                        href={`/profile/${userId}`}
                         className="absolute text-white z-20 m-5 rounded-full bg-gray-700 p-1.5 hover:bg-gray-800"
                     >
                         <AiOutlineClose size="27"/>
@@ -110,10 +111,10 @@ export default function Post({ params }: PostPageTypes) {
 
                         <ClientOnly>
                             {postById ? (
-                                <CommentsHeader post={postById} params={params}/>
+                                <CommentsHeader post={postById} params={{ postId, userId }} />
                             ) : null}
                         </ClientOnly>
-                        <Comments params={params}/>
+                        <Comments params={{ postId, userId }} />
 
                 </div>
             </div>

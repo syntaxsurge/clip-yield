@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { isAddress } from "viem";
 import MainLayout from "@/app/layouts/MainLayout";
@@ -20,11 +20,11 @@ import { formatShortHash } from "@/lib/utils";
 import YieldPanel from "@/features/yield/components/YieldPanel";
 
 type BoostPageProps = {
-  params: { creatorId: string };
+  params: Promise<{ creatorId: string }>;
 };
 
 export default function BoostPage({ params }: BoostPageProps) {
-  const { creatorId } = params;
+  const { creatorId } = use(params);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [vaultRecord, setVaultRecord] = useState<CreatorVaultRecord | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");

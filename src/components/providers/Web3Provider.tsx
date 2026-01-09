@@ -8,17 +8,37 @@ import { WagmiProvider } from "wagmi";
 import { requirePublicEnv } from "@/lib/env/public";
 import { mantleSepolia } from "@/lib/web3/mantle";
 
-const config = getDefaultConfig({
-  appName: "ClipYield",
-  projectId: requirePublicEnv(
-    process.env.NEXT_PUBLIC_WC_PROJECT_ID,
-    "NEXT_PUBLIC_WC_PROJECT_ID",
-  ),
-  chains: [mantleSepolia],
-  ssr: true,
-});
+type Web3Globals = typeof globalThis & {
+  __clipYieldWagmiConfig?: ReturnType<typeof getDefaultConfig>;
+  __clipYieldQueryClient?: QueryClient;
+};
 
-const queryClient = new QueryClient();
+const getWeb3Config = () => {
+  const globalForWeb3 = globalThis as Web3Globals;
+  if (!globalForWeb3.__clipYieldWagmiConfig) {
+    globalForWeb3.__clipYieldWagmiConfig = getDefaultConfig({
+      appName: "ClipYield",
+      projectId: requirePublicEnv(
+        process.env.NEXT_PUBLIC_WC_PROJECT_ID,
+        "NEXT_PUBLIC_WC_PROJECT_ID",
+      ),
+      chains: [mantleSepolia],
+      ssr: false,
+    });
+  }
+  return globalForWeb3.__clipYieldWagmiConfig;
+};
+
+const getQueryClient = () => {
+  const globalForWeb3 = globalThis as Web3Globals;
+  if (!globalForWeb3.__clipYieldQueryClient) {
+    globalForWeb3.__clipYieldQueryClient = new QueryClient();
+  }
+  return globalForWeb3.__clipYieldQueryClient;
+};
+
+const config = getWeb3Config();
+const queryClient = getQueryClient();
 
 export function Web3Provider({ children }: { children: ReactNode }) {
   return (

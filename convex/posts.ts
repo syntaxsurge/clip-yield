@@ -96,6 +96,32 @@ export const list = query({
   },
 });
 
+export const byFollowing = query({
+  args: { wallet: v.string() },
+  handler: async (ctx, args) => {
+    const following = await ctx.db
+      .query("follows")
+      .withIndex("by_follower", (q) => q.eq("followerId", args.wallet))
+      .collect();
+
+    if (following.length === 0) return [];
+
+    const postBuckets = await Promise.all(
+      following.map((record) =>
+        ctx.db
+          .query("posts")
+          .withIndex("by_user", (q) => q.eq("userId", record.followingId))
+          .order("desc")
+          .collect(),
+      ),
+    );
+
+    const posts = postBuckets.flat();
+    posts.sort((a, b) => b.createdAt - a.createdAt);
+    return await attachProfiles(ctx, posts);
+  },
+});
+
 export const byUser = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
@@ -104,6 +130,27 @@ export const byUser = query({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .order("desc")
       .collect();
+    return await attachProfiles(ctx, posts);
+  },
+});
+
+export const likedByUser = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const likes = await ctx.db
+      .query("likes")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .collect();
+
+    if (likes.length === 0) return [];
+
+    const likedPosts = await Promise.all(
+      likes.map((like) => ctx.db.get(like.postId)),
+    );
+    const posts = likedPosts.filter(
+      (post): post is Doc<"posts"> => Boolean(post),
+    );
     return await attachProfiles(ctx, posts);
   },
 });

@@ -5,7 +5,9 @@ const asMutation = (name: string) =>
   name as unknown as FunctionReference<"mutation">;
 
 export const listPosts = asQuery("posts:list");
+export const listFollowingPosts = asQuery("posts:byFollowing");
 export const listPostsByUser = asQuery("posts:byUser");
+export const listLikedPostsByUser = asQuery("posts:likedByUser");
 export const getPost = asQuery("posts:get");
 export const createPost = asMutation("posts:create");
 export const generatePostUploadUrl = asMutation("posts:generateUploadUrl");
@@ -26,6 +28,13 @@ export const listLikes = asQuery("likes:byPost");
 export const isLiked = asQuery("likes:isLiked");
 export const createLike = asMutation("likes:create");
 export const removeLike = asMutation("likes:remove");
+
+export const isFollowing = asQuery("follows:isFollowing");
+export const countFollowers = asQuery("follows:countFollowers");
+export const countFollowing = asQuery("follows:countFollowing");
+export const listFollowing = asQuery("follows:listFollowing");
+export const listFollowingProfiles = asQuery("follows:listFollowingProfiles");
+export const toggleFollow = asMutation("follows:toggle");
 
 export const createProject = asMutation("projects:create");
 export const listProjectsByWallet = asQuery("projects:listByWallet");
