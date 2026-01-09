@@ -8,16 +8,16 @@ import {
   storeProject,
   useAppDispatch,
   useAppSelector,
-} from "../../../store";
+} from "@/app/store";
 import {
   setCurrentProject,
   updateProject,
-} from "../../../store/slices/projectsSlice";
+} from "@/app/store/slices/projectsSlice";
 import {
   rehydrate,
   hydrateMediaFiles,
   setActiveSection,
-} from "../../../store/slices/projectSlice";
+} from "@/app/store/slices/projectSlice";
 import AddText from "../../../components/editor/AssetsPanel/tools-section/AddText";
 import LibraryPanel from "../../../components/editor/AssetsPanel/tools-section/LibraryPanel";
 import TextButton from "@/app/components/editor/AssetsPanel/SidebarButtons/TextButton";
