@@ -31,6 +31,7 @@ import type { MediaFile } from "@/app/types";
 import ExportList from "@/app/components/editor/AssetsPanel/tools-section/ExportList";
 import EditorTopBar from "@/app/components/editor/EditorTopBar";
 import { EditorPlayerProvider } from "@/app/components/editor/player/remotion/EditorPlayerContext";
+import ClientOnly from "@/app/components/ClientOnly";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -243,7 +244,9 @@ export default function ProjectClient({ projectId }: Props) {
           <ResizablePanel defaultSize={30} minSize={18}>
             <div className="flex h-full overflow-hidden border-t border-white/10 bg-black">
               <div className="flex-1 overflow-hidden">
-                <Timeline />
+                <ClientOnly>
+                  <Timeline />
+                </ClientOnly>
               </div>
             </div>
           </ResizablePanel>
