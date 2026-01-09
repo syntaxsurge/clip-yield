@@ -1,13 +1,15 @@
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import MenuItem from "./MenuItem"
-import MenuItemFollow from "./MenuItemFollow"
-import { useEffect, useState } from "react"
-import { useUser } from "@/app/context/user"
-import ClientOnly from "@/app/components/ClientOnly"
-import { useGeneralStore } from "@/app/stores/general"
-import useGetFollowingProfiles from "@/app/hooks/useGetFollowingProfiles"
-import type { RandomUsers } from "@/app/types"
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import MenuItem from "./MenuItem";
+import MenuItemFollow from "./MenuItemFollow";
+import { useEffect, useState } from "react";
+import { useUser } from "@/app/context/user";
+import ClientOnly from "@/app/components/ClientOnly";
+import { useGeneralStore } from "@/app/stores/general";
+import useGetFollowingProfiles from "@/app/hooks/useGetFollowingProfiles";
+import type { RandomUsers } from "@/app/types";
 
 export default function SideNavMain() {
 
@@ -48,10 +50,7 @@ export default function SideNavMain() {
         <>
             <div 
                 id="SideNavMain" 
-                className={`
-                    fixed z-20 bg-white pt-[70px] h-full lg:border-r-0 border-r w-[75px] overflow-auto
-                    ${pathname === '/' ? 'lg:w-[310px]' : 'lg:w-[220px]'}
-                `}
+                className="fixed z-20 bg-white pt-[70px] h-full lg:border-r-0 border-r w-[75px] overflow-auto lg:w-[310px]"
             >
                 
                 <div className="lg:w-full w-[55px] mx-auto">

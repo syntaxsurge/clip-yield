@@ -73,6 +73,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createProjectState } from "@/app/store/slices/projectSlice";
+import MainLayout from "@/app/layouts/MainLayout";
 
 type SortKey = "updated" | "created" | "name";
 
@@ -289,326 +290,328 @@ export default function Projects() {
   }, [isLoading, projects.length]);
 
   return (
-    <TooltipProvider>
-      <main
-        id="main"
-        className="mx-auto max-w-7xl space-y-8 px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
-      >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Creator workspace</p>
-            <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
-              <h1 className="text-4xl font-semibold tracking-tight text-foreground">
-                Projects
-              </h1>
-              <Badge variant="outline" className="tabular-nums">
-                {projectCountLabel}
-              </Badge>
-            </div>
-            <p className="max-w-2xl text-muted-foreground">
-              Start a new timeline, remix an IP asset, or continue a draft. Projects save locally
-              in your browser and sync to the cloud when possible.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Dialog open={isCreating} onOpenChange={setIsCreating}>
-              <Button type="button" onClick={() => setIsCreating(true)}>
-                <Plus className="h-4 w-4" />
-                New project
-              </Button>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create new project</DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-2">
-                  <Label htmlFor="newProjectName">Project name</Label>
-                  <Input
-                    id="newProjectName"
-                    ref={inputRef}
-                    value={newProjectName}
-                    onChange={(e) => setNewProjectName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void handleCreateProject();
-                      if (e.key === "Escape") setIsCreating(false);
-                    }}
-                    placeholder="Project title"
-                    disabled={isCreatingProject}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Tip: include a short subject + version (e.g., “Trailer v2”).
-                  </p>
-                </div>
-
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsCreating(false)}
-                    disabled={isCreatingProject}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => void handleCreateProject()}
-                    disabled={!newProjectName.trim() || isCreatingProject}
-                  >
-                    {isCreatingProject ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Creating…
-                      </>
-                    ) : (
-                      "Create"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            <input
-              ref={importInputRef}
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={handleImportFile}
-              disabled={isImporting}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isImporting}
-              onClick={() => importInputRef.current?.click()}
-            >
-              {isImporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Upload className="h-4 w-4" />
-              )}
-              {isImporting ? "Importing…" : "Import"}
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <Label htmlFor="projectSearch" className="sr-only">
-              Search projects
-            </Label>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="projectSearch"
-                type="search"
-                ref={searchInputRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search projects…"
-                className="pl-9"
-              />
-            </div>
-          </div>
-
-          <div className="lg:col-span-3">
-            <Label htmlFor="projectSort" className="sr-only">
-              Sort projects
-            </Label>
-            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
-              <SelectTrigger id="projectSort">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="updated">Recently updated</SelectItem>
-                <SelectItem value="created">Recently created</SelectItem>
-                <SelectItem value="name">Name (A–Z)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="lg:col-span-2 flex items-center justify-end">
-            {query.trim() ? (
-              <Button type="button" variant="ghost" onClick={() => setQuery("")}>
-                Clear
-              </Button>
-            ) : (
-              <div className="text-xs text-muted-foreground">
-                Press <span className="font-mono">/</span> to search
+    <MainLayout>
+      <TooltipProvider>
+        <main
+          id="main"
+          className="mt-[80px] ml-auto w-[calc(100%-90px)] max-w-7xl space-y-8 px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Creator workspace</p>
+              <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
+                <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+                  Projects
+                </h1>
+                <Badge variant="outline" className="tabular-nums">
+                  {projectCountLabel}
+                </Badge>
               </div>
-            )}
-          </div>
-        </div>
+              <p className="max-w-2xl text-muted-foreground">
+                Start a new timeline, remix an IP asset, or continue a draft. Projects save locally
+                in your browser and sync to the cloud when possible.
+              </p>
+            </div>
 
-        <Alert variant="info">
-          <AlertTitle>Local-first drafts</AlertTitle>
-          <AlertDescription>
-            Projects are stored in your browser. Cloud sync is best-effort and never blocks
-            creation or editing.
-          </AlertDescription>
-        </Alert>
+            <div className="flex flex-wrap items-center gap-2">
+              <Dialog open={isCreating} onOpenChange={setIsCreating}>
+                <Button type="button" onClick={() => setIsCreating(true)}>
+                  <Plus className="h-4 w-4" />
+                  New project
+                </Button>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create new project</DialogTitle>
+                  </DialogHeader>
 
-        {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-[164px] rounded-2xl" />
-            ))}
-          </div>
-        ) : projects.length === 0 ? (
-          <Card>
-            <CardHeader className="space-y-2">
-              <CardTitle>No projects yet</CardTitle>
-              <CardDescription>
-                Create your first timeline to start editing.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button type="button" onClick={() => setIsCreating(true)}>
-                <Plus className="h-4 w-4" />
-                New project
-              </Button>
-            </CardContent>
-          </Card>
-        ) : visibleProjects.length === 0 ? (
-          <Card>
-            <CardHeader className="space-y-2">
-              <CardTitle>No results</CardTitle>
-              <CardDescription>
-                No projects match <span className="font-mono">“{query.trim()}”</span>.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="outline" onClick={() => setQuery("")}>
-                Clear search
-              </Button>
-              <Button type="button" onClick={() => setIsCreating(true)}>
-                <Plus className="h-4 w-4" />
-                New project
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleProjects.map(({ id, projectName, createdAt, lastModified }) => (
-              <Card
-                key={id}
-                className={cn(
-                  "group relative overflow-hidden transition-colors hover:border-border/80",
-                  id === currentProjectId && "border-primary/30",
-                )}
+                  <div className="space-y-2">
+                    <Label htmlFor="newProjectName">Project name</Label>
+                    <Input
+                      id="newProjectName"
+                      ref={inputRef}
+                      value={newProjectName}
+                      onChange={(e) => setNewProjectName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") void handleCreateProject();
+                        if (e.key === "Escape") setIsCreating(false);
+                      }}
+                      placeholder="Project title"
+                      disabled={isCreatingProject}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Tip: include a short subject + version (e.g., “Trailer v2”).
+                    </p>
+                  </div>
+
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsCreating(false)}
+                      disabled={isCreatingProject}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => void handleCreateProject()}
+                      disabled={!newProjectName.trim() || isCreatingProject}
+                    >
+                      {isCreatingProject ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Creating…
+                        </>
+                      ) : (
+                        "Create"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={handleImportFile}
+                disabled={isImporting}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isImporting}
+                onClick={() => importInputRef.current?.click()}
               >
-                <Link
-                  href={`/projects/${id}`}
-                  onClick={() => dispatch(setCurrentProject(id))}
-                  className="block h-full"
-                >
-                  <CardHeader className="space-y-2 pr-14">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="flex min-w-0 items-center gap-2 text-base">
-                        <Film className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        <span className="truncate">{projectName}</span>
-                      </CardTitle>
-                      {id === currentProjectId ? (
-                        <Badge variant="outline">Current</Badge>
-                      ) : null}
-                    </div>
-                    <CardDescription className="flex items-center gap-2">
-                      Updated {formatLocalDate(lastModified)}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Created {formatLocalDate(createdAt)}
-                    </div>
-                  </CardContent>
-                </Link>
-
-                <div className="absolute right-3 top-3">
-                  <DropdownMenu>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            aria-label="Project actions"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>Actions</TooltipContent>
-                    </Tooltip>
-                    <DropdownMenuContent align="end" className="w-44">
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/projects/${id}`}
-                          onClick={() => dispatch(setCurrentProject(id))}
-                        >
-                          <Film className="h-4 w-4" />
-                          Open
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          void handleExportProject(id, projectName);
-                        }}
-                      >
-                        <FileDown className="h-4 w-4" />
-                        Export JSON
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          setDeleteTarget({ id, name: projectName });
-                        }}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </Card>
-            ))}
+                {isImporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                {isImporting ? "Importing…" : "Import"}
+              </Button>
+            </div>
           </div>
-        )}
-      </main>
 
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete project?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes <span className="font-medium">{deleteTarget?.name}</span> from your
-              browser storage. This action can’t be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: "destructive" })}
-              onClick={() => {
-                if (!deleteTarget) return;
-                void handleDeleteProject(deleteTarget.id);
-                setDeleteTarget(null);
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </TooltipProvider>
+          <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <Label htmlFor="projectSearch" className="sr-only">
+                Search projects
+              </Label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="projectSearch"
+                  type="search"
+                  ref={searchInputRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search projects…"
+                  className="pl-9"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-3">
+              <Label htmlFor="projectSort" className="sr-only">
+                Sort projects
+              </Label>
+              <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+                <SelectTrigger id="projectSort">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="updated">Recently updated</SelectItem>
+                  <SelectItem value="created">Recently created</SelectItem>
+                  <SelectItem value="name">Name (A–Z)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="lg:col-span-2 flex items-center justify-end">
+              {query.trim() ? (
+                <Button type="button" variant="ghost" onClick={() => setQuery("")}>
+                  Clear
+                </Button>
+              ) : (
+                <div className="text-xs text-muted-foreground">
+                  Press <span className="font-mono">/</span> to search
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Alert variant="info">
+            <AlertTitle>Local-first drafts</AlertTitle>
+            <AlertDescription>
+              Projects are stored in your browser. Cloud sync is best-effort and never blocks
+              creation or editing.
+            </AlertDescription>
+          </Alert>
+
+          {isLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-[164px] rounded-2xl" />
+              ))}
+            </div>
+          ) : projects.length === 0 ? (
+            <Card>
+              <CardHeader className="space-y-2">
+                <CardTitle>No projects yet</CardTitle>
+                <CardDescription>
+                  Create your first timeline to start editing.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button type="button" onClick={() => setIsCreating(true)}>
+                  <Plus className="h-4 w-4" />
+                  New project
+                </Button>
+              </CardContent>
+            </Card>
+          ) : visibleProjects.length === 0 ? (
+            <Card>
+              <CardHeader className="space-y-2">
+                <CardTitle>No results</CardTitle>
+                <CardDescription>
+                  No projects match <span className="font-mono">“{query.trim()}”</span>.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap items-center gap-2">
+                <Button type="button" variant="outline" onClick={() => setQuery("")}>
+                  Clear search
+                </Button>
+                <Button type="button" onClick={() => setIsCreating(true)}>
+                  <Plus className="h-4 w-4" />
+                  New project
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {visibleProjects.map(({ id, projectName, createdAt, lastModified }) => (
+                <Card
+                  key={id}
+                  className={cn(
+                    "group relative overflow-hidden transition-colors hover:border-border/80",
+                    id === currentProjectId && "border-primary/30",
+                  )}
+                >
+                  <Link
+                    href={`/projects/${id}`}
+                    onClick={() => dispatch(setCurrentProject(id))}
+                    className="block h-full"
+                  >
+                    <CardHeader className="space-y-2 pr-14">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="flex min-w-0 items-center gap-2 text-base">
+                          <Film className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <span className="truncate">{projectName}</span>
+                        </CardTitle>
+                        {id === currentProjectId ? (
+                          <Badge variant="outline">Current</Badge>
+                        ) : null}
+                      </div>
+                      <CardDescription className="flex items-center gap-2">
+                        Updated {formatLocalDate(lastModified)}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Created {formatLocalDate(createdAt)}
+                      </div>
+                    </CardContent>
+                  </Link>
+
+                  <div className="absolute right-3 top-3">
+                    <DropdownMenu>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              aria-label="Project actions"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>Actions</TooltipContent>
+                      </Tooltip>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/projects/${id}`}
+                            onClick={() => dispatch(setCurrentProject(id))}
+                          >
+                            <Film className="h-4 w-4" />
+                            Open
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            void handleExportProject(id, projectName);
+                          }}
+                        >
+                          <FileDown className="h-4 w-4" />
+                          Export JSON
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setDeleteTarget({ id, name: projectName });
+                          }}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </main>
+
+        <AlertDialog
+          open={deleteTarget !== null}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete project?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This removes <span className="font-medium">{deleteTarget?.name}</span> from your
+                browser storage. This action can’t be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={() => {
+                  if (!deleteTarget) return;
+                  void handleDeleteProject(deleteTarget.id);
+                  setDeleteTarget(null);
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </TooltipProvider>
+    </MainLayout>
   );
 }
