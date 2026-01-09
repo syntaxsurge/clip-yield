@@ -18,17 +18,17 @@ import {
   hydrateMediaFiles,
   setActiveSection,
 } from "@/app/store/slices/projectSlice";
-import AddText from "../../../components/editor/AssetsPanel/tools-section/AddText";
-import LibraryPanel from "../../../components/editor/AssetsPanel/tools-section/LibraryPanel";
+import AddText from "@/app/components/editor/AssetsPanel/tools-section/AddText";
+import LibraryPanel from "@/app/components/editor/AssetsPanel/tools-section/LibraryPanel";
 import TextButton from "@/app/components/editor/AssetsPanel/SidebarButtons/TextButton";
 import LibraryButton from "@/app/components/editor/AssetsPanel/SidebarButtons/LibraryButton";
 import ExportButton from "@/app/components/editor/AssetsPanel/SidebarButtons/ExportButton";
-import MediaProperties from "../../../components/editor/PropertiesSection/MediaProperties";
-import TextProperties from "../../../components/editor/PropertiesSection/TextProperties";
-import { Timeline } from "../../../components/editor/timeline/Timline";
-import { PreviewPlayer } from "../../../components/editor/player/remotion/Player";
+import MediaProperties from "@/app/components/editor/PropertiesSection/MediaProperties";
+import TextProperties from "@/app/components/editor/PropertiesSection/TextProperties";
+import { Timeline } from "@/app/components/editor/timeline/Timline";
+import { PreviewPlayer } from "@/app/components/editor/player/remotion/Player";
 import type { MediaFile } from "@/app/types";
-import ExportList from "../../../components/editor/AssetsPanel/tools-section/ExportList";
+import ExportList from "@/app/components/editor/AssetsPanel/tools-section/ExportList";
 import EditorTopBar from "@/app/components/editor/EditorTopBar";
 import { EditorPlayerProvider } from "@/app/components/editor/player/remotion/EditorPlayerContext";
 import {
