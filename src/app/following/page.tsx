@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import MainLayout from "@/app/layouts/MainLayout";
 import { useUser } from "@/app/context/user";
 import useGetFollowingPosts from "@/app/hooks/useGetFollowingPosts";
 import type { PostWithProfile } from "@/app/types";
 import ClientOnly from "@/app/components/ClientOnly";
 import PostMain from "@/app/components/PostMain";
+import EmptyState from "@/components/feedback/EmptyState";
 
 export default function FollowingPage() {
   const contextUser = useUser();
@@ -46,44 +46,33 @@ export default function FollowingPage() {
 
   return (
     <MainLayout>
-      <div className="mt-[80px] w-[calc(100%-90px)] max-w-[690px] ml-auto">
+      <div className="mx-auto mt-[80px] w-full max-w-[690px] px-3 pb-16">
         <ClientOnly>
           {!contextUser?.user?.id ? (
-            <div className="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              <p className="font-semibold text-gray-700">Follow creators</p>
-              <p className="mt-2">
-                Connect your wallet to see clips from creators you follow.
-              </p>
-              <button
-                onClick={() => void contextUser?.openConnect()}
-                className="mt-4 rounded-md bg-[#F02C56] px-4 py-2 text-sm font-semibold text-white"
-              >
-                Connect wallet
-              </button>
-            </div>
+            <EmptyState
+              title="Follow creators"
+              description="Connect your wallet to see clips from creators you follow."
+              primaryAction={{
+                label: "Connect wallet",
+                onClick: () => void contextUser?.openConnect(),
+              }}
+            />
           ) : status === "loading" ? (
-            <div className="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              Loading your followed clips...
-            </div>
+            <EmptyState
+              title="Loading followed clips…"
+              description="Hang tight while we pull in your creators."
+            />
           ) : status === "error" ? (
-            <div className="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              Something went wrong while loading followed clips. Please try
-              again.
-            </div>
+            <EmptyState
+              title="Couldn’t load followed clips"
+              description="Please try again in a moment."
+            />
           ) : posts.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-              <p className="font-semibold text-gray-700">No followed clips yet</p>
-              <p className="mt-2">
-                Follow a creator from the For You feed to start curating your
-                following list.
-              </p>
-              <Link
-                href="/"
-                className="mt-4 inline-flex rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              >
-                Explore For You
-              </Link>
-            </div>
+            <EmptyState
+              title="No followed clips yet"
+              description="Follow a creator from the For You feed to start curating your list."
+              secondaryAction={{ label: "Explore For You", href: "/" }}
+            />
           ) : (
             posts.map((post, index) => <PostMain post={post} key={index} />)
           )}

@@ -75,6 +75,13 @@ export default function SideNavMain() {
                             sizeString="25"
                         />
                     </Link>
+                    <Link href="/projects">
+                        <MenuItem
+                            iconString="Projects"
+                            colorString={pathname == '/projects' ? '#F02C56' : '#000000'}
+                            sizeString="25"
+                        />
+                    </Link>
 
                     <div className="border-b lg:ml-2 mt-2" />
                     <h3 className="lg:block hidden text-xs text-gray-600 font-semibold pt-4 pb-2 px-2">Suggested accounts</h3>

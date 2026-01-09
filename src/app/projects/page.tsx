@@ -21,7 +21,6 @@ import type { ProjectState } from "@/app/types";
 import { toast } from "react-hot-toast";
 import { createConvexProject } from "@/lib/api/convex";
 import { useAccount } from "wagmi";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -294,20 +293,20 @@ export default function Projects() {
       <TooltipProvider>
         <main
           id="main"
-          className="mt-[80px] ml-auto w-[calc(100%-90px)] max-w-7xl space-y-8 px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
+          className="mx-auto mt-[80px] w-full max-w-6xl space-y-8 px-3 pb-16 pt-8 sm:px-6"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Creator workspace</p>
+              <p className="text-sm text-gray-500">Creator workspace</p>
               <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
-                <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+                <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
                   Projects
                 </h1>
-                <Badge variant="outline" className="tabular-nums">
+                <Badge variant="outline" className="border-gray-200 text-gray-600 tabular-nums">
                   {projectCountLabel}
                 </Badge>
               </div>
-              <p className="max-w-2xl text-muted-foreground">
+              <p className="max-w-2xl text-gray-500">
                 Start a new timeline, remix an IP asset, or continue a draft. Projects save locally
                 in your browser and sync to the cloud when possible.
               </p>
@@ -338,7 +337,7 @@ export default function Projects() {
                       placeholder="Project title"
                       disabled={isCreatingProject}
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-500">
                       Tip: include a short subject + version (e.g., “Trailer v2”).
                     </p>
                   </div>
@@ -394,13 +393,13 @@ export default function Projects() {
             </div>
           </div>
 
-          <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 lg:grid-cols-12">
+          <div className="grid gap-3 rounded-2xl border border-gray-200 bg-white p-4 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <Label htmlFor="projectSearch" className="sr-only">
                 Search projects
               </Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <Input
                   id="projectSearch"
                   type="search"
@@ -429,26 +428,26 @@ export default function Projects() {
               </Select>
             </div>
 
-            <div className="lg:col-span-2 flex items-center justify-end">
-              {query.trim() ? (
-                <Button type="button" variant="ghost" onClick={() => setQuery("")}>
-                  Clear
-                </Button>
-              ) : (
-                <div className="text-xs text-muted-foreground">
-                  Press <span className="font-mono">/</span> to search
-                </div>
-              )}
-            </div>
+          <div className="lg:col-span-2 flex items-center justify-end">
+            {query.trim() ? (
+              <Button type="button" variant="ghost" onClick={() => setQuery("")}>
+                Clear
+              </Button>
+            ) : (
+              <div className="text-xs text-gray-400">
+                Press <span className="font-mono">/</span> to search
+              </div>
+            )}
           </div>
+        </div>
 
-          <Alert variant="info">
-            <AlertTitle>Local-first drafts</AlertTitle>
-            <AlertDescription>
-              Projects are stored in your browser. Cloud sync is best-effort and never blocks
-              creation or editing.
-            </AlertDescription>
-          </Alert>
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-500">
+          <div className="font-semibold text-gray-700">Local-first drafts</div>
+          <p className="mt-1">
+            Projects are stored in your browser. Cloud sync is best-effort and never blocks
+            creation or editing.
+          </p>
+        </div>
 
           {isLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -457,13 +456,13 @@ export default function Projects() {
               ))}
             </div>
           ) : projects.length === 0 ? (
-            <Card>
-              <CardHeader className="space-y-2">
-                <CardTitle>No projects yet</CardTitle>
-                <CardDescription>
-                  Create your first timeline to start editing.
-                </CardDescription>
-              </CardHeader>
+          <Card className="border-gray-200">
+            <CardHeader className="space-y-2">
+              <CardTitle>No projects yet</CardTitle>
+              <CardDescription>
+                Create your first timeline to start editing.
+              </CardDescription>
+            </CardHeader>
               <CardContent>
                 <Button type="button" onClick={() => setIsCreating(true)}>
                   <Plus className="h-4 w-4" />
@@ -472,13 +471,13 @@ export default function Projects() {
               </CardContent>
             </Card>
           ) : visibleProjects.length === 0 ? (
-            <Card>
-              <CardHeader className="space-y-2">
-                <CardTitle>No results</CardTitle>
-                <CardDescription>
-                  No projects match <span className="font-mono">“{query.trim()}”</span>.
-                </CardDescription>
-              </CardHeader>
+          <Card className="border-gray-200">
+            <CardHeader className="space-y-2">
+              <CardTitle>No results</CardTitle>
+              <CardDescription>
+                No projects match <span className="font-mono">“{query.trim()}”</span>.
+              </CardDescription>
+            </CardHeader>
               <CardContent className="flex flex-wrap items-center gap-2">
                 <Button type="button" variant="outline" onClick={() => setQuery("")}>
                   Clear search
@@ -495,8 +494,8 @@ export default function Projects() {
                 <Card
                   key={id}
                   className={cn(
-                    "group relative overflow-hidden transition-colors hover:border-border/80",
-                    id === currentProjectId && "border-primary/30",
+                    "group relative overflow-hidden border-gray-200 transition-colors hover:border-gray-300",
+                    id === currentProjectId && "border-[#F02C56]/40",
                   )}
                 >
                   <Link
@@ -507,7 +506,7 @@ export default function Projects() {
                     <CardHeader className="space-y-2 pr-14">
                       <div className="flex items-start justify-between gap-2">
                         <CardTitle className="flex min-w-0 items-center gap-2 text-base">
-                          <Film className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <Film className="h-4 w-4 shrink-0 text-gray-400" />
                           <span className="truncate">{projectName}</span>
                         </CardTitle>
                         {id === currentProjectId ? (
@@ -518,7 +517,7 @@ export default function Projects() {
                         Updated {formatLocalDate(lastModified)}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2 text-sm text-muted-foreground">
+                    <CardContent className="space-y-2 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         Created {formatLocalDate(createdAt)}

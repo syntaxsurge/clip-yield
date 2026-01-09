@@ -7,10 +7,12 @@ import TopNav from "./includes/TopNav";
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     return (
       	<>
-			<TopNav/>
-			<div className="flex justify-between mx-auto w-full max-w-[1150px] lg:px-2.5 px-0">
+			<div className="min-h-screen w-full bg-white">
+				<TopNav />
 				<SideNavMain />
-				{children}
+				<div className="w-full pl-[90px] pr-4 pt-0 lg:pl-[330px]">
+					{children}
+				</div>
 			</div>
       	</>
     )

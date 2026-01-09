@@ -138,24 +138,26 @@ export default function Profile({ params }: ProfilePageTypes) {
     return (
         <>
             <MainLayout>
-                <div className="pt-[90px] ml-[90px] 2xl:pl-[185px] lg:pl-[160px] lg:pr-0 w-[calc(100%-90px)] pr-3 max-w-[1800px] 2xl:mx-auto">
-
-                    <div className="flex w-[calc(100vw-230px)]">
+                <div className="mx-auto mt-[80px] w-full max-w-5xl px-3 pb-16">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
 
                         <ClientOnly>
-                            {currentProfile ? (
-                                <img className="w-[120px] min-w-[120px] rounded-full" src={useCreateBucketUrl(currentProfile?.image)} />
+                            {currentProfile?.image ? (
+                                <img
+                                    className="h-[120px] w-[120px] rounded-full object-cover"
+                                    src={useCreateBucketUrl(currentProfile?.image)}
+                                />
                             ) : (
-                                <div className="min-w-[150px] h-[120px] bg-gray-200 rounded-full" />
+                                <div className="h-[120px] w-[120px] rounded-full bg-gray-200" />
                             )}
                         </ClientOnly>
 
-                        <div className="ml-5 w-full">
+                        <div className="w-full sm:pl-5">
                             <ClientOnly>
                                 {(currentProfile as User)?.name ? (
                                     <div>
-                                        <p className="text-[30px] font-bold truncate">{currentProfile?.name}</p>
-                                        <p className="text-[18px] truncate">{currentProfile?.name}</p>
+                                        <p className="text-[28px] font-bold truncate">{currentProfile?.name}</p>
+                                        <p className="text-[16px] text-gray-500 truncate">{currentProfile?.name}</p>
                                     </div>
                                 ) : (
                                     <div className="h-[60px]" />
@@ -197,7 +199,7 @@ export default function Profile({ params }: ProfilePageTypes) {
 
                     </div>
 
-                    <div className="flex items-center pt-4">
+                    <div className="flex flex-wrap items-center gap-4 pt-4">
                         <div className="mr-4">
                             <span className="font-bold">{followingCount}</span>
                             <span className="text-gray-500 font-light text-[15px] pl-1.5">Following</span>

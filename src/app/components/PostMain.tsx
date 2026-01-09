@@ -175,7 +175,8 @@ export default function PostMain({ post }: PostMainCompTypes) {
                             <img 
                                 className="absolute right-2 bottom-10" 
                                 width="90" 
-                                src="/images/tiktok-logo-white.png"
+                                src="/images/clip-yield-logo-white.png"
+                                alt="ClipYield"
                             />
                         </div>
                         
