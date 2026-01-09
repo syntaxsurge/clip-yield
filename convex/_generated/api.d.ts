@@ -18,6 +18,7 @@ import type * as comments from "../comments.js";
 import type * as creatorVaults from "../creatorVaults.js";
 import type * as crons from "../crons.js";
 import type * as env from "../env.js";
+import type * as follows from "../follows.js";
 import type * as internal_kyc from "../internal_kyc.js";
 import type * as kyc from "../kyc.js";
 import type * as leaderboards from "../leaderboards.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   creatorVaults: typeof creatorVaults;
   crons: typeof crons;
   env: typeof env;
+  follows: typeof follows;
   internal_kyc: typeof internal_kyc;
   kyc: typeof kyc;
   leaderboards: typeof leaderboards;

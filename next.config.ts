@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
         __dirname,
         "src/lib/shims/async-storage.ts",
       ),
+      "lit$": path.resolve(__dirname, "src/lib/shims/lit.ts"),
     };
     return config;
   },
