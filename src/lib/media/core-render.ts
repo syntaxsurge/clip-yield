@@ -1,4 +1,4 @@
-import * as core from "@diffusionstudio/core";
+"use client";
 
 import { getFile } from "@/app/store";
 import type {
@@ -9,12 +9,27 @@ import type {
 } from "@/app/types";
 import { clientEnv } from "@/lib/env/client";
 
+type DiffusionCore = typeof import("@diffusionstudio/core");
+type DiffusionHex = DiffusionCore["hex"];
+type EncoderProgress = NonNullable<
+  InstanceType<DiffusionCore["Encoder"]>["onProgress"]
+>;
+
+let cachedCore: DiffusionCore | null = null;
+
+const loadCore = async () => {
+  if (!cachedCore) {
+    cachedCore = await import("@diffusionstudio/core");
+  }
+  return cachedCore;
+};
+
 type CoreRenderInput = {
   mediaFiles: MediaFile[];
   textElements: TextElement[];
   tracks: TimelineTrack[];
   exportSettings: ExportConfig;
-  onProgress?: NonNullable<InstanceType<typeof core.Encoder>["onProgress"]>;
+  onProgress?: EncoderProgress;
 };
 
 const resolutionToSize = (resolution: string) => {
@@ -65,16 +80,16 @@ const toHexColor = (input?: string) => {
 };
 
 const parseHexWithAlpha = (input?: string) => {
-  if (!input) return { hex: "#000000" as core.hex, alpha: 0 };
+  if (!input) return { hex: "#000000" as DiffusionHex, alpha: 0 };
   const raw = input.trim();
   if (raw.length === 0 || raw === "transparent") {
-    return { hex: "#000000" as core.hex, alpha: 0 };
+    return { hex: "#000000" as DiffusionHex, alpha: 0 };
   }
   const match = raw.match(/^#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?$/);
   if (!match) {
-    return { hex: toHexColor(raw) as core.hex, alpha: 1 };
+    return { hex: toHexColor(raw) as DiffusionHex, alpha: 1 };
   }
-  const hex = `#${match[1]}` as core.hex;
+  const hex = `#${match[1]}` as DiffusionHex;
   const alpha = match[2] ? parseInt(match[2], 16) / 255 : 1;
   return { hex, alpha: Math.min(Math.max(alpha, 0), 1) };
 };
@@ -92,6 +107,7 @@ export async function renderWithDiffusionCore({
     );
   }
 
+  const core = await loadCore();
   const { width, height } = resolutionToSize(exportSettings.resolution);
   const bitrates = qualityToBitrates(exportSettings.quality);
 
