@@ -55,8 +55,8 @@ export default function ProjectName({ compact = false, className }: Props) {
           onKeyDown={handleKeyDown}
           className={cn(
             compact
-              ? "text-lg font-semibold capitalize tracking-wide bg-black/60 w-full px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-white/30"
-              : "text-2xl font-bold mt-4 capitalize tracking-wider bg-black w-full px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500",
+              ? "text-lg font-semibold capitalize tracking-wide text-white bg-black/60 w-full px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-white/30"
+              : "text-2xl font-bold mt-4 capitalize tracking-wider text-white bg-black w-full px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500",
           )}
           autoFocus
         />
@@ -65,13 +65,13 @@ export default function ProjectName({ compact = false, className }: Props) {
           onClick={handleClick}
           className={cn(
             compact
-              ? "text-lg font-semibold capitalize tracking-wide cursor-pointer hover:bg-white/10 px-2 py-1 rounded flex items-center"
-              : "text-2xl font-bold mt-4 capitalize tracking-wider cursor-pointer hover:bg-gray-800 px-2 py-1 rounded flex items-center",
+              ? "text-lg font-semibold capitalize tracking-wide text-white cursor-pointer hover:bg-white/10 px-2 py-1 rounded flex items-center"
+              : "text-2xl font-bold mt-4 capitalize tracking-wider text-white cursor-pointer hover:bg-gray-800 px-2 py-1 rounded flex items-center",
           )}
         >
           {projectName || "Untitled project"}
           <svg
-            className="w-4 h-4 ml-2 text-gray-500"
+            className="w-4 h-4 ml-2 text-white/60"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

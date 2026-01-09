@@ -15,9 +15,14 @@ export default function EditorTopBar() {
   const dispatch = useAppDispatch();
 
   return (
-    <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-black/70 px-3 py-2 backdrop-blur">
+    <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-black/70 px-3 py-2 text-white backdrop-blur">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white hover:bg-white/10 hover:text-white"
+          asChild
+        >
           <Link href="/projects" aria-label="Back to projects">
             <ArrowLeft className="h-5 w-5" />
           </Link>
@@ -27,6 +32,7 @@ export default function EditorTopBar() {
         <Button
           variant="ghost"
           size="icon"
+          className="text-white hover:bg-white/10 hover:text-white"
           onClick={() => dispatch(undoState())}
           aria-label="Undo"
         >
@@ -35,6 +41,7 @@ export default function EditorTopBar() {
         <Button
           variant="ghost"
           size="icon"
+          className="text-white hover:bg-white/10 hover:text-white"
           onClick={() => dispatch(redoState())}
           aria-label="Redo"
         >
