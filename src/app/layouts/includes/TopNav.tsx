@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { debounce } from "debounce";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { BiSearch, BiUser } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiLogOut } from "react-icons/fi";
@@ -15,8 +15,6 @@ import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
 export default function TopNav() {
     const userContext = useUser();
     const router = useRouter();
-    const pathname = usePathname();
-
     const [searchProfiles, setSearchProfiles] = useState<RandomUsers[]>([]);
     const [showMenu, setShowMenu] = useState<boolean>(false);
 
@@ -44,15 +42,20 @@ export default function TopNav() {
 
     return (
         <>
-            <div id="TopNav" className="fixed bg-white z-30 flex items-center w-full border-b h-[60px]">
+            <div id="TopNav" className="fixed left-0 top-0 z-30 flex h-[64px] w-full items-center border-b bg-white">
                 <div className="flex items-center justify-between gap-6 w-full px-4 mx-auto max-w-[1150px]">
 
-                    <Link href="/" className="flex items-center shrink-0">
-                        <img
-                            className="h-7 w-auto sm:h-8 md:h-9"
-                            src="/images/clip-yield-logo.png"
-                            alt="ClipYield"
-                        />
+                    <Link href="/" className="flex items-center gap-2 shrink-0">
+                        <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
+                            <img
+                                className="h-full w-full object-cover"
+                                src="/images/clip-yield-logo.png"
+                                alt="ClipYield"
+                            />
+                        </span>
+                        <span className="text-lg font-semibold tracking-tight text-gray-900">
+                            ClipYield
+                        </span>
                     </Link>
 
                     <div className="relative hidden md:flex items-center justify-end bg-[#F1F1F2] p-1 rounded-full max-w-[430px] w-full">
@@ -86,7 +89,7 @@ export default function TopNav() {
                             </div>
                     </div>
 
-                    <div className="flex items-center gap-3 ">
+                    <div className="flex items-center gap-3">
                             <button
                                 onClick={() => void goTo()}
                                 className="flex items-center border rounded-sm py-[6px] hover:bg-gray-100 pl-1.5"
@@ -95,7 +98,11 @@ export default function TopNav() {
                                 <span className="px-2 font-medium text-[15px]">Upload</span>
                             </button>
 
-                            {!userContext?.user?.id ? (
+                            {userContext?.isLoading ? (
+                                <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-gray-200">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-500" />
+                                </div>
+                            ) : !userContext?.user?.id ? (
                                 <button
                                     onClick={() => void userContext?.openConnect()}
                                     className="flex items-center bg-[#F02C56] text-white border rounded-md px-3 py-[6px]"

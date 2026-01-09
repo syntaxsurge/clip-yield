@@ -212,6 +212,7 @@ export interface SoraJob {
 
 export interface UserContextTypes {
   user: User | null;
+  isLoading: boolean;
   openConnect: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;

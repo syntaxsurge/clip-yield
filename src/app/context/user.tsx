@@ -14,6 +14,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { disconnectAsync } = useDisconnect();
   const { openConnectModal } = useConnectModal();
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshProfile = async () => {
     if (!address) {
@@ -38,11 +39,33 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    if (isConnected && address) {
-      void refreshProfile();
-      return;
-    }
-    setUser(null);
+    let isMounted = true;
+    const syncProfile = async () => {
+      setIsLoading(true);
+
+      if (!isConnected || !address) {
+        if (!isMounted) return;
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        await refreshProfile();
+      } catch {
+        if (!isMounted) return;
+        setUser(null);
+      } finally {
+        if (!isMounted) return;
+        setIsLoading(false);
+      }
+    };
+
+    void syncProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, [address, isConnected]);
 
   const openConnect = async () => {
@@ -60,6 +83,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     <UserContext.Provider
       value={{
         user,
+        isLoading,
         openConnect,
         logout,
         refreshProfile,

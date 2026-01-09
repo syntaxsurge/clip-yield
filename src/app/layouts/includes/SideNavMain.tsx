@@ -18,6 +18,7 @@ export default function SideNavMain() {
 
     const contextUser = useUser()
     const pathname = usePathname()
+    const isProjectsRoute = pathname.startsWith("/projects")
 
     useEffect(() => { setRandomUsers() }, [setRandomUsers])
 
@@ -50,7 +51,7 @@ export default function SideNavMain() {
         <>
             <div 
                 id="SideNavMain" 
-                className="fixed z-20 bg-white pt-[70px] h-full lg:border-r-0 border-r w-[75px] overflow-auto lg:w-[310px]"
+                className="fixed left-0 top-0 z-20 h-full w-[75px] overflow-auto border-r bg-white pt-[70px] lg:w-[310px] lg:border-r-0"
             >
                 
                 <div className="lg:w-full w-[55px] mx-auto">
@@ -78,7 +79,7 @@ export default function SideNavMain() {
                     <Link href="/projects">
                         <MenuItem
                             iconString="Projects"
-                            colorString={pathname == '/projects' ? '#F02C56' : '#000000'}
+                            colorString={isProjectsRoute ? '#F02C56' : '#000000'}
                             sizeString="25"
                         />
                     </Link>
