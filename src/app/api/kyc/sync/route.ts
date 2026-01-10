@@ -184,13 +184,15 @@ async function provisionCreatorVault({
   publicClient,
   walletClient,
   creatorWallet,
+  syncSecret,
 }: {
   publicClient: ReturnType<typeof createMantleClients>["publicClient"];
   walletClient: ReturnType<typeof createMantleClients>["walletClient"];
   creatorWallet: Address;
+  syncSecret?: string;
 }) {
   const existing = await convexHttpClient.query(
-    anyApi.creatorVaults.getByWalletInternal,
+    anyApi.creatorVaults.getByWallet,
     { wallet: creatorWallet },
   );
 
@@ -222,9 +224,10 @@ async function provisionCreatorVault({
       sponsorHub,
     });
 
-    await convexHttpClient.mutation(anyApi.creatorVaults.insertVaultInternal, {
+    await convexHttpClient.mutation(anyApi.creatorVaults.upsertVaultFromServer, {
       wallet: creatorWallet,
       vault: onchainVault,
+      secret: syncSecret,
     });
 
     return { vault: onchainVault, txHash: null };
@@ -257,10 +260,11 @@ async function provisionCreatorVault({
     sponsorHub,
   });
 
-  await convexHttpClient.mutation(anyApi.creatorVaults.insertVaultInternal, {
+  await convexHttpClient.mutation(anyApi.creatorVaults.upsertVaultFromServer, {
     wallet: creatorWallet,
     vault,
     txHash,
+    secret: syncSecret,
   });
 
   return { vault, txHash };
@@ -309,7 +313,7 @@ export async function POST(req: Request) {
   } else if (referenceId && isAddress(referenceId)) {
     walletAddress = getAddress(referenceId);
   } else {
-    const existing = await convexHttpClient.query(anyApi.internal_kyc.getInquiryById, {
+    const existing = await convexHttpClient.query(anyApi.kyc.getInquiryById, {
       inquiryId,
     });
     if (existing?.walletAddress && isAddress(existing.walletAddress)) {
@@ -343,7 +347,7 @@ export async function POST(req: Request) {
   }
 
   const existingVerification = await convexHttpClient.query(
-    anyApi.internal_kyc.getWalletVerification,
+    anyApi.kyc.getWalletVerification,
     { walletAddress },
   );
 
@@ -380,10 +384,13 @@ export async function POST(req: Request) {
 
     await publicClient.waitForTransactionReceipt({ hash: txHash });
 
-    await convexHttpClient.mutation(anyApi.internal_kyc.setWalletVerified, {
+    const syncSecret = getServerEnv("KYC_SYNC_SECRET");
+
+    await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
       walletAddress,
       verified: true,
       txHash,
+      secret: syncSecret,
     });
 
     try {
@@ -391,6 +398,7 @@ export async function POST(req: Request) {
         publicClient,
         walletClient,
         creatorWallet: getAddress(walletAddress),
+        syncSecret,
       });
       vaultAddress = result.vault;
     } catch (error) {

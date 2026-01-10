@@ -1,4 +1,10 @@
-import { action, query, internalMutation, internalQuery } from "./_generated/server";
+import {
+  action,
+  query,
+  mutation,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import { v } from "convex/values";
 import { getAddress, isAddress, zeroAddress } from "viem";
 import { createMantleClients } from "./mantle";
@@ -137,6 +143,53 @@ export const insertVaultInternal = internalMutation({
       txHash: args.txHash,
       createdAt: Date.now(),
     });
+  },
+});
+
+export const upsertVaultFromServer = mutation({
+  args: {
+    secret: v.optional(v.string()),
+    wallet: v.string(),
+    vault: v.string(),
+    txHash: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const expected = getEnv("KYC_SYNC_SECRET");
+    if (expected && args.secret !== expected) {
+      throw new Error("Invalid KYC sync secret.");
+    }
+
+    if (!isAddress(args.wallet) || !isAddress(args.vault)) {
+      throw new Error("Invalid wallet or vault address.");
+    }
+
+    const wallet = getAddress(args.wallet);
+    const vault = getAddress(args.vault);
+
+    const existing = await ctx.db
+      .query("creatorVaults")
+      .withIndex("by_wallet", (q) => q.eq("wallet", wallet))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        vault,
+        txHash: args.txHash ?? existing.txHash,
+      });
+      return {
+        vault,
+        txHash: args.txHash ?? existing.txHash ?? null,
+      };
+    }
+
+    await ctx.db.insert("creatorVaults", {
+      wallet,
+      vault,
+      txHash: args.txHash,
+      createdAt: Date.now(),
+    });
+
+    return { vault, txHash: args.txHash ?? null };
   },
 });
 
