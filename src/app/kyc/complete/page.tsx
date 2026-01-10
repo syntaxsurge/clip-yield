@@ -21,7 +21,13 @@ type SyncResponse = {
   error?: string;
 };
 
-const FINAL_STATUSES = new Set(["approved", "declined", "rejected", "failed"]);
+const FINAL_STATUSES = new Set([
+  "approved",
+  "completed",
+  "declined",
+  "rejected",
+  "failed",
+]);
 
 export default function KycCompletePage() {
   const searchParams = useSearchParams();
@@ -85,7 +91,7 @@ export default function KycCompletePage() {
   const statusLabel = syncStatus ?? status ?? "processing";
   const formattedWallet = walletAddress ? formatShortHash(walletAddress) : "Unavailable";
   const syncedAtLabel = lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : "Not synced";
-  const isApproved = statusLabel === "approved";
+  const isApproved = statusLabel === "approved" || statusLabel === "completed";
   const isDeclined = statusLabel === "declined" || statusLabel === "rejected" || statusLabel === "failed";
 
   return (

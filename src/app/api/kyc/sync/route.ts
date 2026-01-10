@@ -100,11 +100,25 @@ export async function POST(req: Request) {
     );
   }
 
-  const result = await convexHttpClient.action(anyApi.kyc.syncInquiryStatus, {
-    inquiryId,
-    walletAddress,
-    status,
-  });
+  let result: unknown;
+  try {
+    result = await convexHttpClient.action(anyApi.kyc.syncInquiryStatus, {
+      inquiryId,
+      walletAddress,
+      status,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        inquiryId,
+        status,
+        walletAddress,
+        error: error instanceof Error ? error.message : "KYC sync failed.",
+      },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({
     ok: true,
