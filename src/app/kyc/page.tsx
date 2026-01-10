@@ -6,6 +6,7 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import MainLayout from "@/app/layouts/MainLayout";
 
 export default function KycStartPage() {
   const { address, isConnected } = useAccount();
@@ -56,42 +57,50 @@ export default function KycStartPage() {
 
   if (!isConnected) {
     return (
-      <div className="mx-auto max-w-xl space-y-4 px-4 py-10">
-        <h1 className="text-2xl font-semibold">Verify your identity</h1>
-        <p className="text-sm text-muted-foreground">
-          Connect a wallet to begin the KYC flow.
-        </p>
-        <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
-      </div>
+      <MainLayout>
+        <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+          <div className="mx-auto max-w-xl space-y-4">
+            <h1 className="text-2xl font-semibold">Verify your identity</h1>
+            <p className="text-sm text-muted-foreground">
+              Connect a wallet to begin the KYC flow.
+            </p>
+            <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+          </div>
+        </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-4 px-4 py-10">
-      <h1 className="text-2xl font-semibold">Verify your identity</h1>
-      <p className="text-sm text-muted-foreground">
-        You will be redirected to Persona to complete verification.
-      </p>
+    <MainLayout>
+      <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+        <div className="mx-auto max-w-xl space-y-4">
+          <h1 className="text-2xl font-semibold">Verify your identity</h1>
+          <p className="text-sm text-muted-foreground">
+            You will be redirected to Persona to complete verification.
+          </p>
 
-      {status === "starting" && (
-        <Alert variant="info">
-          <AlertTitle>Redirecting...</AlertTitle>
-          <AlertDescription>
-            Preparing your inquiry for {address}. This usually takes a few
-            seconds.
-          </AlertDescription>
-        </Alert>
-      )}
+          {status === "starting" && (
+            <Alert variant="info">
+              <AlertTitle>Redirecting...</AlertTitle>
+              <AlertDescription>
+                Preparing your inquiry for {address}. This usually takes a few
+                seconds.
+              </AlertDescription>
+            </Alert>
+          )}
 
-      {status === "error" && (
-        <Alert variant="destructive">
-          <AlertTitle>Unable to start KYC</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-          <div className="mt-3">
-            <Button onClick={() => setLastAddress(null)}>Try again</Button>
-          </div>
-        </Alert>
-      )}
-    </div>
+          {status === "error" && (
+            <Alert variant="destructive">
+              <AlertTitle>Unable to start KYC</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+              <div className="mt-3">
+                <Button onClick={() => setLastAddress(null)}>Try again</Button>
+              </div>
+            </Alert>
+          )}
+        </div>
+      </div>
+    </MainLayout>
   );
 }
