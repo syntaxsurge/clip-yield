@@ -76,7 +76,7 @@ export default function Post({ params }: PostPageTypes) {
 
             window.setTimeout(() => {
                 scrollLockRef.current = false
-            }, 520)
+            }, 620)
         }
 
         panel.addEventListener("wheel", handleWheel, { passive: false })

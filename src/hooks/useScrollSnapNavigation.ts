@@ -7,7 +7,7 @@ type ScrollSnapConfig = {
 
 export function useScrollSnapNavigation({
   itemCount,
-  lockDurationMs = 520,
+  lockDurationMs = 620,
 }: ScrollSnapConfig) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -23,12 +23,12 @@ export function useScrollSnapNavigation({
       const container = containerRef.current;
       if (!container) return;
       const nextIndex = clampIndex(index);
-    requestAnimationFrame(() => {
-      container.scrollTo({
-        top: container.clientHeight * nextIndex,
-        behavior: "smooth",
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          top: container.clientHeight * nextIndex,
+          behavior: "smooth",
+        });
       });
-    });
       setActiveIndex(nextIndex);
     },
     [clampIndex],
@@ -37,9 +37,18 @@ export function useScrollSnapNavigation({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    setActiveIndex(0);
-    container.scrollTo({ top: 0 });
-  }, [itemCount]);
+    if (itemCount === 0) {
+      setActiveIndex(0);
+      container.scrollTo({ top: 0 });
+      return;
+    }
+
+    if (activeIndex >= itemCount) {
+      const clampedIndex = clampIndex(activeIndex);
+      setActiveIndex(clampedIndex);
+      container.scrollTo({ top: container.clientHeight * clampedIndex });
+    }
+  }, [activeIndex, clampIndex, itemCount]);
 
   useEffect(() => {
     const container = containerRef.current;
