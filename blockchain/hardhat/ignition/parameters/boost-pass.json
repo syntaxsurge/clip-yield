@@ -1,0 +1,6 @@
+{
+  "ClipYieldBoostPass": {
+    "kycRegistry": "0x761D0dbB45654513AdF1BF6b5D217C0f8B3c5737",
+    "baseUri": "https://clipyield.com/boost-pass/{id}.json"
+  }
+}

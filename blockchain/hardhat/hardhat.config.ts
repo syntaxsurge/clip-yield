@@ -19,7 +19,7 @@ const config: HardhatUserConfig = {
   },
   defaultNetwork: "mantleSepolia",
   paths: {
-    sources: "../contracts",
+    sources: "./contracts",
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
