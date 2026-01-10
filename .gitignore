@@ -36,4 +36,3 @@ pnpm-debug.log*
 # root markdown (keep README and AGENTS)
 /*.md
 !/README.md
-!/AGENTS.md
