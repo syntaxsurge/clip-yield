@@ -346,7 +346,6 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/` short-form feed backed by Convex posts
 - `/following` feed of clips from followed creators
 - `/start` Mantle Sepolia onboarding wizard (wallet connect, faucet/bridge, WMNT wrap, entry to vault flows)
-- `/movement` Privy embedded wallet demo for Movement testnet transfers
 - `/upload` upload a new video post
 - `/profile/[id]` creator profile with posts
 - `/post/[postId]/[userId]` post detail + comments
@@ -367,8 +366,6 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 ## API endpoints
 - `/api/kyc/start` creates a Persona inquiry and returns the hosted flow URL
 - `/api/kyc/sync` fetches Persona inquiry status and triggers on-chain KYC updates
-- `/api/movement/wallet` provisions or fetches a Movement wallet linked to the Privy user
-- `/api/movement/transfer` signs and submits a Movement transfer using the embedded wallet
 - `/api/mantle/rollup-info` returns `{ ok, info }` rollup status via `rollup_getInfo` for finality UX
 - `/api/boost-pass/remix-pack` verifies Boost Pass ownership and returns the remix pack JSON
 - `/api/sponsor/remix-pack` verifies sponsor perks eligibility and returns the sponsor remix pack JSON
@@ -379,7 +376,6 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with a cron recompute of leaderboards
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence (`src/app/store`)
 - Mantle Sepolia wallet stack using Privy embedded wallets + wagmi + viem (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`)
-- Movement demo flow uses Privy server APIs (app ID + secret) to provision Movement wallets and sign MoveVM transfers via `/api/movement/*`
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
 - Mantle rollup status is fetched server-side and surfaced in the campaign receipt finality panel
 - RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldBoostPass) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
