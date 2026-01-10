@@ -28,8 +28,10 @@ pnpm-debug.log*
 /blockchain/hardhat/artifacts/
 /blockchain/hardhat/cache/
 /blockchain/hardhat/ignition/deployments/
+/blockchain/hardhat/typechain-types/
 /blockchain/foundry/out/
 /blockchain/foundry/cache/
+/blockchain/typechain-types/
 
 # root markdown (keep README and AGENTS)
 /*.md
