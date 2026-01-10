@@ -68,7 +68,8 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_inquiryId", ["inquiryId"])
-    .index("by_walletAddress", ["walletAddress"]),
+    .index("by_walletAddress", ["walletAddress"])
+    .index("by_walletAddress_updatedAt", ["walletAddress", "updatedAt"]),
 
   walletVerifications: defineTable({
     walletAddress: v.string(),

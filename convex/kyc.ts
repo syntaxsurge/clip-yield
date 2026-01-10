@@ -69,6 +69,25 @@ export const getWalletVerification = query({
   },
 });
 
+export const getLatestInquiryByWallet = query({
+  args: { walletAddress: v.string() },
+  handler: async (ctx, args) => {
+    if (!isAddress(args.walletAddress)) {
+      throw new Error("Invalid wallet address.");
+    }
+
+    const walletAddress = getAddress(args.walletAddress);
+
+    return await ctx.db
+      .query("kycInquiries")
+      .withIndex("by_walletAddress_updatedAt", (q) =>
+        q.eq("walletAddress", walletAddress),
+      )
+      .order("desc")
+      .first();
+  },
+});
+
 export const setWalletVerified = mutation({
   args: {
     walletAddress: v.string(),
