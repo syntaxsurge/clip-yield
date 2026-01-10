@@ -5,6 +5,7 @@ import type { Doc } from "./_generated/dataModel";
 type ProfileSummary = {
   user_id: string;
   name: string;
+  username?: string;
   image: string;
 };
 
@@ -23,6 +24,7 @@ const toSummary = (
     | {
         wallet: string;
         name: string;
+        username?: string;
         image: string;
       }
     | null,
@@ -31,6 +33,7 @@ const toSummary = (
     return {
       user_id: profile.wallet,
       name: profile.name,
+      username: profile.username,
       image: profile.image,
     };
   }
@@ -38,6 +41,7 @@ const toSummary = (
   return {
     user_id: wallet,
     name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}`,
+    username: `user-${wallet.slice(2, 10).toLowerCase()}`,
     image: "/images/placeholder-user.jpg",
   };
 };

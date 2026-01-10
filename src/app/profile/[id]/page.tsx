@@ -8,7 +8,7 @@ import { BsPencil } from "react-icons/bs"
 import { AiOutlineCopy } from "react-icons/ai"
 import { useUser } from "@/app/context/user"
 import ClientOnly from "@/app/components/ClientOnly"
-import { ProfilePageTypes, PostWithProfile, User } from "@/app/types"
+import { ProfilePageTypes, PostWithProfile } from "@/app/types"
 import { usePostStore } from "@/app/stores/post"
 import { useProfileStore } from "@/app/stores/profile"
 import { useGeneralStore } from "@/app/stores/general"
@@ -19,6 +19,7 @@ import useGetLikedPostsByUserId from "@/app/hooks/useGetLikedPostsByUserId"
 import useIsFollowing from "@/app/hooks/useIsFollowing"
 import useToggleFollow from "@/app/hooks/useToggleFollow"
 import { toast } from "react-hot-toast"
+import { formatShortHash } from "@/lib/utils"
 
 export default function Profile({ params }: ProfilePageTypes) {
     const contextUser = useUser()
@@ -34,8 +35,8 @@ export default function Profile({ params }: ProfilePageTypes) {
     const [likedPosts, setLikedPosts] = useState<PostWithProfile[]>([])
     const [likedStatus, setLikedStatus] = useState<"idle" | "loading">("idle")
     const [isCopying, setIsCopying] = useState(false)
-    const displayName = (currentProfile as User | null)?.name || ""
-    const showSecondary = Boolean(displayName && displayName !== id)
+    const displayName = currentProfile?.name || ""
+    const handle = currentProfile?.username || formatShortHash(id)
 
     useEffect(() => {
         setCurrentProfile(id)
@@ -189,11 +190,9 @@ export default function Profile({ params }: ProfilePageTypes) {
                                         <p className="text-[28px] font-bold truncate text-gray-900 dark:text-white">
                                             {displayName}
                                         </p>
-                                        {showSecondary ? (
-                                            <p className="text-[16px] text-gray-500 truncate dark:text-white/60">
-                                                @{displayName}
-                                            </p>
-                                        ) : null}
+                                        <p className="text-[16px] text-gray-500 truncate dark:text-white/60">
+                                            @{handle}
+                                        </p>
                                     </div>
                                 ) : (
                                     <div className="h-[60px]" />

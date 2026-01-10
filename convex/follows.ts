@@ -71,6 +71,7 @@ export const listFollowingProfiles = query({
       .map((profile) => ({
         id: profile!.wallet,
         name: profile!.name,
+        username: profile!.username,
         image: profile!.image,
       }));
 

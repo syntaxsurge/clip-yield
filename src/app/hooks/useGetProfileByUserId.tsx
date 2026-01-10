@@ -12,6 +12,7 @@ const useGetProfileByUserId = async (
       _id: string;
       wallet: string;
       name: string;
+      username?: string;
       image: string;
       bio: string;
     } | null;
@@ -22,6 +23,7 @@ const useGetProfileByUserId = async (
       id: profile._id,
       user_id: profile.wallet,
       name: profile.name,
+      username: profile.username,
       image: profile.image,
       bio: profile.bio,
     };

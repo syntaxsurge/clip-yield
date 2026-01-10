@@ -13,6 +13,7 @@ import type { SponsorCampaign } from "@/app/types"
 import { useUser } from "@/app/context/user"
 import useIsFollowing from "@/app/hooks/useIsFollowing"
 import useToggleFollow from "@/app/hooks/useToggleFollow"
+import { formatShortHash } from "@/lib/utils"
 
 export default function PostMain({ post }: PostMainCompTypes) {
     const contextUser = useUser()
@@ -117,12 +118,20 @@ export default function PostMain({ post }: PostMainCompTypes) {
                 </div>
 
                 <div className="pl-3 w-full px-4">
-                    <div className="flex items-center justify-between pb-0.5">
-                        <Link href={`/profile/${post.profile.user_id}`}>
-                            <span className="font-bold hover:underline cursor-pointer text-gray-900 dark:text-white">
-                                {post.profile.name}
-                            </span>
-                        </Link>
+                    <div className="flex items-start justify-between pb-0.5 gap-3">
+                        <div>
+                            <Link href={`/profile/${post.profile.user_id}`}>
+                                <span className="font-bold hover:underline cursor-pointer text-gray-900 dark:text-white">
+                                    {post.profile.name}
+                                </span>
+                            </Link>
+                            <div className="text-xs text-gray-500 dark:text-white/60">
+                                @
+                                {post.profile.username
+                                    ? post.profile.username
+                                    : formatShortHash(post.profile.user_id)}
+                            </div>
+                        </div>
 
                         <div className="flex items-center gap-2">
                             {isSponsored ? (

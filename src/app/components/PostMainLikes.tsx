@@ -1,9 +1,9 @@
 import { AiFillHeart } from "react-icons/ai"
-import { FaShare, FaCommentDots, FaBolt, FaBullhorn } from "react-icons/fa"
+import { FaCommentDots, FaBolt, FaBullhorn } from "react-icons/fa"
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useUser } from "../context/user"
 import { BiLoaderCircle } from "react-icons/bi"
-import { useRouter } from "next/navigation"
 import { Comment, Like, PostMainLikesCompTypes } from "../types"
 import useGetCommentsByPostId from "../hooks/useGetCommentsByPostId"
 import useGetLikesByPostId from "../hooks/useGetLikesByPostId"
@@ -13,7 +13,6 @@ import useDeleteLike from "../hooks/useDeleteLike"
 
 export default function PostMainLikes({ post }: PostMainLikesCompTypes) {
 
-    const router = useRouter()
     const contextUser = useUser()
     const [hasClickedLike, setHasClickedLike] = useState<boolean>(false)
     const [userLiked, setUserLiked] = useState<boolean>(false)
@@ -83,69 +82,68 @@ export default function PostMainLikes({ post }: PostMainLikesCompTypes) {
         }
     }
 
-    const boost = () => {
-        if (!post?.profile?.user_id) return
-        router.push(`/boost/${post.profile.user_id}`)
-    }
-
-    const sponsor = () => {
-        if (!post?.id) return
-        router.push(`/sponsor/${post.id}`)
-    }
-
     return (
         <>
-            <div id={`PostMainLikes-${post?.id}`} className="relative mr-[75px]">
-                <div className="absolute bottom-0 pl-2">
-                    <div className="pb-4 text-center">
-                        <button 
-                            disabled={hasClickedLike}
-                            onClick={() => likeOrUnlike()} 
-                            className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80"
-                        >
-                            {!hasClickedLike ? (
-                                <AiFillHeart color={likes?.length > 0 && userLiked ? '#ff2626' : ''} size="25"/>
-                            ) : (
-                                <BiLoaderCircle className="animate-spin" size="25"/>
-                            )}
-                            
-                        </button>
-                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">
-                            {likes?.length}
-                        </span>
-                    </div>
-
+            <div
+                id={`PostMainLikes-${post?.id}`}
+                className="flex flex-col items-center justify-end gap-4 self-end pb-3 pl-3"
+            >
+                <div className="flex flex-col items-center gap-1 text-center">
                     <button 
-                        onClick={() => router.push(`/post/${post?.id}/${post?.profile?.user_id}`)} 
-                        className="pb-4 text-center"
+                        disabled={hasClickedLike}
+                        onClick={() => likeOrUnlike()} 
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-white/80"
+                        aria-label="Like"
                     >
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
-                            <FaCommentDots size="25"/>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">{comments?.length}</span>
+                        {!hasClickedLike ? (
+                            <AiFillHeart color={likes?.length > 0 && userLiked ? '#ff2626' : ''} size="24"/>
+                        ) : (
+                            <BiLoaderCircle className="animate-spin" size="24"/>
+                        )}
                     </button>
-
-                    <button onClick={boost} className="pb-4 text-center">
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
-                            <FaBolt size="25"/>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">Boost</span>
-                    </button>
-
-                    <button onClick={sponsor} className="pb-4 text-center">
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
-                            <FaBullhorn size="24"/>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">Sponsor</span>
-                    </button>
-
-                    <button className="text-center">
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
-                            <FaShare size="25"/>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">55</span>
-                    </button>
+                    <span className="text-[11px] font-semibold text-gray-800 dark:text-white/80">
+                        {likes?.length}
+                    </span>
                 </div>
+
+                <Link
+                    href={`/post/${post?.id}/${post?.profile?.user_id}`}
+                    className="flex flex-col items-center gap-1 text-center"
+                    aria-label="View comments"
+                >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-white/80">
+                        <FaCommentDots size="22"/>
+                    </div>
+                    <span className="text-[11px] font-semibold text-gray-800 dark:text-white/80">
+                        {comments?.length}
+                    </span>
+                </Link>
+
+                <Link
+                    href={`/boost/${post?.profile?.user_id}`}
+                    className="flex flex-col items-center gap-1 text-center"
+                    aria-label="Boost creator"
+                >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-white/80">
+                        <FaBolt size="22"/>
+                    </div>
+                    <span className="text-[11px] font-semibold text-gray-800 dark:text-white/80">
+                        Boost
+                    </span>
+                </Link>
+
+                <Link
+                    href={`/sponsor/${post?.id}`}
+                    className="flex flex-col items-center gap-1 text-center"
+                    aria-label="Sponsor clip"
+                >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-white/80">
+                        <FaBullhorn size="21"/>
+                    </div>
+                    <span className="text-[11px] font-semibold text-gray-800 dark:text-white/80">
+                        Sponsor
+                    </span>
+                </Link>
             </div>
         </>
     )

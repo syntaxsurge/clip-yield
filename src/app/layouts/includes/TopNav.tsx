@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import { BiSearch, BiUser } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiLogOut } from "react-icons/fi";
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { useUser } from "@/app/context/user";
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
 import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
 import ThemeToggle from "@/components/ui/theme-toggle";
+import { formatShortHash } from "@/lib/utils";
 
 export default function TopNav() {
     const userContext = useUser();
@@ -33,12 +34,13 @@ export default function TopNav() {
         }
     }, 500);
 
-    const goTo = async () => {
+    const handleUploadClick = async (
+        event: MouseEvent<HTMLAnchorElement>,
+    ) => {
         if (!userContext?.user) {
+            event.preventDefault();
             await userContext?.openConnect();
-            return;
         }
-        router.push("/upload");
     };
 
     return (
@@ -72,19 +74,28 @@ export default function TopNav() {
 
                             {searchProfiles.length > 0 ?
                                 <div className="absolute bg-white max-w-[910px] h-auto w-full z-20 left-0 top-12 border p-1 dark:border-white/10 dark:bg-[#0f0f12]">
-                                    {searchProfiles.map((profile, index) => (
+                                    {searchProfiles.map((profile, index) => {
+                                        const handle = profile?.username
+                                            ? `@${profile.username}`
+                                            : `@${formatShortHash(profile?.id ?? "")}`;
+                                        return (
                                         <div className="p-1" key={index}>
                                             <Link 
                                                 href={`/profile/${profile?.id}`}
-                                                className="flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[#F12B56] hover:text-white dark:text-white"
+                                                className="group flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[#F12B56] hover:text-white dark:text-white"
                                             >
                                                 <div className="flex items-center">
                                                     <img className="rounded-md" width="40" src={useCreateBucketUrl(profile?.image)} />
-                                                    <div className="truncate ml-2">{ profile?.name }</div>
+                                                    <div className="ml-2">
+                                                        <div className="truncate font-semibold">{ profile?.name }</div>
+                                                        <div className="text-xs text-gray-500 dark:text-white/60 group-hover:text-white/90">
+                                                            {handle}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </Link>
                                         </div>
-                                    ))}
+                                    )})}
                                 </div>
                             : null}
 
@@ -94,13 +105,14 @@ export default function TopNav() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => void goTo()}
+                            <Link
+                                href="/upload"
+                                onClick={handleUploadClick}
                                 className="flex items-center border rounded-sm py-[6px] hover:bg-gray-100 pl-1.5 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                             >
                                 <AiOutlinePlus color="currentColor" size="22"/>
                                 <span className="px-2 font-medium text-[15px]">Upload</span>
-                            </button>
+                            </Link>
 
                             <ThemeToggle />
 

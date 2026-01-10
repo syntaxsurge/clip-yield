@@ -33,6 +33,7 @@ export const byPost = query({
         profile: {
           user_id: comment.userId,
           name: profile?.name ?? `${comment.userId.slice(0, 6)}...${comment.userId.slice(-4)}`,
+          username: profile?.username ?? `user-${comment.userId.slice(2, 10).toLowerCase()}`,
           image: profile?.image ?? "/images/placeholder-user.jpg",
         },
       };

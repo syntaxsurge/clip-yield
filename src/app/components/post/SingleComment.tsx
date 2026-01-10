@@ -8,6 +8,7 @@ import moment from "moment"
 import useDeleteComment from "@/app/hooks/useDeleteComment"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import { SingleCommentCompTypes } from "@/app/types"
+import { formatShortHash } from "@/lib/utils"
 
 export default function SingleComment({ comment, params }: SingleCommentCompTypes) {
 
@@ -43,9 +44,13 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
                     <div className="ml-14 pt-0.5 w-full">
 
                         <div className="text-[18px] font-semibold flex items-center justify-between">
-                            <span className="flex items-center">
-                                {comment?.profile?.name} - 
-                                <span className="text-[12px] text-gray-600 font-light ml-1 dark:text-white/60">
+                            <span className="flex flex-col">
+                                <span>{comment?.profile?.name}</span>
+                                <span className="text-[12px] text-gray-600 font-light dark:text-white/60">
+                                    @{comment?.profile?.username
+                                        ? comment.profile.username
+                                        : formatShortHash(comment?.profile?.user_id ?? "")}
+                                    <span className="px-1" aria-hidden="true">&middot;</span>
                                     {moment(comment?.created_at).calendar()}
                                 </span>
                             </span>

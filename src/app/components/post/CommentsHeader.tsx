@@ -18,6 +18,7 @@ import useCreateLike from "@/app/hooks/useCreateLike"
 import useDeleteLike from "@/app/hooks/useDeleteLike"
 import useDeletePostById from "@/app/hooks/useDeletePostById"
 import { CommentsHeaderCompTypes } from "@/app/types"
+import { formatShortHash } from "@/lib/utils"
 
 export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes) {
 
@@ -114,18 +115,23 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                         )}
                     </Link>
                     <div className="ml-3 pt-0.5">
-
-                        <Link 
-                            href={`/profile/${post?.user_id}`} 
+                        <Link
+                            href={`/profile/${post?.user_id}`}
                             className="relative z-10 text-[17px] font-semibold hover:underline text-gray-900 dark:text-white"
                         >
                             {post?.profile.name}
                         </Link>
-
-                        <div className="relative z-0 text-[13px] -mt-5 font-light text-gray-600 dark:text-white/60">
-                            {post?.profile.name}
-                            <span className="relative -top-[2px] text-[30px] pl-1 pr-0.5 ">.</span>
-                            <span className="font-medium text-gray-500 dark:text-white/60">{moment(post?.created_at).calendar()}</span>
+                        <div className="flex flex-wrap items-center gap-1 text-[12px] text-gray-600 dark:text-white/60">
+                            <span>
+                                @
+                                {post?.profile.username
+                                    ? post.profile.username
+                                    : formatShortHash(post?.user_id ?? "")}
+                            </span>
+                            <span aria-hidden="true">&middot;</span>
+                            <span className="font-medium">
+                                {moment(post?.created_at).calendar()}
+                            </span>
                         </div>
                     </div>
                 </div>

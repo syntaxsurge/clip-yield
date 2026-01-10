@@ -53,7 +53,7 @@ export function MantleFinalityPanel({
             <Badge variant="outline">Protocol step</Badge>
           </div>
           <div className="flex items-center justify-between">
-            <span>3) Verified on Ethereum -> finalized</span>
+            <span>3) Verified on Ethereum {"->"} finalized</span>
             <Badge variant="outline">Protocol step</Badge>
           </div>
         </div>

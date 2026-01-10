@@ -4,6 +4,7 @@ import { updateProfile } from "@/lib/convex/functions";
 const useUpdateProfile = async (
   userId: string,
   name: string,
+  username: string | undefined,
   bio: string,
   image?: string,
 ) => {
@@ -11,6 +12,7 @@ const useUpdateProfile = async (
     return await convexClient.mutation(updateProfile, {
       wallet: userId,
       name,
+      username,
       bio,
       image,
     });

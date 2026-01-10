@@ -221,6 +221,7 @@ export interface UserContextTypes {
 export interface User {
   id: string;
   name: string;
+  username?: string;
   bio: string;
   image: string;
 }
@@ -229,6 +230,7 @@ export interface Profile {
   id: string;
   user_id: string;
   name: string;
+  username?: string;
   image: string;
   bio: string;
 }
@@ -314,6 +316,7 @@ export interface BoostPassClaim {
 export interface RandomUsers {
   id: string;
   name: string;
+  username?: string;
   image: string;
 }
 
@@ -347,6 +350,7 @@ export interface PostWithProfile {
   profile: {
     user_id: string;
     name: string;
+    username?: string;
     image: string;
   };
 }
@@ -360,6 +364,7 @@ export interface CommentWithProfile {
   profile: {
     user_id: string;
     name: string;
+    username?: string;
     image: string;
   };
 }

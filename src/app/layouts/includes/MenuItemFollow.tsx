@@ -1,5 +1,6 @@
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import { MenuItemFollowCompTypes } from "@/app/types"
+import { formatShortHash } from "@/lib/utils"
 import Link from "next/link"
 import { AiOutlineCheck } from "react-icons/ai"
 
@@ -27,7 +28,9 @@ export default function MenuItemFollow({ user }: MenuItemFollowCompTypes) {
                     </div>
 
                     <p className="font-light text-[12px] text-gray-600 dark:text-white/60">
-                        {user?.name}
+                        {user?.username
+                          ? `@${user.username}`
+                          : `@${formatShortHash(user?.id || "")}`}
                     </p>
                 </div>
             </Link>

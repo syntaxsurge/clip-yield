@@ -5,6 +5,7 @@ export default defineSchema({
   profiles: defineTable({
     wallet: v.string(),
     name: v.string(),
+    username: v.optional(v.string()),
     bio: v.string(),
     image: v.string(),
     createdAt: v.number(),

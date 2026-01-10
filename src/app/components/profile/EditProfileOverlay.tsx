@@ -17,6 +17,7 @@ export default function EditProfileOverlay() {
   const contextUser = useUser();
 
   const [userName, setUserName] = useState("");
+  const [userHandle, setUserHandle] = useState("");
   const [userBio, setUserBio] = useState("");
   const [userImage, setUserImage] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -25,9 +26,15 @@ export default function EditProfileOverlay() {
 
   useEffect(() => {
     setUserName(currentProfile?.name || "");
+    setUserHandle(currentProfile?.username || "");
     setUserBio(currentProfile?.bio || "");
     setUserImage(currentProfile?.image || "");
-  }, [currentProfile?.bio, currentProfile?.image, currentProfile?.name]);
+  }, [
+    currentProfile?.bio,
+    currentProfile?.image,
+    currentProfile?.name,
+    currentProfile?.username,
+  ]);
 
   const showError = (type: string) => {
     if (error && error.type === type) {
@@ -42,6 +49,18 @@ export default function EditProfileOverlay() {
       setError({ type: "userName", message: "A name is required." });
       return true;
     }
+    const normalizedHandle = userHandle.trim().toLowerCase();
+    if (!normalizedHandle) {
+      setError({ type: "userHandle", message: "A username is required." });
+      return true;
+    }
+    if (!/^[a-z0-9._]{3,20}$/.test(normalizedHandle)) {
+      setError({
+        type: "userHandle",
+        message: "Use 3-20 characters: letters, numbers, dots, underscores.",
+      });
+      return true;
+    }
     return false;
   };
 
@@ -54,6 +73,7 @@ export default function EditProfileOverlay() {
       await useUpdateProfile(
         contextUser.user.id,
         userName.trim(),
+        userHandle.trim().toLowerCase(),
         userBio.trim(),
         userImage.trim() || undefined,
       );
@@ -188,6 +208,22 @@ export default function EditProfileOverlay() {
                 onUpdate={setUserName}
                 inputType="text"
                 error={showError("userName")}
+              />
+            </div>
+
+            <div className="rounded-xl border border-gray-200 p-4 dark:border-white/10">
+              <h3 className="mb-1 text-[15px] font-semibold text-gray-900 dark:text-white">
+                Username
+              </h3>
+              <p className="mb-3 text-xs text-gray-500 dark:text-white/60">
+                This becomes your @handle. Letters, numbers, dots, and underscores only.
+              </p>
+              <TextInput
+                string={userHandle}
+                placeholder="username"
+                onUpdate={setUserHandle}
+                inputType="text"
+                error={showError("userHandle")}
               />
             </div>
 

@@ -33,6 +33,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setUser({
       id: profile.wallet,
       name: profile.name,
+      username: profile.username,
       bio: profile.bio,
       image: profile.image,
     });
