@@ -70,14 +70,6 @@ export default defineSchema({
     .index("by_inquiryId", ["inquiryId"])
     .index("by_walletAddress", ["walletAddress"]),
 
-  kycWebhookEvents: defineTable({
-    eventId: v.string(),
-    eventName: v.string(),
-    inquiryId: v.string(),
-    createdAtIso: v.optional(v.string()),
-    receivedAt: v.number(),
-  }).index("by_eventId", ["eventId"]),
-
   walletVerifications: defineTable({
     walletAddress: v.string(),
     verified: v.boolean(),

@@ -55,78 +55,48 @@ export const upsertInquiry = mutation({
   },
 });
 
-export const ingestWebhookEvent = mutation({
-  args: {
-    eventId: v.string(),
-    eventName: v.string(),
-    inquiryId: v.string(),
-    createdAtIso: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query("kycWebhookEvents")
-      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
-      .unique();
-
-    if (existing) return { ok: true, deduped: true };
-
-    await ctx.db.insert("kycWebhookEvents", {
-      eventId: args.eventId,
-      eventName: args.eventName,
-      inquiryId: args.inquiryId,
-      createdAtIso: args.createdAtIso,
-      receivedAt: Date.now(),
-    });
-
-    await ctx.scheduler.runAfter(0, anyApi.kyc.processKycEvent, {
-      inquiryId: args.inquiryId,
-      eventName: args.eventName,
-    });
-
-    return { ok: true, deduped: false };
-  },
-});
-
-export const processKycEvent = action({
+export const syncInquiryStatus = action({
   args: {
     inquiryId: v.string(),
-    eventName: v.string(),
+    walletAddress: v.string(),
+    status: v.string(),
   },
   handler: async (ctx, args) => {
-    const positiveEvents = new Set(["inquiry.completed", "inquiry.approved"]);
-
-    const inquiry = await ctx.runQuery(
-      anyApi.internal_kyc.getInquiryById,
-      {
-        inquiryId: args.inquiryId,
-      },
-    );
-
-    if (!inquiry) {
-      throw new Error(`KYC inquiry not found: ${args.inquiryId}`);
+    if (!isAddress(args.walletAddress)) {
+      throw new Error("Invalid wallet address for KYC sync.");
     }
 
-    await ctx.runMutation(anyApi.internal_kyc.setInquiryStatus, {
+    const normalizedWallet = getAddress(args.walletAddress);
+    const existingInquiry = await ctx.runQuery(anyApi.internal_kyc.getInquiryById, {
       inquiryId: args.inquiryId,
-      status: args.eventName,
     });
 
-    if (!positiveEvents.has(args.eventName)) {
-      return { ok: true, skippedOnchain: true };
+    if (existingInquiry?.walletAddress) {
+      const existingWallet = getAddress(existingInquiry.walletAddress);
+      if (existingWallet !== normalizedWallet) {
+        throw new Error("KYC inquiry wallet mismatch.");
+      }
     }
 
-    if (!isAddress(inquiry.walletAddress)) {
-      throw new Error(`Invalid wallet address stored: ${inquiry.walletAddress}`);
+    await ctx.runMutation(anyApi.kyc.upsertInquiry, {
+      inquiryId: args.inquiryId,
+      walletAddress: normalizedWallet,
+      status: args.status,
+    });
+
+    const approvedStatuses = new Set(["approved", "completed"]);
+
+    if (!approvedStatuses.has(args.status)) {
+      return { ok: true, status: args.status, skippedOnchain: true };
     }
 
-    const walletAddress = getAddress(inquiry.walletAddress);
     const existingVerification = await ctx.runQuery(
       anyApi.internal_kyc.getWalletVerification,
-      { walletAddress },
+      { walletAddress: normalizedWallet },
     );
 
     if (existingVerification?.verified) {
-      return { ok: true, alreadyVerified: true };
+      return { ok: true, status: args.status, alreadyVerified: true };
     }
 
     const kycRegistry =
@@ -144,13 +114,13 @@ export const processKycEvent = action({
       address: getAddress(kycRegistry),
       abi: kycRegistryAbi,
       functionName: "setVerified",
-      args: [walletAddress, true],
+      args: [normalizedWallet, true],
     });
 
     await publicClient.waitForTransactionReceipt({ hash: txHash });
 
     await ctx.runMutation(anyApi.internal_kyc.setWalletVerified, {
-      walletAddress,
+      walletAddress: normalizedWallet,
       verified: true,
       txHash,
     });
@@ -161,7 +131,7 @@ export const processKycEvent = action({
     try {
       const result = await ctx.runAction(
         anyApi.creatorVaults.provisionCreatorVault,
-        { creatorWallet: walletAddress },
+        { creatorWallet: normalizedWallet },
       );
       vaultAddress = result?.vault ?? null;
     } catch (error) {
@@ -169,6 +139,6 @@ export const processKycEvent = action({
       console.error("Vault provisioning failed:", error);
     }
 
-    return { ok: true, txHash, vaultAddress, vaultError };
+    return { ok: true, status: args.status, txHash, vaultAddress, vaultError };
   },
 });

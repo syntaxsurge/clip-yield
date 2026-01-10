@@ -9,7 +9,6 @@ const TABLES = [
   "profiles",
   "projects",
   "kycInquiries",
-  "kycWebhookEvents",
   "walletVerifications",
   "creatorVaults",
   "sponsorCampaigns",

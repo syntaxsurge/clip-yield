@@ -365,7 +365,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 
 ## API endpoints
 - `/api/kyc/start` creates a Persona inquiry and returns the hosted flow URL
-- `/api/kyc/webhook` verifies Persona webhook signatures and schedules on-chain KYC updates
+- `/api/kyc/sync` fetches Persona inquiry status and triggers on-chain KYC updates
 - `/api/mantle/rollup-info` returns `{ ok, info }` rollup status via `rollup_getInfo` for finality UX
 - `/api/boost-pass/remix-pack` verifies Boost Pass ownership and returns the remix pack JSON
 - `/api/sponsor/remix-pack` verifies sponsor perks eligibility and returns the sponsor remix pack JSON
@@ -379,7 +379,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
 - Mantle rollup status is fetched server-side and surfaced in the campaign receipt finality panel
 - RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldBoostPass) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
-- Persona hosted-flow KYC with webhook verification triggers Convex actions that write verification status on-chain in `KycRegistry`
+- Persona hosted-flow KYC uses redirect + `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles
 
 ## Core Commands
