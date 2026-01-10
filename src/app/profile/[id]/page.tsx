@@ -34,6 +34,8 @@ export default function Profile({ params }: ProfilePageTypes) {
     const [likedPosts, setLikedPosts] = useState<PostWithProfile[]>([])
     const [likedStatus, setLikedStatus] = useState<"idle" | "loading">("idle")
     const [isCopying, setIsCopying] = useState(false)
+    const displayName = (currentProfile as User | null)?.name || ""
+    const showSecondary = Boolean(displayName && displayName !== id)
 
     useEffect(() => {
         setCurrentProfile(id)
@@ -182,12 +184,16 @@ export default function Profile({ params }: ProfilePageTypes) {
 
                         <div className="w-full sm:pl-5">
                             <ClientOnly>
-                                {(currentProfile as User)?.name ? (
+                                {displayName ? (
                                     <div>
                                         <p className="text-[28px] font-bold truncate text-gray-900 dark:text-white">
-                                            {currentProfile?.name}
+                                            {displayName}
                                         </p>
-                                        <p className="text-[16px] text-gray-500 truncate dark:text-white/60">{currentProfile?.name}</p>
+                                        {showSecondary ? (
+                                            <p className="text-[16px] text-gray-500 truncate dark:text-white/60">
+                                                @{displayName}
+                                            </p>
+                                        ) : null}
                                     </div>
                                 ) : (
                                     <div className="h-[60px]" />

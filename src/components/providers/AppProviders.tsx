@@ -19,7 +19,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <ConvexClientProvider>
         <Web3Provider>
           <UserProvider>
-            <NextTopLoader color="#F02C56" height={3} showSpinner={false} />
+            <NextTopLoader
+              color="#F02C56"
+              height={3}
+              showSpinner={false}
+              initialPosition={0.15}
+              zIndex={9999}
+              shadow="0 0 10px #F02C56,0 0 5px #F02C56"
+            />
             <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
           </UserProvider>
         </Web3Provider>

@@ -345,7 +345,6 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 ## Pages
 - `/` short-form feed backed by Convex posts
 - `/following` feed of clips from followed creators
-- `/live` live replays and trending clips
 - `/start` Mantle Sepolia onboarding wizard (wallet connect, faucet/bridge, WMNT wrap, entry to vault flows)
 - `/upload` upload a new video post
 - `/profile/[id]` creator profile with posts

@@ -2,7 +2,6 @@
 
 import { AiOutlineHome, AiOutlineFolderOpen } from "react-icons/ai"
 import { RiGroupLine } from "react-icons/ri"
-import { BsCameraVideo } from "react-icons/bs"
 import { MenuItemTypes } from "@/app/types"
 
 export default function MenuItem({ iconString, colorString, sizeString }: MenuItemTypes) {
@@ -10,7 +9,6 @@ export default function MenuItem({ iconString, colorString, sizeString }: MenuIt
     const icons = () => {
         if (iconString == 'For You') return <AiOutlineHome size={sizeString} color={colorString} />
         if (iconString == 'Following') return <RiGroupLine size={sizeString} color={colorString} />
-        if (iconString == 'LIVE') return <BsCameraVideo size={sizeString} color={colorString} />
         if (iconString == 'Projects') return <AiOutlineFolderOpen size={sizeString} color={colorString} />
     }
 

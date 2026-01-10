@@ -12,7 +12,9 @@ const getSystemTheme = (): ThemeMode =>
   window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
 const applyTheme = (theme: ThemeMode) => {
-  document.documentElement.classList.toggle("dark", theme === "dark");
+  const root = document.documentElement;
+  root.classList.toggle("dark", theme === "dark");
+  root.style.colorScheme = theme;
 };
 
 export default function ThemeToggle({ className }: { className?: string }) {

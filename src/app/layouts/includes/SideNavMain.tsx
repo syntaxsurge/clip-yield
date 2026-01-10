@@ -70,13 +70,6 @@ export default function SideNavMain() {
                             sizeString="25"
                         />
                     </Link>
-                    <Link href="/live">
-                        <MenuItem
-                            iconString="LIVE"
-                            colorString={pathname == '/live' ? '#F02C56' : defaultColor}
-                            sizeString="25"
-                        />
-                    </Link>
                     <Link href="/projects">
                         <MenuItem
                             iconString="Projects"

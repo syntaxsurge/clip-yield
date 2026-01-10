@@ -80,10 +80,14 @@ export default function Upload() {
     return (
         <>
             <UploadLayout>
-                <div className="w-full mt-[80px] mb-[40px] bg-white shadow-lg rounded-md py-6 md:px-10 px-4">
+                <div className="w-full mt-[80px] mb-[40px] rounded-md bg-white py-6 px-4 shadow-lg md:px-10 dark:bg-[#0f0f12] dark:shadow-none dark:border dark:border-white/10">
                     <div>
-                        <h1 className="text-[23px] font-semibold">Upload video</h1>
-                        <h2 className="text-gray-400 mt-1">Post a video to your account</h2>
+                        <h1 className="text-[23px] font-semibold text-gray-900 dark:text-white">
+                          Upload video
+                        </h1>
+                        <h2 className="mt-1 text-gray-400 dark:text-white/60">
+                          Post a video to your account
+                        </h2>
                     </div>
 
                     <div className="mt-8 md:flex gap-6">
@@ -111,14 +115,25 @@ export default function Upload() {
                                     rounded-lg 
                                     hover:bg-gray-100 
                                     cursor-pointer
+                                    dark:border-white/10
+                                    dark:text-white/80
+                                    dark:hover:bg-white/5
                                 "
                             >
                                 <BiSolidCloudUpload size="40" color="#b3b3b1"/>
-                                <p className="mt-4 text-[17px]">Select video to upload</p>
-                                <p className="mt-1.5 text-gray-500 text-[13px]">Or drag and drop a file</p>
-                                <p className="mt-12 text-gray-400 text-sm">MP4</p>
-                                <p className="mt-2 text-gray-400 text-[13px]">Up to 30 minutes</p>
-                                <p className="mt-2 text-gray-400 text-[13px]">Less than 2 GB</p>
+                                <p className="mt-4 text-[17px] text-gray-900 dark:text-white">
+                                  Select video to upload
+                                </p>
+                                <p className="mt-1.5 text-[13px] text-gray-500 dark:text-white/60">
+                                  Or drag and drop a file
+                                </p>
+                                <p className="mt-12 text-sm text-gray-400 dark:text-white/40">MP4</p>
+                                <p className="mt-2 text-[13px] text-gray-400 dark:text-white/40">
+                                  Up to 30 minutes
+                                </p>
+                                <p className="mt-2 text-[13px] text-gray-400 dark:text-white/40">
+                                  Less than 2 GB
+                                </p>
                                 <label 
                                     htmlFor="fileInput" 
                                     className="px-2 py-1.5 mt-8 text-white text-[15px] w-[80%] bg-[#F02C56] rounded-sm cursor-pointer"
@@ -180,12 +195,12 @@ export default function Upload() {
                                     src={fileDisplay} 
                                 />
 
-                                <div className="absolute -bottom-12 flex items-center justify-between z-50 rounded-xl border w-full p-2 border-gray-300">
+                                <div className="absolute -bottom-12 z-50 flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white/90 p-2 text-gray-900 dark:border-white/10 dark:bg-black/80 dark:text-white">
                                     <div className="flex items-center truncate">
                                         <AiOutlineCheckCircle size="16" className="min-w-[16px]"/>
                                         <p className="text-[11px] pl-1 truncate text-ellipsis">{file?.name}</p>
                                     </div>
-                                    <button onClick={() => clearVideo()} className="text-[11px] ml-2 font-semibold">
+                                    <button onClick={() => clearVideo()} className="text-[11px] ml-2 font-semibold text-gray-700 dark:text-white/80">
                                         Change
                                     </button>
                                 </div>
@@ -194,13 +209,13 @@ export default function Upload() {
 
 
                         <div className="mt-4 mb-6">
-                            <div className="flex bg-[#F8F8F8] py-4 px-6">
+                            <div className="flex bg-[#F8F8F8] py-4 px-6 text-gray-900 dark:bg-white/5 dark:text-white">
                                 <div>
                                     <PiKnifeLight className="mr-4" size="20"/>
                                 </div>
                                 <div>
                                     <div className="text-semibold text-[15px] mb-1.5">Divide videos and edit</div>
-                                    <div className="text-semibold text-[13px] text-gray-400">
+                                    <div className="text-semibold text-[13px] text-gray-400 dark:text-white/60">
                                         You can quickly divide videos into multiple parts, remove redundant parts and turn landscape videos into portrait videos
                                     </div>
                                 </div>
@@ -216,8 +231,8 @@ export default function Upload() {
 
                             <div className="mt-5">
                                 <div className="flex items-center justify-between">
-                                    <div className="mb-1 text-[15px]">Caption</div>
-                                    <div className="text-gray-400 text-[12px]">{caption.length}/150</div>
+                                    <div className="mb-1 text-[15px] text-gray-900 dark:text-white">Caption</div>
+                                    <div className="text-gray-400 text-[12px] dark:text-white/60">{caption.length}/150</div>
                                 </div>
                                 <input 
                                     maxLength={150}
@@ -228,6 +243,14 @@ export default function Upload() {
                                         p-2.5
                                         rounded-md
                                         focus:outline-none
+                                        bg-white
+                                        text-gray-900
+                                        border-gray-300
+                                        placeholder:text-gray-400
+                                        dark:bg-black/60
+                                        dark:text-white
+                                        dark:border-white/10
+                                        dark:placeholder:text-white/40
                                     "
                                     value={caption}
                                     onChange={event => setCaption(event.target.value)}
@@ -238,7 +261,7 @@ export default function Upload() {
                                 <button 
                                     disabled={isUploading}
                                     onClick={() => discard()}
-                                    className="px-10 py-2.5 mt-8 border text-[16px] hover:bg-gray-100 rounded-sm"
+                                    className="mt-8 rounded-sm border border-gray-300 px-10 py-2.5 text-[16px] text-gray-800 hover:bg-gray-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                                 >
                                     Discard
                                 </button>
@@ -252,7 +275,7 @@ export default function Upload() {
                             </div>
 
                             {error ? (
-                                <div className="text-red-600 mt-4">
+                                <div className="mt-4 text-red-600 dark:text-red-400">
                                     {error.message}
                                 </div>
                             ) : null}

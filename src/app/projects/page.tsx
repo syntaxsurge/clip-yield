@@ -476,7 +476,7 @@ export default function Projects() {
               </CardContent>
             </Card>
           ) : visibleProjects.length === 0 ? (
-          <Card className="border-gray-200">
+          <Card className="border-gray-200 dark:border-white/10">
             <CardHeader className="space-y-2">
               <CardTitle>No results</CardTitle>
               <CardDescription>
