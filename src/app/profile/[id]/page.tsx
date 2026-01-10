@@ -5,6 +5,7 @@ import PostUser from "@/app/components/profile/PostUser"
 import MainLayout from "@/app/layouts/MainLayout"
 import { use, useEffect, useState } from "react"
 import { BsPencil } from "react-icons/bs"
+import { AiOutlineCopy } from "react-icons/ai"
 import { useUser } from "@/app/context/user"
 import ClientOnly from "@/app/components/ClientOnly"
 import { ProfilePageTypes, PostWithProfile, User } from "@/app/types"
@@ -17,6 +18,7 @@ import useGetFollowingCount from "@/app/hooks/useGetFollowingCount"
 import useGetLikedPostsByUserId from "@/app/hooks/useGetLikedPostsByUserId"
 import useIsFollowing from "@/app/hooks/useIsFollowing"
 import useToggleFollow from "@/app/hooks/useToggleFollow"
+import { toast } from "react-hot-toast"
 
 export default function Profile({ params }: ProfilePageTypes) {
     const contextUser = useUser()
@@ -31,6 +33,7 @@ export default function Profile({ params }: ProfilePageTypes) {
     const [activeTab, setActiveTab] = useState<"videos" | "liked">("videos")
     const [likedPosts, setLikedPosts] = useState<PostWithProfile[]>([])
     const [likedStatus, setLikedStatus] = useState<"idle" | "loading">("idle")
+    const [isCopying, setIsCopying] = useState(false)
 
     useEffect(() => {
         setCurrentProfile(id)
@@ -116,6 +119,31 @@ export default function Profile({ params }: ProfilePageTypes) {
         }
     }, [activeTab, id])
 
+    const handleCopyAddress = async () => {
+        if (!id || isCopying) return
+        setIsCopying(true)
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(id)
+            } else {
+                const textarea = document.createElement("textarea")
+                textarea.value = id
+                textarea.style.position = "fixed"
+                textarea.style.opacity = "0"
+                document.body.appendChild(textarea)
+                textarea.select()
+                document.execCommand("copy")
+                document.body.removeChild(textarea)
+            }
+            toast.success("Wallet address copied")
+        } catch (error) {
+            console.error(error)
+            toast.error("Failed to copy wallet address")
+        } finally {
+            setIsCopying(false)
+        }
+    }
+
     const handleFollow = async () => {
         if (!contextUser?.user?.id) {
             await contextUser?.openConnect()
@@ -148,7 +176,7 @@ export default function Profile({ params }: ProfilePageTypes) {
                                     src={useCreateBucketUrl(currentProfile?.image)}
                                 />
                             ) : (
-                                <div className="h-[120px] w-[120px] rounded-full bg-gray-200" />
+                                <div className="h-[120px] w-[120px] rounded-full bg-gray-200 dark:bg-white/10" />
                             )}
                         </ClientOnly>
 
@@ -156,19 +184,39 @@ export default function Profile({ params }: ProfilePageTypes) {
                             <ClientOnly>
                                 {(currentProfile as User)?.name ? (
                                     <div>
-                                        <p className="text-[28px] font-bold truncate">{currentProfile?.name}</p>
-                                        <p className="text-[16px] text-gray-500 truncate">{currentProfile?.name}</p>
+                                        <p className="text-[28px] font-bold truncate text-gray-900 dark:text-white">
+                                            {currentProfile?.name}
+                                        </p>
+                                        <p className="text-[16px] text-gray-500 truncate dark:text-white/60">{currentProfile?.name}</p>
                                     </div>
                                 ) : (
                                     <div className="h-[60px]" />
                                 )}
                             </ClientOnly>
 
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-white/70">
+                                    Wallet
+                                </span>
+                                <div className="flex flex-1 flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 dark:border-white/10 dark:bg-black dark:text-white/70">
+                                    <span className="font-mono break-all">{id}</span>
+                                    <button
+                                        onClick={() => void handleCopyAddress()}
+                                        className="ml-auto inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+                                        disabled={isCopying}
+                                        aria-label="Copy wallet address"
+                                    >
+                                        <AiOutlineCopy size={14} />
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+
                             
                             {contextUser?.user?.id === id ? (
                                 <button
                                     onClick={() => setIsEditProfileOpen(!isEditProfileOpen)}
-                                    className="flex item-center rounded-md py-1.5 px-3.5 mt-3 text-[15px] font-semibold border hover:bg-gray-100"
+                                    className="flex item-center rounded-md py-1.5 px-3.5 mt-3 text-[15px] font-semibold border border-gray-200 hover:bg-gray-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                                 >
                                     <BsPencil className="mt-0.5 mr-1" size="18"/>
                                     <span>Edit profile</span>
@@ -181,7 +229,7 @@ export default function Profile({ params }: ProfilePageTypes) {
                                         aria-pressed={isFollowing}
                                         className={`flex item-center rounded-md py-1.5 px-6 text-[15px] font-semibold border ${
                                             isFollowing
-                                                ? "border-gray-200 text-gray-700 hover:bg-gray-100"
+                                                ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
                                                 : "border-[#F02C56] bg-[#F02C56] text-white hover:bg-[#e0264c]"
                                         }`}
                                     >
@@ -189,7 +237,7 @@ export default function Profile({ params }: ProfilePageTypes) {
                                     </button>
                                     <Link
                                         href={`/boost/${id}`}
-                                        className="flex item-center rounded-md border border-[#F02C56] px-6 py-1.5 text-[15px] font-semibold text-[#F02C56] hover:bg-[#ffeef2]"
+                                        className="flex item-center rounded-md border border-[#F02C56] px-6 py-1.5 text-[15px] font-semibold text-[#F02C56] hover:bg-[#ffeef2] dark:hover:bg-[#35151d]"
                                     >
                                         Boost with yield
                                     </Link>
@@ -202,28 +250,28 @@ export default function Profile({ params }: ProfilePageTypes) {
                     <div className="flex flex-wrap items-center gap-4 pt-4">
                         <div className="mr-4">
                             <span className="font-bold">{followingCount}</span>
-                            <span className="text-gray-500 font-light text-[15px] pl-1.5">Following</span>
+                            <span className="text-gray-500 font-light text-[15px] pl-1.5 dark:text-white/60">Following</span>
                         </div>
                         <div className="mr-4">
                             <span className="font-bold">{followerCount}</span>
-                            <span className="text-gray-500 font-light text-[15px] pl-1.5">Followers</span>
+                            <span className="text-gray-500 font-light text-[15px] pl-1.5 dark:text-white/60">Followers</span>
                         </div>
                     </div>
 
                     <ClientOnly>
-                        <p className="pt-4 mr-4 text-gray-500 font-light text-[15px] pl-1.5 max-w-[500px]">
+                        <p className="pt-4 mr-4 text-gray-500 font-light text-[15px] pl-1.5 max-w-[500px] dark:text-white/60">
                             {currentProfile?.bio}
                         </p>
                     </ClientOnly>
 
-                    <ul className="w-full flex items-center pt-4 border-b">
+                    <ul className="w-full flex items-center pt-4 border-b border-gray-200 dark:border-white/10">
                         <li className="w-60 text-center">
                             <button
                                 onClick={() => setActiveTab("videos")}
                                 className={`w-full py-2 text-[17px] font-semibold ${
                                     activeTab === "videos"
-                                        ? "border-b-2 border-b-black text-black"
-                                        : "text-gray-500"
+                                        ? "border-b-2 border-b-black text-black dark:border-b-white dark:text-white"
+                                        : "text-gray-500 dark:text-white/60"
                                 }`}
                             >
                                 Videos
@@ -234,8 +282,8 @@ export default function Profile({ params }: ProfilePageTypes) {
                                 onClick={() => setActiveTab("liked")}
                                 className={`w-full py-2 text-[17px] font-semibold ${
                                     activeTab === "liked"
-                                        ? "border-b-2 border-b-black text-black"
-                                        : "text-gray-500"
+                                        ? "border-b-2 border-b-black text-black dark:border-b-white dark:text-white"
+                                        : "text-gray-500 dark:text-white/60"
                                 }`}
                             >
                                 Liked
@@ -245,7 +293,7 @@ export default function Profile({ params }: ProfilePageTypes) {
 
                     <ClientOnly>
                         {activeTab === "liked" && likedStatus === "loading" ? (
-                            <div className="mt-6 text-sm text-gray-500">
+                            <div className="mt-6 text-sm text-gray-500 dark:text-white/60">
                                 Loading liked clips...
                             </div>
                         ) : (
@@ -256,12 +304,12 @@ export default function Profile({ params }: ProfilePageTypes) {
                             </div>
                         )}
                         {activeTab === "videos" && postsByUser.length === 0 ? (
-                            <div className="mt-6 text-sm text-gray-500">
+                            <div className="mt-6 text-sm text-gray-500 dark:text-white/60">
                                 No clips yet. Upload a new video to get started.
                             </div>
                         ) : null}
                         {activeTab === "liked" && likedStatus === "idle" && likedPosts.length === 0 ? (
-                            <div className="mt-6 text-sm text-gray-500">
+                            <div className="mt-6 text-sm text-gray-500 dark:text-white/60">
                                 No liked clips yet. Tap the heart on a video to save it here.
                             </div>
                         ) : null}

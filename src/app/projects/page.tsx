@@ -297,16 +297,21 @@ export default function Projects() {
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="text-sm text-gray-500">Creator workspace</p>
+              <p className="text-sm text-gray-500 dark:text-white/60">
+                Creator workspace
+              </p>
               <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+                <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
                   Projects
                 </h1>
-                <Badge variant="outline" className="border-gray-200 text-gray-600 tabular-nums">
+                <Badge
+                  variant="outline"
+                  className="border-gray-200 text-gray-600 tabular-nums dark:border-white/10 dark:text-white/70"
+                >
                   {projectCountLabel}
                 </Badge>
               </div>
-              <p className="max-w-2xl text-gray-500">
+              <p className="max-w-2xl text-gray-500 dark:text-white/60">
                 Start a new timeline, remix an IP asset, or continue a draft. Projects save locally
                 in your browser and sync to the cloud when possible.
               </p>
@@ -337,7 +342,7 @@ export default function Projects() {
                       placeholder="Project title"
                       disabled={isCreatingProject}
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-white/60">
                       Tip: include a short subject + version (e.g., “Trailer v2”).
                     </p>
                   </div>
@@ -393,13 +398,13 @@ export default function Projects() {
             </div>
           </div>
 
-          <div className="grid gap-3 rounded-2xl border border-gray-200 bg-white p-4 lg:grid-cols-12">
+          <div className="grid gap-3 rounded-2xl border border-gray-200 bg-white p-4 lg:grid-cols-12 dark:border-white/10 dark:bg-black/80">
             <div className="lg:col-span-7">
               <Label htmlFor="projectSearch" className="sr-only">
                 Search projects
               </Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-white/40" />
                 <Input
                   id="projectSearch"
                   type="search"
@@ -434,15 +439,15 @@ export default function Projects() {
                 Clear
               </Button>
             ) : (
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-400 dark:text-white/40">
                 Press <span className="font-mono">/</span> to search
               </div>
             )}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-500">
-          <div className="font-semibold text-gray-700">Local-first drafts</div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-500 dark:border-white/10 dark:bg-black/80 dark:text-white/60">
+          <div className="font-semibold text-gray-700 dark:text-white">Local-first drafts</div>
           <p className="mt-1">
             Projects are stored in your browser. Cloud sync is best-effort and never blocks
             creation or editing.
@@ -456,7 +461,7 @@ export default function Projects() {
               ))}
             </div>
           ) : projects.length === 0 ? (
-          <Card className="border-gray-200">
+          <Card className="border-gray-200 dark:border-white/10">
             <CardHeader className="space-y-2">
               <CardTitle>No projects yet</CardTitle>
               <CardDescription>
@@ -494,7 +499,7 @@ export default function Projects() {
                 <Card
                   key={id}
                   className={cn(
-                    "group relative overflow-hidden border-gray-200 transition-colors hover:border-gray-300",
+                    "group relative overflow-hidden border-gray-200 transition-colors hover:border-gray-300 dark:border-white/10 dark:hover:border-white/20",
                     id === currentProjectId && "border-[#F02C56]/40",
                   )}
                 >
@@ -506,7 +511,7 @@ export default function Projects() {
                     <CardHeader className="space-y-2 pr-14">
                       <div className="flex items-start justify-between gap-2">
                         <CardTitle className="flex min-w-0 items-center gap-2 text-base">
-                          <Film className="h-4 w-4 shrink-0 text-gray-400" />
+                          <Film className="h-4 w-4 shrink-0 text-gray-400 dark:text-white/40" />
                           <span className="truncate">{projectName}</span>
                         </CardTitle>
                         {id === currentProjectId ? (
@@ -517,7 +522,7 @@ export default function Projects() {
                         Updated {formatLocalDate(lastModified)}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2 text-sm text-gray-500">
+                    <CardContent className="space-y-2 text-sm text-gray-500 dark:text-white/60">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         Created {formatLocalDate(createdAt)}

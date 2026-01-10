@@ -101,7 +101,7 @@ export default function PostMainLikes({ post }: PostMainLikesCompTypes) {
                         <button 
                             disabled={hasClickedLike}
                             onClick={() => likeOrUnlike()} 
-                            className="rounded-full bg-gray-200 p-2 cursor-pointer"
+                            className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80"
                         >
                             {!hasClickedLike ? (
                                 <AiFillHeart color={likes?.length > 0 && userLiked ? '#ff2626' : ''} size="25"/>
@@ -110,7 +110,7 @@ export default function PostMainLikes({ post }: PostMainLikesCompTypes) {
                             )}
                             
                         </button>
-                        <span className="text-xs text-gray-800 font-semibold">
+                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">
                             {likes?.length}
                         </span>
                     </div>
@@ -119,31 +119,31 @@ export default function PostMainLikes({ post }: PostMainLikesCompTypes) {
                         onClick={() => router.push(`/post/${post?.id}/${post?.profile?.user_id}`)} 
                         className="pb-4 text-center"
                     >
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer">
+                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
                             <FaCommentDots size="25"/>
                         </div>
-                        <span className="text-xs text-gray-800 font-semibold">{comments?.length}</span>
+                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">{comments?.length}</span>
                     </button>
 
                     <button onClick={boost} className="pb-4 text-center">
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer">
+                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
                             <FaBolt size="25"/>
                         </div>
-                        <span className="text-xs text-gray-800 font-semibold">Boost</span>
+                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">Boost</span>
                     </button>
 
                     <button onClick={sponsor} className="pb-4 text-center">
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer">
+                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
                             <FaBullhorn size="24"/>
                         </div>
-                        <span className="text-xs text-gray-800 font-semibold">Sponsor</span>
+                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">Sponsor</span>
                     </button>
 
                     <button className="text-center">
-                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer">
+                        <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white/80">
                             <FaShare size="25"/>
                         </div>
-                        <span className="text-xs text-gray-800 font-semibold">55</span>
+                        <span className="text-xs font-semibold text-gray-800 dark:text-white/80">55</span>
                     </button>
                 </div>
             </div>

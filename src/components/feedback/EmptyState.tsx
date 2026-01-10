@@ -18,7 +18,8 @@ type EmptyStateProps = {
 
 const actionClasses: Record<NonNullable<EmptyStateAction["variant"]>, string> = {
   primary: "bg-[#F02C56] text-white hover:bg-[#e02650]",
-  secondary: "border border-gray-200 text-gray-700 hover:bg-gray-50",
+  secondary:
+    "border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10",
 };
 
 const ActionButton = ({ action }: { action: EmptyStateAction }) => {
@@ -56,10 +57,14 @@ export default function EmptyState({
         className,
       )}
     >
-      <div className="w-full max-w-[520px] rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-8 text-center shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+      <div className="w-full max-w-[520px] rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-8 text-center shadow-sm dark:border-white/10 dark:bg-black/80">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {title}
+        </h2>
         {description ? (
-          <p className="mt-2 text-sm text-gray-500">{description}</p>
+          <p className="mt-2 text-sm text-gray-500 dark:text-white/60">
+            {description}
+          </p>
         ) : null}
         {primaryAction || secondaryAction ? (
           <div className="mt-5 flex flex-wrap justify-center gap-3">

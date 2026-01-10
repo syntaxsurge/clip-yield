@@ -343,7 +343,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 # Platform Summary
 
 ## Pages
-- `/` TikTok-style feed backed by Convex posts
+- `/` short-form feed backed by Convex posts
 - `/following` feed of clips from followed creators
 - `/live` live replays and trending clips
 - `/start` Mantle Sepolia onboarding wizard (wallet connect, faucet/bridge, WMNT wrap, entry to vault flows)
@@ -372,7 +372,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/api/sponsor/remix-pack` verifies sponsor perks eligibility and returns the sponsor remix pack JSON
 
 ## Architecture Overview
-- Next.js 15 App Router under `src/app` with TikTok-style routes plus editor routes
+- Next.js 15 App Router under `src/app` with short-form feed routes plus editor routes
 - Convex backend in `convex/` with `profiles`, `posts` (Convex file storage), `comments`, `likes`, `follows`, `projects`, creator vaults (`creatorVaults`), sponsor campaigns (`sponsorCampaigns`), campaign receipts (`campaignReceipts` with L2 inclusion metadata), vault tx logs (`vaultTx` with L2 inclusion metadata), activity events (`activityEvents`), leaderboard snapshots (`leaderboardSnapshots`), boost pass epochs/claims (`boostPassEpochs`, `boostPassClaims`), KYC tables (`kycInquiries`, `kycWebhookEvents`, `walletVerifications`), plus `admin.truncateAll` for `convex:reset`
 - Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with a cron recompute of leaderboards
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence (`src/app/store`)

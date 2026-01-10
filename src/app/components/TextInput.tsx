@@ -17,6 +17,11 @@ export default function TextInput({ string, inputType, placeholder, error, onUpd
                 py-2.5
                 px-3
                 focus:outline-none
+                placeholder:text-gray-500
+                dark:bg-white/10
+                dark:text-white
+                dark:border-white/10
+                dark:placeholder:text-white/50
             " 
             value={string || ''}
             onChange={(event) => onUpdate(event.target.value)}

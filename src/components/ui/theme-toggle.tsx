@@ -58,7 +58,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
         type="button"
         aria-label="Toggle theme"
         className={cn(
-          "flex h-[38px] w-[38px] items-center justify-center rounded-full border border-gray-200 text-gray-400",
+          "flex h-[38px] w-[38px] items-center justify-center rounded-full border border-gray-200 text-gray-400 dark:border-white/10 dark:text-white/40",
           className,
         )}
         disabled

@@ -104,28 +104,28 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
     }
     return (
         <>
-            <div className="flex items-center justify-between px-8">
+            <div className="flex items-center justify-between px-8 text-gray-900 dark:text-white">
                 <div className="flex items-center">
                     <Link href={`/profile/${post?.user_id}`}>
                         {post?.profile.image ? (
                             <img className="rounded-full lg:mx-0 mx-auto" width="40" src={useCreateBucketUrl(post?.profile.image)} />
                         ) : (
-                            <div className="w-[40px] h-[40px] bg-gray-200 rounded-full"></div>
+                            <div className="w-[40px] h-[40px] bg-gray-200 rounded-full dark:bg-white/10"></div>
                         )}
                     </Link>
                     <div className="ml-3 pt-0.5">
 
                         <Link 
                             href={`/profile/${post?.user_id}`} 
-                            className="relative z-10 text-[17px] font-semibold hover:underline"
+                            className="relative z-10 text-[17px] font-semibold hover:underline text-gray-900 dark:text-white"
                         >
                             {post?.profile.name}
                         </Link>
 
-                        <div className="relative z-0 text-[13px] -mt-5 font-light">
+                        <div className="relative z-0 text-[13px] -mt-5 font-light text-gray-600 dark:text-white/60">
                             {post?.profile.name}
                             <span className="relative -top-[2px] text-[30px] pl-1 pr-0.5 ">.</span>
-                            <span className="font-medium">{moment(post?.created_at).calendar()}</span>
+                            <span className="font-medium text-gray-500 dark:text-white/60">{moment(post?.created_at).calendar()}</span>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                         {isDeleteing ? (
                             <BiLoaderCircle className="animate-spin" size="25"/>
                         ) : (
-                            <button disabled={isDeleteing} onClick={() => deletePost()}>
+                            <button disabled={isDeleteing} onClick={() => deletePost()} className="text-gray-600 dark:text-white/70">
                                 <BsTrash3 className="cursor-pointer" size="25"/>
                             </button>
                         )}
@@ -143,20 +143,20 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                 ) : null}
             </div>
 
-            <p className="px-8 mt-4 text-sm">{post?.text}</p>
+            <p className="px-8 mt-4 text-sm text-gray-900 dark:text-white">{post?.text}</p>
 
-            <p className="flex item-center gap-2 px-8 mt-4 text-sm font-bold">
+            <p className="flex item-center gap-2 px-8 mt-4 text-sm font-bold text-gray-700 dark:text-white/80">
                 <ImMusic size="17"/>
                 original sound - {post?.profile.name}
             </p>
 
-            <div className="flex items-center px-8 mt-8">
+            <div className="flex items-center px-8 mt-8 text-gray-800 dark:text-white">
                 <ClientOnly>
                     <div className="pb-4 text-center flex items-center">
                         <button 
                             disabled={hasClickedLike}
                             onClick={() => likeOrUnlike()} 
-                            className="rounded-full bg-gray-200 p-2 cursor-pointer"
+                            className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white"
                         >
                             {!hasClickedLike ? (
                                 <AiFillHeart color={likesByPost.length > 0 && userLiked ? '#ff2626' : ''} size="25"/>
@@ -164,17 +164,17 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                                 <BiLoaderCircle className="animate-spin" size="25"/>
                             )}
                         </button>
-                        <span className="text-xs pl-2 pr-4 text-gray-800 font-semibold">
+                        <span className="text-xs pl-2 pr-4 text-gray-800 font-semibold dark:text-white/80">
                             {likesByPost.length}
                         </span>
                     </div>
                 </ClientOnly>
 
                 <div className="pb-4 text-center flex items-center">
-                    <div className="rounded-full bg-gray-200 p-2 cursor-pointer">
+                    <div className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white">
                         <BsChatDots size={25} />
                     </div>
-                    <span className="text-xs pl-2 text-gray-800 font-semibold">{commentsByPost?.length}</span>
+                    <span className="text-xs pl-2 text-gray-800 font-semibold dark:text-white/80">{commentsByPost?.length}</span>
                 </div>
             </div>
         </>

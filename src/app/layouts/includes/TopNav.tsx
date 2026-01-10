@@ -71,12 +71,12 @@ export default function TopNav() {
                             />
 
                             {searchProfiles.length > 0 ?
-                                <div className="absolute bg-white max-w-[910px] h-auto w-full z-20 left-0 top-12 border p-1">
+                                <div className="absolute bg-white max-w-[910px] h-auto w-full z-20 left-0 top-12 border p-1 dark:border-white/10 dark:bg-[#0f0f12]">
                                     {searchProfiles.map((profile, index) => (
                                         <div className="p-1" key={index}>
                                             <Link 
                                                 href={`/profile/${profile?.id}`}
-                                                className="flex items-center justify-between w-full cursor-pointer hover:bg-[#F12B56] p-1 px-2 hover:text-white"
+                                                className="flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[#F12B56] hover:text-white dark:text-white"
                                             >
                                                 <div className="flex items-center">
                                                     <img className="rounded-md" width="40" src={useCreateBucketUrl(profile?.image)} />
@@ -88,7 +88,7 @@ export default function TopNav() {
                                 </div>
                             : null}
 
-                            <div className="px-3 py-1 flex items-center border-l border-l-gray-300">
+                            <div className="px-3 py-1 flex items-center border-l border-l-gray-300 dark:border-l-white/10">
                                 <BiSearch color="#A1A2A7" size="22" />
                             </div>
                     </div>
@@ -120,19 +120,19 @@ export default function TopNav() {
                                     <div className="relative">
                                         <button
                                             onClick={() => setShowMenu((prev) => !prev)}
-                                            className="mt-1 border border-gray-200 rounded-full"
+                                            className="mt-1 border border-gray-200 rounded-full dark:border-white/10"
                                         >
                                             <img className="rounded-full w-[35px] h-[35px]" src={useCreateBucketUrl(userContext?.user?.image || '')} />
                                         </button>
 
                                         {showMenu ? (
-                                            <div className="absolute bg-white rounded-lg py-1.5 w-[200px] shadow-xl border top-[40px] right-0">
+                                            <div className="absolute bg-white rounded-lg py-1.5 w-[200px] shadow-xl border top-[40px] right-0 dark:border-white/10 dark:bg-[#0f0f12]">
                                                 <button
                                                     onClick={() => {
                                                         router.push(`/profile/${userContext?.user?.id}`)
                                                         setShowMenu(false)
                                                     }}
-                                                    className="flex items-center w-full justify-start py-3 px-2 hover:bg-gray-100 cursor-pointer"
+                                                    className="flex items-center w-full justify-start py-3 px-2 text-gray-800 hover:bg-gray-100 cursor-pointer dark:text-white dark:hover:bg-white/10"
                                                 >
                                                     <BiUser size="20"/>
                                                     <span className="pl-2 font-semibold text-sm">Profile</span>
@@ -142,7 +142,7 @@ export default function TopNav() {
                                                         await userContext?.logout()
                                                         setShowMenu(false)
                                                     }}
-                                                    className="flex items-center justify-start w-full py-3 px-1.5 hover:bg-gray-100 border-t cursor-pointer"
+                                                    className="flex items-center justify-start w-full py-3 px-1.5 hover:bg-gray-100 border-t cursor-pointer text-gray-800 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                                                 >
                                                     <FiLogOut size={20} />
                                                     <span className="pl-2 font-semibold text-sm">Disconnect</span>

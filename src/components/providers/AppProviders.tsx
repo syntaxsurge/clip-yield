@@ -11,6 +11,7 @@ import { Web3Provider } from "@/components/providers/Web3Provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { store } from "@/app/store";
 import UserProvider from "@/app/context/user";
+import NextTopLoader from "nextjs-toploader";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
@@ -18,6 +19,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <ConvexClientProvider>
         <Web3Provider>
           <UserProvider>
+            <NextTopLoader color="#F02C56" height={3} showSpinner={false} />
             <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
           </UserProvider>
         </Web3Provider>

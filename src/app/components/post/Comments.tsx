@@ -35,14 +35,16 @@ export default function Comments({ params }: CommentsCompTypes) {
         <>
             <div 
                 id="Comments" 
-                className="relative bg-[#F8F8F8] z-0 w-full h-[calc(100%-273px)] border-t-2 overflow-auto"
+                className="relative z-0 w-full h-[calc(100%-273px)] overflow-auto border-t-2 border-gray-200 bg-[#F8F8F8] text-gray-900 dark:border-white/10 dark:bg-[#0f0f12] dark:text-white"
             >
    
                 <div className="pt-2"/>
 
                 <ClientOnly>
                     {commentsByPost.length < 1 ? (
-                        <div className="text-center mt-6 text-xl text-gray-500">No comments...</div>
+                        <div className="text-center mt-6 text-xl text-gray-500 dark:text-white/60">
+                            No comments...
+                        </div>
                     ) : (
                         <div>
                             {commentsByPost.map((comment, index) => (
@@ -58,12 +60,12 @@ export default function Comments({ params }: CommentsCompTypes) {
 
             <div 
                 id="CreateComment" 
-                className="absolute flex items-center justify-between bottom-0 bg-white h-[85px] lg:max-w-[550px] w-full py-5 px-8 border-t-2"
+                className="absolute bottom-0 flex h-[85px] w-full items-center justify-between border-t-2 border-gray-200 bg-white px-8 py-5 lg:max-w-[550px] dark:border-white/10 dark:bg-black"
             >
                 <div 
                     className={`
-                        bg-[#F1F1F2] flex items-center rounded-lg w-full lg:max-w-[420px]
-                        ${inputFocused ? 'border-2 border-gray-400' : 'border-2 border-[#F1F1F2]'}
+                        flex items-center rounded-lg w-full lg:max-w-[420px] border-2 bg-[#F1F1F2] dark:bg-white/10
+                        ${inputFocused ? 'border-gray-400 dark:border-white/30' : 'border-[#F1F1F2] dark:border-white/10'}
                     `}
                 >
                     <input 
@@ -71,7 +73,7 @@ export default function Comments({ params }: CommentsCompTypes) {
                         onBlur={() => setInputFocused(false)}
                         onChange={e => setComment(e.target.value)}
                         value={comment || ''}
-                        className="bg-[#F1F1F2] text-[14px] focus:outline-none w-full lg:max-w-[420px] p-2 rounded-lg" 
+                        className="w-full rounded-lg bg-transparent p-2 text-[14px] text-gray-900 placeholder:text-gray-500 focus:outline-none dark:text-white dark:placeholder:text-white/60" 
                         type="text"
                         placeholder="Add comment..."
                     />
@@ -82,7 +84,7 @@ export default function Comments({ params }: CommentsCompTypes) {
                         onClick={() => addComment()}
                         className={`
                             font-semibold text-sm ml-5 pr-1
-                            ${comment ? 'text-[#F02C56] cursor-pointer' : 'text-gray-400'}
+                            ${comment ? 'text-[#F02C56] cursor-pointer' : 'text-gray-400 dark:text-white/40'}
                         `}
                     >
                         Post

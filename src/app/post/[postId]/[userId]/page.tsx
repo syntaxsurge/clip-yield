@@ -50,12 +50,12 @@ export default function Post({ params }: PostPageTypes) {
         <>
             <div 
                 id="PostPage" 
-                className="lg:flex justify-between w-full h-screen bg-black overflow-auto"
+                className="lg:flex justify-between w-full h-screen overflow-auto bg-black"
             >
                 <div className="lg:w-[calc(100%-540px)] h-full relative">
                     <Link
                         href={`/profile/${userId}`}
-                        className="absolute text-white z-20 m-5 rounded-full bg-gray-700 p-1.5 hover:bg-gray-800"
+                        className="absolute z-20 m-5 rounded-full bg-gray-700 p-1.5 text-white hover:bg-gray-800"
                     >
                         <AiOutlineClose size="27"/>
                     </Link>
@@ -90,7 +90,7 @@ export default function Post({ params }: PostPageTypes) {
                             />
                         ) : null}
 
-                        <div className="bg-black bg-opacity-70 lg:min-w-[480px] z-10 relative">
+                        <div className="relative z-10 bg-black/70 lg:min-w-[480px]">
                             {postById?.video_url ? (
                                 <video 
                                     autoPlay
@@ -106,7 +106,10 @@ export default function Post({ params }: PostPageTypes) {
 
                 </div>
 
-                <div id="InfoSection" className="lg:max-w-[550px] relative w-full h-full bg-white">
+                <div
+                    id="InfoSection"
+                    className="relative w-full h-full border-l border-gray-200 bg-white text-gray-900 lg:max-w-[550px] dark:border-white/10 dark:bg-[#0f0f12] dark:text-white"
+                >
                     <div className="py-7" />
 
                         <ClientOnly>

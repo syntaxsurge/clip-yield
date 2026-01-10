@@ -37,8 +37,10 @@ export default function LivePage() {
     <MainLayout>
       <div className="mx-auto mt-[80px] w-full max-w-[980px] px-3 pb-16">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold">LIVE</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            LIVE
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-white/60">
             Catch up on creator replays and trending clips.
           </p>
         </div>

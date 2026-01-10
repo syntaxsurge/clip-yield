@@ -31,7 +31,7 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
     }
     return (
         <>
-            <div id="SingleComment" className="flex items-center justify-between px-8 mt-4">
+            <div id="SingleComment" className="flex items-center justify-between px-8 mt-4 text-gray-900 dark:text-white">
                 <div className="flex items-center relative w-full">
                     <Link href={`/profile/${comment.profile.user_id}`}>
                         <img 
@@ -45,7 +45,7 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
                         <div className="text-[18px] font-semibold flex items-center justify-between">
                             <span className="flex items-center">
                                 {comment?.profile?.name} - 
-                                <span className="text-[12px] text-gray-600 font-light ml-1">
+                                <span className="text-[12px] text-gray-600 font-light ml-1 dark:text-white/60">
                                     {moment(comment?.created_at).calendar()}
                                 </span>
                             </span>
@@ -54,6 +54,7 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
                                 <button 
                                     disabled={isDeleting} 
                                     onClick={() => deleteThisComment()}
+                                    className="text-gray-500 hover:text-gray-700 dark:text-white/60 dark:hover:text-white"
                                 >
                                     {isDeleting 
                                         ? <BiLoaderCircle className="animate-spin" color="#E91E62" size="20"/>
@@ -63,7 +64,7 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
                             ) : null}
                         </div>
                         
-                        <p className="text-[15px] font-light">{comment.text}</p>
+                        <p className="text-[15px] font-light text-gray-800 dark:text-white/80">{comment.text}</p>
 
                     </div>
                 </div>

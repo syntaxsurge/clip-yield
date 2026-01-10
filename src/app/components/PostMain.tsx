@@ -107,7 +107,10 @@ export default function PostMain({ post }: PostMainCompTypes) {
 
     return (
         <>
-            <div id={`PostMain-${post.id}`} className="flex border-b py-6">
+            <div
+                id={`PostMain-${post.id}`}
+                className="flex border-b border-gray-200 py-6 dark:border-white/10"
+            >
 
                 <div className="cursor-pointer">
                     <img className="rounded-full max-h-[60px]" width="60" src={useCreateBucketUrl(post?.profile?.image)} />
@@ -116,7 +119,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
                 <div className="pl-3 w-full px-4">
                     <div className="flex items-center justify-between pb-0.5">
                         <Link href={`/profile/${post.profile.user_id}`}>
-                            <span className="font-bold hover:underline cursor-pointer">
+                            <span className="font-bold hover:underline cursor-pointer text-gray-900 dark:text-white">
                                 {post.profile.name}
                             </span>
                         </Link>
@@ -125,14 +128,14 @@ export default function PostMain({ post }: PostMainCompTypes) {
                             {isSponsored ? (
                                 <Link
                                     href={`/sponsor/${post.id}`}
-                                    className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700"
+                                    className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-400/10 dark:text-emerald-200"
                                 >
                                     Sponsored
                                 </Link>
                             ) : null}
                             <Link
                                 href={`/sponsor/${post.id}`}
-                                className="rounded-md border border-slate-200 px-3 py-1 text-[13px] font-semibold text-slate-700 hover:bg-slate-50"
+                                className="rounded-md border border-slate-200 px-3 py-1 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10"
                             >
                                 Sponsor
                             </Link>
@@ -143,8 +146,8 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                     aria-pressed={isFollowing}
                                     className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
                                         isFollowing
-                                            ? "border-gray-200 text-gray-700 hover:bg-gray-100"
-                                            : "border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2]"
+                                            ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+                                            : "border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] dark:hover:bg-[#35151d]"
                                     }`}
                                 >
                                     {isFollowing ? "Following" : "Follow"}
@@ -152,9 +155,11 @@ export default function PostMain({ post }: PostMainCompTypes) {
                             )}
                         </div>
                     </div>
-                    <p className="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px]">{post.text}</p>
-                    <p className="text-[14px] text-gray-500 pb-0.5">#fun #cool #SuperAwesome</p>
-                    <p className="text-[14px] pb-0.5 flex items-center font-semibold">
+                    <p className="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px] text-gray-800 dark:text-white/80">
+                        {post.text}
+                    </p>
+                    <p className="text-[14px] pb-0.5 text-gray-500 dark:text-white/60">#fun #cool #SuperAwesome</p>
+                    <p className="text-[14px] pb-0.5 flex items-center font-semibold text-gray-800 dark:text-white/80">
                         <ImMusic size="17"/>
                         <span className="px-1">original sound - AWESOME</span>
                         <AiFillHeart size="20"/>
