@@ -47,10 +47,13 @@ export default function KycCompletePage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
 
+  const statusLabel = syncStatus ?? status ?? "processing";
+  const isFinalStatus = FINAL_STATUSES.has(statusLabel);
   const shouldPoll = useMemo(() => {
-    if (!syncStatus) return true;
-    return !FINAL_STATUSES.has(syncStatus);
-  }, [syncStatus]);
+    if (!inquiryId) return false;
+    if (txHash) return false;
+    return !isFinalStatus;
+  }, [inquiryId, isFinalStatus, txHash]);
 
   const runSync = useCallback(async () => {
     if (!inquiryId || isSyncing) return;
@@ -103,11 +106,11 @@ export default function KycCompletePage() {
     return () => clearInterval(interval);
   }, [inquiryId, shouldPoll, runSync]);
 
-  const statusLabel = syncStatus ?? status ?? "processing";
   const formattedWallet = walletAddress ? formatShortHash(walletAddress) : "Unavailable";
   const syncedAtLabel = lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : "Not synced";
   const isApproved = statusLabel === "approved" || statusLabel === "completed";
   const isDeclined = statusLabel === "declined" || statusLabel === "rejected" || statusLabel === "failed";
+  const isSettled = Boolean(txHash) || isDeclined;
 
   return (
     <MainLayout>
@@ -115,8 +118,9 @@ export default function KycCompletePage() {
         <div className="mx-auto max-w-xl space-y-4">
           <h1 className="text-2xl font-semibold">KYC status</h1>
           <p className="text-sm text-muted-foreground">
-            We are syncing your Persona inquiry so your wallet can unlock boost
-            and yield actions as soon as verification is approved.
+            {isSettled
+              ? "Your inquiry is synced. You can proceed to boost or yield actions."
+              : "We are syncing your Persona inquiry so your wallet can unlock boost and yield actions as soon as verification is approved."}
           </p>
 
           <Alert variant="info">
@@ -166,7 +170,7 @@ export default function KycCompletePage() {
 
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => void runSync()} disabled={!inquiryId || isSyncing}>
-              {isSyncing ? "Syncing..." : "Refresh status"}
+              {isSyncing ? "Syncing..." : isSettled ? "Sync again" : "Refresh status"}
             </Button>
             <Button asChild variant="secondary">
               <Link href={returnTo}>Return to ClipYield</Link>
