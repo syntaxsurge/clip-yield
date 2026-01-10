@@ -1,7 +1,5 @@
 "use client"
 
-import { AiFillHeart } from "react-icons/ai"
-import { ImMusic } from "react-icons/im"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import PostMainLikes from "./PostMainLikes"
@@ -142,12 +140,6 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                     Sponsored
                                 </Link>
                             ) : null}
-                            <Link
-                                href={`/sponsor/${post.id}`}
-                                className="rounded-md border border-slate-200 px-3 py-1 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/10"
-                            >
-                                Sponsor
-                            </Link>
                             {contextUser?.user?.id === post.profile.user_id ? null : (
                                 <button
                                     onClick={() => void handleFollow()}
@@ -166,12 +158,6 @@ export default function PostMain({ post }: PostMainCompTypes) {
                     </div>
                     <p className="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px] text-gray-800 dark:text-white/80">
                         {post.text}
-                    </p>
-                    <p className="text-[14px] pb-0.5 text-gray-500 dark:text-white/60">#fun #cool #SuperAwesome</p>
-                    <p className="text-[14px] pb-0.5 flex items-center font-semibold text-gray-800 dark:text-white/80">
-                        <ImMusic size="17"/>
-                        <span className="px-1">original sound - AWESOME</span>
-                        <AiFillHeart size="20"/>
                     </p>
 
                     <div className="mt-2.5 flex">

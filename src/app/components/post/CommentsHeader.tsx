@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { AiFillHeart } from "react-icons/ai"
 import { BsChatDots, BsTrash3 } from "react-icons/bs"
-import { ImMusic } from "react-icons/im"
 import moment from "moment"
 import { useUser } from "@/app/context/user"
 import { useEffect, useState } from "react"
@@ -150,11 +149,6 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
             </div>
 
             <p className="px-8 mt-4 text-sm text-gray-900 dark:text-white">{post?.text}</p>
-
-            <p className="flex item-center gap-2 px-8 mt-4 text-sm font-bold text-gray-700 dark:text-white/80">
-                <ImMusic size="17"/>
-                original sound - {post?.profile.name}
-            </p>
 
             <div className="flex items-center px-8 mt-8 text-gray-800 dark:text-white">
                 <ClientOnly>
