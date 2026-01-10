@@ -77,9 +77,8 @@ export default function Post({ params }: PostPageTypes) {
                     </div>
 
                     <img 
-                        className="absolute z-20 top-[18px] left-[70px] rounded-full lg:mx-0 mx-auto" 
-                        width="45" 
-                        src="/images/clip-yield-logo-small.png"
+                        className="absolute z-20 top-[18px] left-[70px] h-10 w-auto lg:mx-0 mx-auto" 
+                        src="/images/clip-yield-logo.png"
                         alt="ClipYield"
                     />
 

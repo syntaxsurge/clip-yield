@@ -175,7 +175,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
                             <img 
                                 className="absolute right-2 bottom-10" 
                                 width="90" 
-                                src="/images/clip-yield-logo-white.png"
+                                src="/images/clip-yield-logo.png"
                                 alt="ClipYield"
                             />
                         </div>
