@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 
 export function AppHeader() {
   return (
@@ -20,7 +20,7 @@ export function AppHeader() {
             </Link>
           </nav>
         </div>
-        <ConnectButton showBalance={false} />
+        <PrivyConnectButton showDisconnect />
       </div>
     </header>
   );

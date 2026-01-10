@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePaginatedQuery } from "convex/react";
 import { useAccount } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { formatUnits, getAddress, isAddress } from "viem";
 
 import ActivityFilters, { type ActivityFilter } from "@/app/activity/components/ActivityFilters";
@@ -36,13 +36,13 @@ function formatAmount(value?: string) {
 
 export default function ActivityFeed() {
   const { address } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { ready, authenticated, login } = usePrivy();
   const [filter, setFilter] = useState<ActivityFilter>("all");
 
   const normalizedWallet = useMemo(() => {
-    if (!address || !isAddress(address)) return null;
+    if (!authenticated || !address || !isAddress(address)) return null;
     return getAddress(address);
-  }, [address]);
+  }, [address, authenticated]);
 
   const queryArgs = useMemo(() => {
     if (!normalizedWallet) return "skip" as const;
@@ -66,7 +66,9 @@ export default function ActivityFeed() {
           Connect to view every boost, sponsorship, and yield action you have taken.
         </AlertDescription>
         <div className="mt-3">
-          <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+          <Button onClick={() => void login()} disabled={!ready}>
+            {ready ? "Connect wallet" : "Checking..."}
+          </Button>
         </div>
       </Alert>
     );

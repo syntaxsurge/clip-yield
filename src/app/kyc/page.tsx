@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import MainLayout from "@/app/layouts/MainLayout";
 
 export default function KycStartPage() {
-  const { address, isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
+  const { ready, authenticated, login } = usePrivy();
+  const isConnected = authenticated && Boolean(address);
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "/yield";
 
@@ -64,7 +65,9 @@ export default function KycStartPage() {
             <p className="text-sm text-muted-foreground">
               Connect a wallet to begin the KYC flow.
             </p>
-            <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+            <Button onClick={() => void login()} disabled={!ready}>
+              {ready ? "Connect wallet" : "Checking..."}
+            </Button>
           </div>
         </div>
       </MainLayout>

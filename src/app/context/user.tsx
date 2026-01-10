@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAccount, useDisconnect } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+import { usePrivy } from "@privy-io/react-auth";
 import type { User, UserContextTypes } from "@/app/types";
 import { convexClient } from "@/lib/convex/client";
 import { ensureProfile, getProfile } from "@/lib/convex/functions";
@@ -10,20 +10,20 @@ import { ensureProfile, getProfile } from "@/lib/convex/functions";
 const UserContext = createContext<UserContextTypes | null>(null);
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const { address, isConnected } = useAccount();
-  const { disconnectAsync } = useDisconnect();
-  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
+  const { ready, authenticated, login, logout: privyLogout, user: privyUser } = usePrivy();
+  const walletAddress = privyUser?.wallet?.address ?? address;
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshProfile = async () => {
-    if (!address) {
+    if (!walletAddress) {
       setUser(null);
       return;
     }
 
-    await convexClient.mutation(ensureProfile, { wallet: address });
-    const profile = await convexClient.query(getProfile, { wallet: address });
+    await convexClient.mutation(ensureProfile, { wallet: walletAddress });
+    const profile = await convexClient.query(getProfile, { wallet: walletAddress });
 
     if (!profile) {
       setUser(null);
@@ -42,9 +42,15 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
     const syncProfile = async () => {
+      if (!ready) {
+        if (!isMounted) return;
+        setIsLoading(true);
+        return;
+      }
+
       setIsLoading(true);
 
-      if (!isConnected || !address) {
+      if (!authenticated || !walletAddress) {
         if (!isMounted) return;
         setUser(null);
         setIsLoading(false);
@@ -67,16 +73,15 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       isMounted = false;
     };
-  }, [address, isConnected]);
+  }, [authenticated, ready, walletAddress]);
 
   const openConnect = async () => {
-    openConnectModal?.();
+    if (!ready) return;
+    await login();
   };
 
   const logout = async () => {
-    if (disconnectAsync) {
-      await disconnectAsync();
-    }
+    await privyLogout();
     setUser(null);
   };
 

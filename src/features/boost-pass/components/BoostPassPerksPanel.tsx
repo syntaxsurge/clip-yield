@@ -8,7 +8,7 @@ import {
   useSignMessage,
   useSwitchChain,
 } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,11 +26,12 @@ import boostPassPackPreview from "@/content/remix-packs/boost-pass-pack.json";
 type ActionId = "download" | "create";
 
 export default function BoostPassPerksPanel() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
+  const { ready, authenticated, login } = usePrivy();
+  const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const { signMessageAsync } = useSignMessage();
   const { switchChainAsync } = useSwitchChain();
-  const { openConnectModal } = useConnectModal();
   const router = useRouter();
 
   const { currentEpoch, hasPass, isOnMantle } = useBoostPass();
@@ -64,7 +65,7 @@ export default function BoostPassPerksPanel() {
 
   const handleDownload = async () => {
     if (!isConnected) {
-      openConnectModal?.();
+      await login();
       return;
     }
     if (!isOnMantle) {
@@ -100,7 +101,7 @@ export default function BoostPassPerksPanel() {
 
   const handleCreateProject = async () => {
     if (!isConnected) {
-      openConnectModal?.();
+      await login();
       return;
     }
     if (!isOnMantle) {
@@ -166,7 +167,9 @@ export default function BoostPassPerksPanel() {
             Connect a wallet to unlock your Boost Pass perks.
           </AlertDescription>
           <div className="mt-3">
-            <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+            <Button onClick={() => void login()} disabled={!ready}>
+              {ready ? "Connect wallet" : "Checking..."}
+            </Button>
           </div>
         </Alert>
       )}

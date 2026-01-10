@@ -11,7 +11,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { parseUnits } from "viem";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,9 @@ import { wmntWrapAbi } from "@/lib/web3/wmnt";
 const DEFAULT_WRAP_AMOUNT = "0.1";
 
 export default function StartWizard() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
+  const { ready, authenticated, login } = usePrivy();
   const chainId = useChainId();
-  const { openConnectModal } = useConnectModal();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();
 
@@ -39,6 +39,7 @@ export default function StartWizard() {
     setIsMounted(true);
   }, []);
 
+  const isConnected = authenticated && Boolean(address);
   const isConnectedReady = isMounted && isConnected;
   const isOnMantle = isMounted && chainId === mantleConfig.chainId;
 
@@ -147,8 +148,8 @@ export default function StartWizard() {
               <span>{isConnectedReady && address ? formatShortHash(address) : "—"}</span>
             </div>
             {(!isMounted || !isConnected) && (
-              <Button onClick={() => openConnectModal?.()} disabled={!isMounted}>
-                {isMounted ? "Connect wallet" : "Checking..."}
+              <Button onClick={() => void login()} disabled={!ready}>
+                {ready ? "Connect wallet" : "Checking..."}
               </Button>
             )}
           </CardContent>

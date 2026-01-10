@@ -22,7 +22,7 @@ import {
   parseUnits,
   toHex,
 } from "viem";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,10 +73,11 @@ export default function SponsorPanel({
   currentCampaign,
   onCampaignCreated,
 }: SponsorPanelProps) {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
+  const { ready, authenticated, login } = usePrivy();
+  const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
-  const { openConnectModal } = useConnectModal();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
   const { signMessageAsync } = useSignMessage();
@@ -366,7 +367,7 @@ export default function SponsorPanel({
 
   const handleSponsor = async () => {
     if (!user) {
-      openConnectModal?.();
+      await login();
       return;
     }
 
@@ -461,7 +462,7 @@ export default function SponsorPanel({
 
   const handleDownloadPack = async () => {
     if (!user) {
-      openConnectModal?.();
+      await login();
       return;
     }
 
@@ -512,7 +513,9 @@ export default function SponsorPanel({
             Connect to sponsor and unlock boosters-only perks.
           </AlertDescription>
           <div className="mt-3">
-            <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+            <Button onClick={() => void login()} disabled={!ready}>
+              {ready ? "Connect wallet" : "Checking..."}
+            </Button>
           </div>
         </Alert>
       )}

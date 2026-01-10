@@ -10,7 +10,7 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
 import { formatShortHash } from "@/lib/utils";
@@ -33,7 +34,9 @@ import { explorerTxUrl } from "@/lib/web3/mantleConfig";
 const kycRegistryAddress = mantleSepoliaContracts.kycRegistry as Address;
 
 export default function AdminKycPanel() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
+  const { authenticated } = usePrivy();
+  const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -127,7 +130,7 @@ export default function AdminKycPanel() {
               Update on-chain verification status for Mantle Sepolia wallets.
             </CardDescription>
           </div>
-          <ConnectButton showBalance={false} />
+          <PrivyConnectButton showDisconnect />
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="grid gap-2">

@@ -10,7 +10,7 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import boostPassAbi from "@/lib/contracts/abi/ClipYieldBoostPass.json";
 import { formatShortHash } from "@/lib/utils";
@@ -34,7 +35,9 @@ import type { LeaderboardSnapshot } from "@/app/types";
 const boostPassAddress = mantleSepoliaContracts.boostPass as Address;
 
 export default function AdminBoostPassPanel() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
+  const { authenticated } = usePrivy();
+  const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -196,7 +199,7 @@ export default function AdminBoostPassPanel() {
               Publish on-chain epochs for top boosters and unlock Boost Pass claims.
             </CardDescription>
           </div>
-          <ConnectButton showBalance={false} />
+          <PrivyConnectButton showDisconnect />
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="grid gap-2">

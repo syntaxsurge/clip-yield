@@ -11,7 +11,7 @@ import {
   useWriteContract,
 } from "wagmi";
 import { Address, erc20Abi, formatUnits, parseUnits } from "viem";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -69,10 +69,11 @@ export default function YieldPanel({
   recordDeposit = true,
   onDeposit,
 }: YieldPanelProps) {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
+  const { ready, authenticated, login } = usePrivy();
+  const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
-  const { openConnectModal } = useConnectModal();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
 
@@ -364,7 +365,9 @@ export default function YieldPanel({
             Connect to view balances and interact with the vault.
           </AlertDescription>
           <div className="mt-3">
-            <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+            <Button onClick={() => void login()} disabled={!ready}>
+              {ready ? "Connect wallet" : "Checking..."}
+            </Button>
           </div>
         </Alert>
       )}
