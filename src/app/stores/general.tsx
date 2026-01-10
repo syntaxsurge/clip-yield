@@ -5,8 +5,11 @@ import useGetRandomUsers from '../hooks/useGetRandomUsers';
   
 interface GeneralStore {
     isEditProfileOpen: boolean
+    isFeedMuted: boolean
     randomUsers: RandomUsers[]
     setIsEditProfileOpen: (val: boolean) => void
+    setIsFeedMuted: (val: boolean) => void
+    toggleFeedMuted: () => void
     setRandomUsers: () => void,
 }
 
@@ -15,9 +18,13 @@ export const useGeneralStore = create<GeneralStore>()(
         persist(
             (set) => ({
                 isEditProfileOpen: false,
+                isFeedMuted: true,
                 randomUsers: [],
 
                 setIsEditProfileOpen: (val: boolean) => set({ isEditProfileOpen: val }),
+                setIsFeedMuted: (val: boolean) => set({ isFeedMuted: val }),
+                toggleFeedMuted: () =>
+                    set((state) => ({ isFeedMuted: !state.isFeedMuted })),
                 setRandomUsers: async () => {
                     const result = await useGetRandomUsers()
                     set({ randomUsers: result })

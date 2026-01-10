@@ -242,7 +242,7 @@ export default function Profile({ params }: ProfilePageTypes) {
                                     </button>
                                     <Link
                                         href={`/boost/${id}`}
-                                        className="flex item-center rounded-md border border-[color:var(--brand-accent)] px-6 py-1.5 text-[15px] font-semibold text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-soft)]"
+                                        className="flex item-center rounded-md border border-[color:var(--brand-accent)] px-6 py-1.5 text-[15px] font-semibold text-[color:var(--brand-accent-text)] hover:bg-[color:var(--brand-accent-soft)]"
                                     >
                                         Boost with yield
                                     </Link>

@@ -111,7 +111,7 @@ export default function TopNav() {
                                 className="flex items-center border rounded-sm py-[6px] hover:bg-gray-100 pl-1.5 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                             >
                                 <AiOutlinePlus color="currentColor" size="22"/>
-                                <span className="px-2 font-medium text-[15px]">Upload</span>
+                                <span className="px-2 font-semibold text-[15px]">Upload</span>
                             </Link>
 
                             <ThemeToggle />
@@ -125,7 +125,7 @@ export default function TopNav() {
                                     onClick={() => void userContext?.openConnect()}
                                     className="flex items-center rounded-md border border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] px-3 py-[6px] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
                                 >
-                                    <span className="whitespace-nowrap mx-4 font-medium text-[15px]">Connect</span>
+                                    <span className="whitespace-nowrap mx-4 font-semibold text-[15px]">Connect</span>
                                 </button>
                             ) : (
                                 <div className="flex items-center">

@@ -11,7 +11,7 @@ const badgeVariants = cva(
         success:
           "border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]",
         warning:
-          "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-accent)] dark:text-[color:var(--brand-accent-strong)]",
+          "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-accent-text)] dark:text-[color:var(--brand-accent-strong)]",
         outline: "border-border text-foreground",
       },
     },

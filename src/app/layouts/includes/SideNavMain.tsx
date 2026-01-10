@@ -20,7 +20,7 @@ export default function SideNavMain() {
     const pathname = usePathname()
     const isProjectsRoute = pathname.startsWith("/projects")
     const defaultColor = "hsl(var(--foreground))"
-    const activeColor = "var(--brand-accent)"
+    const activeColor = "var(--brand-accent-text)"
 
     useEffect(() => { setRandomUsers() }, [setRandomUsers])
 
@@ -93,7 +93,7 @@ export default function SideNavMain() {
                         </div>
                     </ClientOnly>
 
-                    <button className="lg:block hidden text-[color:var(--brand-accent)] pt-1.5 pl-2 text-[13px]">See all</button>
+                    <button className="lg:block hidden text-[color:var(--brand-accent-text)] pt-1.5 pl-2 text-[13px] font-semibold">See all</button>
 
                     {contextUser?.user?.id ? (
                         <div >
@@ -117,7 +117,7 @@ export default function SideNavMain() {
                                 </div>
                             </ClientOnly>
 
-                            <button className="lg:block hidden text-[color:var(--brand-accent)] pt-1.5 pl-2 text-[13px]">See more</button>
+                            <button className="lg:block hidden text-[color:var(--brand-accent-text)] pt-1.5 pl-2 text-[13px] font-semibold">See more</button>
                         </div>
                     ) : null}
                     <div className="lg:block hidden border-b lg:ml-2 mt-2 dark:border-white/10" />

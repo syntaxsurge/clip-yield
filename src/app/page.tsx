@@ -6,9 +6,18 @@ import { usePostStore } from "@/app/stores/post"
 import ClientOnly from "./components/ClientOnly"
 import PostMain from "./components/PostMain"
 import EmptyState from "@/components/feedback/EmptyState"
+import FeedNavButtons from "@/components/layout/FeedNavButtons"
+import { useScrollSnapNavigation } from "@/hooks/useScrollSnapNavigation"
 
 export default function Home() {
   let { allPosts, setAllPosts } = usePostStore();
+  const {
+    containerRef,
+    activeIndex,
+    hasNext,
+    hasPrev,
+    scrollToIndex,
+  } = useScrollSnapNavigation({ itemCount: allPosts.length });
   useEffect(() => { setAllPosts() }, [setAllPosts])
   return (
     <>
@@ -28,10 +37,24 @@ export default function Home() {
                 />
               </div>
             ) : (
-              <div className="feed-scroll h-full overflow-y-auto snap-y snap-mandatory">
+              <div className="relative h-full">
+                <div
+                  ref={containerRef}
+                  className="feed-scroll h-full overscroll-contain overflow-y-auto snap-y snap-mandatory"
+                >
                 {allPosts.map((post, index) => (
                   <PostMain post={post} key={index} />
                 ))}
+                </div>
+                {allPosts.length > 1 ? (
+                  <FeedNavButtons
+                    onPrev={() => scrollToIndex(activeIndex - 1)}
+                    onNext={() => scrollToIndex(activeIndex + 1)}
+                    disablePrev={!hasPrev}
+                    disableNext={!hasNext}
+                    className="fixed right-6 top-1/2 z-30 -translate-y-1/2"
+                  />
+                ) : null}
               </div>
             )}
           </ClientOnly>

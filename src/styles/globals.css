@@ -79,6 +79,7 @@
     --brand-accent: #f69d04;
     --brand-accent-strong: #fcd01f;
     --brand-accent-soft: rgba(246, 157, 4, 0.18);
+    --brand-accent-text: #23354d;
     --brand-success: #61a633;
     --brand-success-dark: #1e5432;
     --brand-success-soft: rgba(97, 166, 51, 0.18);
@@ -120,6 +121,7 @@
     --brand-accent: #f69d04;
     --brand-accent-strong: #fcd01f;
     --brand-accent-soft: rgba(246, 157, 4, 0.24);
+    --brand-accent-text: #f69d04;
     --brand-success: #61a633;
     --brand-success-dark: #1e5432;
     --brand-success-soft: rgba(97, 166, 51, 0.24);

@@ -62,7 +62,7 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
                                     className="text-gray-500 hover:text-gray-700 dark:text-white/60 dark:hover:text-white"
                                 >
                                     {isDeleting 
-                                        ? <BiLoaderCircle className="animate-spin" color="var(--brand-accent)" size="20"/>
+                                        ? <BiLoaderCircle className="animate-spin" color="var(--brand-accent-text)" size="20"/>
                                         : <BsTrash3 className="cursor-pointer" size="25"/>
                                     }
                                 </button>

@@ -3,9 +3,8 @@
 import Comments from "@/app/components/post/Comments"
 import CommentsHeader from "@/app/components/post/CommentsHeader"
 import Link from "next/link"
-import { use, useEffect } from "react"
+import { use, useCallback, useEffect, useMemo, useRef } from "react"
 import { AiOutlineClose } from "react-icons/ai"
-import { BiChevronDown, BiChevronUp } from "react-icons/bi"
 import { useRouter } from "next/navigation"
 import ClientOnly from "@/app/components/ClientOnly"
 import { PostPageTypes } from "@/app/types"
@@ -13,6 +12,7 @@ import { usePostStore } from "@/app/stores/post"
 import { useLikeStore } from "@/app/stores/like"
 import { useCommentStore } from "@/app/stores/comment"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import FeedNavButtons from "@/components/layout/FeedNavButtons"
 
 export default function Post({ params }: PostPageTypes) {
     const { postId, userId } = use(params)
@@ -22,6 +22,8 @@ export default function Post({ params }: PostPageTypes) {
     let { setCommentsByPost } = useCommentStore()
 
     const router = useRouter()
+    const videoPanelRef = useRef<HTMLDivElement>(null)
+    const scrollLockRef = useRef(false)
 
     useEffect(() => { 
         setPostById(postId)
@@ -30,51 +32,76 @@ export default function Post({ params }: PostPageTypes) {
         setPostsByUser(userId) 
     }, [postId, setCommentsByPost, setLikesByPost, setPostById, setPostsByUser, userId])
 
-    const loopThroughPostsUp = () => {
-        postsByUser.forEach(post => {
-            if (post.id > postId) {
-                router.push(`/post/${post.id}/${userId}`)
-            }
-        });
-    }
+    const currentIndex = useMemo(
+        () => postsByUser.findIndex((post) => post.id === postId),
+        [postId, postsByUser],
+    )
 
-    const loopThroughPostsDown = () => {
-        postsByUser.forEach(post => {
-            if (post.id < postId) {
-                router.push(`/post/${post.id}/${userId}`)
-            }
-        });
-    }
+    const navigateToIndex = useCallback(
+        (nextIndex: number) => {
+            if (nextIndex < 0 || nextIndex >= postsByUser.length) return
+            const nextPost = postsByUser[nextIndex]
+            if (!nextPost) return
+            router.push(`/post/${nextPost.id}/${userId}`)
+        },
+        [postsByUser, router, userId],
+    )
+
+    const goPrev = useCallback(() => {
+        navigateToIndex(currentIndex - 1)
+    }, [currentIndex, navigateToIndex])
+
+    const goNext = useCallback(() => {
+        navigateToIndex(currentIndex + 1)
+    }, [currentIndex, navigateToIndex])
+
+    useEffect(() => {
+        const panel = videoPanelRef.current
+        if (!panel) return
+
+        const handleWheel = (event: WheelEvent) => {
+            if (postsByUser.length <= 1) return
+            event.preventDefault()
+            if (scrollLockRef.current) return
+
+            scrollLockRef.current = true
+            const direction = event.deltaY > 0 ? 1 : -1
+            direction > 0 ? goNext() : goPrev()
+
+            window.setTimeout(() => {
+                scrollLockRef.current = false
+            }, 360)
+        }
+
+        panel.addEventListener("wheel", handleWheel, { passive: false })
+
+        return () => {
+            panel.removeEventListener("wheel", handleWheel)
+        }
+    }, [goNext, goPrev, postsByUser.length])
 
     return (
         <>
             <div 
                 id="PostPage" 
-                className="lg:flex justify-between w-full h-screen overflow-auto bg-black"
+                className="lg:flex justify-between w-full h-screen overflow-hidden bg-black"
             >
-                <div className="lg:w-[calc(100%-540px)] h-full relative">
+                <div ref={videoPanelRef} className="lg:w-[calc(100%-540px)] h-full relative">
                     <Link
                         href={`/profile/${userId}`}
                         className="absolute z-20 m-5 rounded-full bg-gray-700 p-1.5 text-white hover:bg-gray-800"
                     >
                         <AiOutlineClose size="27"/>
                     </Link>
-
-                    <div >
-                        <button 
-                            onClick={() => loopThroughPostsUp()}
-                            className="absolute z-20 right-4 top-4 flex items-center justify-center rounded-full bg-gray-700 p-1.5 hover:bg-gray-800"
-                        >
-                            <BiChevronUp size="30" color="#FFFFFF"/>
-                        </button>
-
-                        <button  
-                            onClick={() => loopThroughPostsDown()}
-                            className="absolute z-20 right-4 top-20 flex items-center justify-center rounded-full bg-gray-700 p-1.5 hover:bg-gray-800"
-                        >
-                            <BiChevronDown size="30" color="#FFFFFF"/>
-                        </button>
-                    </div>
+                    {postsByUser.length > 1 ? (
+                        <FeedNavButtons
+                            onPrev={goPrev}
+                            onNext={goNext}
+                            disablePrev={currentIndex <= 0}
+                            disableNext={currentIndex >= postsByUser.length - 1}
+                            className="absolute right-4 top-1/2 z-20 -translate-y-1/2"
+                        />
+                    ) : null}
 
                     <img 
                         className="absolute z-20 top-[18px] left-[70px] h-10 w-auto lg:mx-0 mx-auto" 
@@ -96,7 +123,6 @@ export default function Post({ params }: PostPageTypes) {
                                     autoPlay
                                     controls
                                     loop
-                                    muted
                                     className="h-screen mx-auto" 
                                     src={useCreateBucketUrl(postById.video_url, "")}
                                 />

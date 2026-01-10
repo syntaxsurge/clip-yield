@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react"
 import PostMainLikes from "./PostMainLikes"
 import useCreateBucketUrl from "../hooks/useCreateBucketUrl"
 import { PostMainCompTypes } from "../types"
@@ -12,12 +12,15 @@ import { useUser } from "@/app/context/user"
 import useIsFollowing from "@/app/hooks/useIsFollowing"
 import useToggleFollow from "@/app/hooks/useToggleFollow"
 import { formatShortHash } from "@/lib/utils"
+import { FiVolume2, FiVolumeX } from "react-icons/fi"
+import { useGeneralStore } from "@/app/stores/general"
 
 export default function PostMain({ post }: PostMainCompTypes) {
     const contextUser = useUser()
     const [sponsorCampaign, setSponsorCampaign] = useState<SponsorCampaign | null>(null)
     const [isFollowing, setIsFollowing] = useState(false)
     const [isFollowLoading, setIsFollowLoading] = useState(false)
+    const { isFeedMuted, setIsFeedMuted, toggleFeedMuted } = useGeneralStore()
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -114,7 +117,19 @@ export default function PostMain({ post }: PostMainCompTypes) {
     const togglePlayback = () => {
         const video = videoRef.current
         if (!video) return
+        if (isFeedMuted) {
+            setIsFeedMuted(false)
+        }
         video.paused ? void video.play() : video.pause()
+    }
+
+    const toggleMute = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation()
+        toggleFeedMuted()
+        const video = videoRef.current
+        if (video?.paused) {
+            void video.play()
+        }
     }
 
     const handleKeyToggle = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -173,7 +188,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                     className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
                                         isFollowing
                                             ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
-                                            : "border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-soft)]"
+                                            : "border-[color:var(--brand-accent)] text-[color:var(--brand-accent-text)] hover:bg-[color:var(--brand-accent-soft)]"
                                     }`}
                                 >
                                         {isFollowing ? "Following" : "Follow"}
@@ -200,11 +215,19 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                 id={`video-${post.id}`}
                                 ref={videoRef}
                                 loop
-                                muted
+                                muted={isFeedMuted}
                                 playsInline
                                 className="h-full w-full object-cover"
                                 src={useCreateBucketUrl(post?.video_url, "")}
                             />
+                            <button
+                                type="button"
+                                onClick={toggleMute}
+                                className="absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition hover:bg-black/80"
+                                aria-label={isFeedMuted ? "Unmute video" : "Mute video"}
+                            >
+                                {isFeedMuted ? <FiVolumeX size={18} /> : <FiVolume2 size={18} />}
+                            </button>
                             <img
                                 className="absolute right-2 bottom-10 w-[84px]"
                                 src="/images/clip-yield-logo.png"
