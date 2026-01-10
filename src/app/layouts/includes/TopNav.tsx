@@ -7,51 +7,65 @@ import { BiChevronDown, BiSearch, BiUser } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiLogOut } from "react-icons/fi";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useAccount } from "wagmi";
 import { useUser } from "@/app/context/user";
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
 import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
 import ThemeToggle from "@/components/ui/theme-toggle";
+import { isAdminAddress } from "@/lib/admin/adminAllowlist";
 import { formatShortHash } from "@/lib/utils";
 
 export default function TopNav() {
     const userContext = useUser();
     const router = useRouter();
     const pathname = usePathname();
+    const { address } = useAccount();
     const [searchProfiles, setSearchProfiles] = useState<RandomUsers[]>([]);
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [showNavMenu, setShowNavMenu] = useState<boolean>(false);
+    const isAdmin = useMemo(
+        () => isAdminAddress(address ?? userContext?.user?.id ?? null),
+        [address, userContext?.user?.id],
+    );
 
     const navSections = useMemo(
-        () => [
-            {
-                title: "Get started",
-                links: [
-                    { label: "Start onboarding", href: "/start" },
-                    { label: "KYC verification", href: "/kyc" },
-                    { label: "Yield vault", href: "/yield" },
-                ],
-            },
-            {
-                title: "Insights",
-                links: [
-                    { label: "Activity feed", href: "/activity" },
-                    { label: "Leaderboard", href: "/leaderboard" },
-                ],
-            },
-            {
-                title: "Perks",
-                links: [{ label: "Boost Pass perks", href: "/perks/boost-pass" }],
-            },
-            {
-                title: "Admin",
-                links: [
-                    { label: "KYC console", href: "/admin/kyc" },
-                    { label: "Boost Pass admin", href: "/admin/boost-pass" },
-                ],
-            },
-        ],
-        [],
+        () => {
+            const sections = [
+                {
+                    title: "Get started",
+                    links: [
+                        { label: "Start onboarding", href: "/start" },
+                        { label: "KYC verification", href: "/kyc" },
+                        { label: "Yield vault", href: "/yield" },
+                    ],
+                },
+                {
+                    title: "Insights",
+                    links: [
+                        { label: "Activity feed", href: "/activity" },
+                        { label: "Leaderboard", href: "/leaderboard" },
+                    ],
+                },
+                {
+                    title: "Perks",
+                    links: [{ label: "Boost Pass perks", href: "/perks/boost-pass" }],
+                },
+            ];
+
+            if (isAdmin) {
+                sections.push({
+                    title: "Admin",
+                    links: [
+                        { label: "KYC console", href: "/admin/kyc" },
+                        { label: "Boost Pass admin", href: "/admin/boost-pass" },
+                    ],
+                });
+            }
+
+            return sections;
+        },
+        [isAdmin],
     );
 
     useEffect(() => {
