@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { debounce } from "debounce";
-import { useRouter } from "next/navigation";
-import { BiSearch, BiUser } from "react-icons/bi";
+import { usePathname, useRouter } from "next/navigation";
+import { BiChevronDown, BiSearch, BiUser } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { FiLogOut } from "react-icons/fi";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useUser } from "@/app/context/user";
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
@@ -17,8 +17,47 @@ import { formatShortHash } from "@/lib/utils";
 export default function TopNav() {
     const userContext = useUser();
     const router = useRouter();
+    const pathname = usePathname();
     const [searchProfiles, setSearchProfiles] = useState<RandomUsers[]>([]);
     const [showMenu, setShowMenu] = useState<boolean>(false);
+    const [showNavMenu, setShowNavMenu] = useState<boolean>(false);
+
+    const navSections = useMemo(
+        () => [
+            {
+                title: "Get started",
+                links: [
+                    { label: "Start onboarding", href: "/start" },
+                    { label: "KYC verification", href: "/kyc" },
+                    { label: "Yield vault", href: "/yield" },
+                ],
+            },
+            {
+                title: "Insights",
+                links: [
+                    { label: "Activity feed", href: "/activity" },
+                    { label: "Leaderboard", href: "/leaderboard" },
+                ],
+            },
+            {
+                title: "Perks",
+                links: [{ label: "Boost Pass perks", href: "/perks/boost-pass" }],
+            },
+            {
+                title: "Admin",
+                links: [
+                    { label: "KYC console", href: "/admin/kyc" },
+                    { label: "Boost Pass admin", href: "/admin/boost-pass" },
+                ],
+            },
+        ],
+        [],
+    );
+
+    useEffect(() => {
+        setShowMenu(false);
+        setShowNavMenu(false);
+    }, [pathname]);
 
     const handleSearchName = debounce(async (event: { target: { value: string } }) => {
         if (event.target.value == "") return setSearchProfiles([]);
@@ -105,6 +144,42 @@ export default function TopNav() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNavMenu((prev) => !prev)}
+                                    aria-expanded={showNavMenu}
+                                    className="flex items-center gap-1 rounded-sm border border-gray-200 px-3 py-[6px] text-[15px] font-semibold text-gray-900 hover:bg-gray-100 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
+                                >
+                                    Explore
+                                    <BiChevronDown
+                                        size={18}
+                                        className={showNavMenu ? "rotate-180 transition-transform" : "transition-transform"}
+                                    />
+                                </button>
+
+                                {showNavMenu ? (
+                                    <div className="absolute right-0 top-[46px] w-[230px] rounded-lg border bg-white p-2 shadow-xl dark:border-white/10 dark:bg-[#0f0f12]">
+                                        {navSections.map((section) => (
+                                            <div key={section.title} className="space-y-1 pb-2">
+                                                <div className="px-2 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-white/50">
+                                                    {section.title}
+                                                </div>
+                                                {section.links.map((link) => (
+                                                    <Link
+                                                        key={link.href}
+                                                        href={link.href}
+                                                        className="flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+                                                        onClick={() => setShowNavMenu(false)}
+                                                    >
+                                                        {link.label}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </div>
                             <Link
                                 href="/upload"
                                 onClick={handleUploadClick}

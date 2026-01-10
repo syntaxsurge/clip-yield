@@ -59,7 +59,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Step-by-step onboarding wizard showing wallet connect, Mantle Sepolia network readiness, links to faucet/bridge, and a WMNT wrap step.
 - **Steps:**
   1. **Current page:** `/following` — confirm “Following” is selected in the top nav.
-  2. **Navigate:** **Current page:** `/following` — click **Start** in the top navigation (or the “Get Started” CTA) → lands on `/start` — confirm a page heading like “Onboarding” and a stepper is visible.
+  2. **Navigate:** **Current page:** `/following` — open **Explore** in the header → select **Start onboarding** → lands on `/start` — confirm a page heading like “Start on Mantle Sepolia” and the step list is visible.
   3. **Action:** **Current page:** `/start` — click **Connect Wallet** — confirm a wallet modal opens and you see your wallet option (e.g., “MetaMask”).
   4. **Action:** **Current page:** `/start` — select **MetaMask** (or your wallet) and approve connection — confirm a connected wallet indicator appears (e.g., “0x…”) and the network shows “Mantle Sepolia”.
   5. **Action:** **Current page:** `/start` — click **Open Faucet** — confirm a new tab opens to Mantle Sepolia faucet at `https://faucet.sepolia.mantle.xyz/`.
@@ -72,7 +72,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** KYC landing page that clearly states verification status and has a single “Start verification” CTA; transition to Persona hosted flow.
 - **Steps:**
   1. **Current page:** `/start` — confirm the onboarding stepper is visible and wallet is connected.
-  2. **Navigate:** **Current page:** `/start` — click **Start KYC** → lands on `/kyc` — confirm a heading like “KYC Verification” and a **Start Verification** button is visible.
+  2. **Navigate:** **Current page:** `/start` — open **Explore** in the header → select **KYC verification** → lands on `/kyc` — confirm a heading like “KYC Verification” and a **Start Verification** button is visible.
   3. **Action:** **Current page:** `/kyc` — click **Start Verification** — confirm you are redirected to a Persona hosted flow (new tab or same tab) and you see “Persona” branding.
   4. **Action:** **Current page:** Persona hosted flow — pause on the first Persona screen — confirm “Identity Verification” (or similar) is visible.
   5. **Action:** **Current page:** Persona hosted flow — click **Continue** (Persona) to proceed — confirm Persona advances to the next step screen.
@@ -98,7 +98,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Admin console with a KYC table (wallets/inquiries), statuses, and on-chain sync/tx info.
 - **Steps:**
   1. **Current page:** `/kyc/complete` — confirm the “Verified” status badge is visible.
-  2. **Navigate:** **Current page:** `/kyc/complete` — open URL directly: `/admin/kyc` → lands on `/admin/kyc` — confirm the heading “KYC Admin” and a table of KYC records appears.
+  2. **Navigate:** **Current page:** `/kyc/complete` — open **Explore** in the header → select **KYC console** → lands on `/admin/kyc` — confirm the heading “KYC Admin” and a table of KYC records appears.
   3. **Action:** **Current page:** `/admin/kyc` — locate your wallet row and click **View Details** (or row expansion) — confirm you see fields like wallet address and status “Verified”.
   4. **Action:** **Current page:** `/admin/kyc` — click **View on MantleScan** for the on-chain KYC update (if present) — confirm a new tab opens to `https://sepolia.mantlescan.xyz/` with the transaction page.
   5. **Action:** **Current page:** `/admin/kyc` — return to the app tab and click **Back** (or close details) — confirm you return to the KYC table view.
@@ -111,7 +111,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Vault UI showing KYC status, deposit/withdraw panels, balances, and transaction status.
 - **Steps:**
   1. **Current page:** `/admin/kyc` — confirm you can see the KYC table.
-  2. **Navigate:** **Current page:** `/admin/kyc` — click **Yield** in the top navigation → lands on `/yield` — confirm a page heading like “Yield Vault” and a “KYC Verified” badge is visible.
+  2. **Navigate:** **Current page:** `/admin/kyc` — open **Explore** in the header → select **Yield vault** → lands on `/yield` — confirm a page heading like “Yield Vault” and a “KYC Verified” badge is visible.
   3. **Action:** **Current page:** `/yield` — click **Deposit** — confirm a deposit modal/panel opens with an amount input.
   4. **Enter values:**
      - Amount (WMNT) = `[DEPOSIT_WMNT=5]`
@@ -166,7 +166,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Paginated activity list showing events (boost deposits, sponsorships), amounts, timestamps, and MantleScan links.
 - **Steps:**
   1. **Current page:** `/campaign/[campaignId]` — confirm the receipt is visible with tx status.
-  2. **Navigate:** **Current page:** `/campaign/[campaignId]` — click **Activity** in the top navigation → lands on `/activity` — confirm the heading “Activity” and a list/table of events is visible.
+  2. **Navigate:** **Current page:** `/campaign/[campaignId]` — open **Explore** in the header → select **Activity feed** → lands on `/activity` — confirm the heading “Activity” and a list/table of events is visible.
   3. **Action:** **Current page:** `/activity` — click **Next** in pagination — confirm new rows/events load and the page indicator updates (e.g., “Page 2”).
   4. **Action:** **Current page:** `/activity` — click **View on MantleScan** on an event row — confirm a new tab opens to `https://sepolia.mantlescan.xyz/` for that tx.
   5. **Action:** **Current page:** `/activity` — return to the app and click **Previous** in pagination — confirm the event list returns to the prior page.
@@ -179,7 +179,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Leaderboard view with ranked creators/campaigns, totals (boost/sponsor amounts), and clickable rows.
 - **Steps:**
   1. **Current page:** `/activity` — confirm the event list is visible.
-  2. **Navigate:** **Current page:** `/activity` — click **Leaderboard** in the top navigation → lands on `/leaderboard` — confirm a “Leaderboard” heading and ranked rows are visible.
+  2. **Navigate:** **Current page:** `/activity` — open **Explore** in the header → select **Leaderboard** → lands on `/leaderboard` — confirm a “Leaderboard” heading and ranked rows are visible.
   3. **Action:** **Current page:** `/leaderboard` — find the creator you boosted/sponsored and click their row — confirm a detail panel or link target appears (profile/campaign highlight).
   4. **Action:** **Current page:** `/leaderboard` — click **View Profile** (or the creator handle link) — confirm the profile opens (creator identity visible).
   5. **Action:** **Current page:** `/leaderboard` — return back using the browser Back button — confirm you’re back on `/leaderboard` with rankings still visible.
@@ -192,7 +192,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Admin Boost Pass page showing leaderboard snapshots, epoch controls, and a publish action that generates an on-chain tx.
 - **Steps:**
   1. **Current page:** `/leaderboard` — confirm ranked rows are visible.
-  2. **Navigate:** **Current page:** `/leaderboard` — open URL directly: `/admin/boost-pass` → lands on `/admin/boost-pass` — confirm a heading like “Boost Pass Admin” and an epoch/snapshot table is visible.
+  2. **Navigate:** **Current page:** `/leaderboard` — open **Explore** in the header → select **Boost Pass admin** → lands on `/admin/boost-pass` — confirm a heading like “Boost Pass Admin” and an epoch/snapshot table is visible.
   3. **Action:** **Current page:** `/admin/boost-pass` — select the latest snapshot row and click **Publish Epoch** — confirm a transaction prompt or “Publishing…” state appears.
   4. **Action:** **Current page:** `/admin/boost-pass` — confirm in wallet if prompted — wait for a “Epoch published” toast/state.
   5. **Action:** **Current page:** `/admin/boost-pass` — click **View on MantleScan** for the epoch tx — confirm `https://sepolia.mantlescan.xyz/` opens on the tx page.
@@ -205,7 +205,7 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
 - **Shot:** Perks page showing Boost Pass ownership check, a “Download Remix Pack” button, and an “Import to Projects” CTA.
 - **Steps:**
   1. **Current page:** `/admin/boost-pass` — confirm the published epoch status is visible.
-  2. **Navigate:** **Current page:** `/admin/boost-pass` — click **Boost Pass Perks** (or open URL directly: `/perks/boost-pass`) → lands on `/perks/boost-pass` — confirm a “Boost Pass” heading and an ownership status (✅) is visible.
+  2. **Navigate:** **Current page:** `/admin/boost-pass` — open **Explore** in the header → select **Boost Pass perks** → lands on `/perks/boost-pass` — confirm a “Boost Pass” heading and an ownership status (✅) is visible.
   3. **Action:** **Current page:** `/perks/boost-pass` — click **Download Remix Pack** — wait for a “Download started” toast or browser download.
   4. **Action:** **Current page:** `/perks/boost-pass` — click **Import to Projects** — confirm navigation begins (loader/redirect).
   5. Click **Import to Projects** — wait for redirect — confirm you land on `/projects`.

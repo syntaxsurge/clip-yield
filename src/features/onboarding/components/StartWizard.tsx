@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   useAccount,
@@ -30,11 +30,17 @@ export default function StartWizard() {
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();
 
+  const [isMounted, setIsMounted] = useState(false);
   const [wrapAmount, setWrapAmount] = useState(DEFAULT_WRAP_AMOUNT);
   const [wrapError, setWrapError] = useState<string | null>(null);
   const [wrapTxHash, setWrapTxHash] = useState<`0x${string}` | null>(null);
 
-  const isOnMantle = chainId === mantleConfig.chainId;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const isConnectedReady = isMounted && isConnected;
+  const isOnMantle = isMounted && chainId === mantleConfig.chainId;
 
   const parsedWrapAmount = useMemo(() => {
     if (!wrapAmount) return 0n;
@@ -47,19 +53,19 @@ export default function StartWizard() {
 
   const nativeBalance = useBalance({
     address,
-    query: { enabled: Boolean(address && isOnMantle) },
+    query: { enabled: Boolean(address && isOnMantle && isMounted) },
   });
 
   const wmntBalance = useBalance({
     address,
     token: mantleConfig.wmntAddress,
-    query: { enabled: Boolean(address && isOnMantle) },
+    query: { enabled: Boolean(address && isOnMantle && isMounted) },
   });
 
   const mntBalanceLabel =
-    isConnected && isOnMantle ? nativeBalance.data?.formatted ?? "0" : "—";
+    isConnectedReady && isOnMantle ? nativeBalance.data?.formatted ?? "0" : "—";
   const wmntBalanceLabel =
-    isConnected && isOnMantle ? wmntBalance.data?.formatted ?? "0" : "—";
+    isConnectedReady && isOnMantle ? wmntBalance.data?.formatted ?? "0" : "—";
 
   const hasEnoughMnt =
     parsedWrapAmount === 0n ||
@@ -72,14 +78,16 @@ export default function StartWizard() {
     query: { enabled: Boolean(wrapTxHash) },
   });
 
-  const networkStatus = !isConnected
-    ? "Connect wallet"
-    : isOnMantle
-      ? "Ready"
-      : "Wrong network";
+  const networkStatus = !isMounted
+    ? "Checking..."
+    : !isConnected
+      ? "Connect wallet"
+      : isOnMantle
+        ? "Ready"
+        : "Wrong network";
 
   const canWrap =
-    isConnected &&
+    isConnectedReady &&
     isOnMantle &&
     parsedWrapAmount > 0n &&
     hasEnoughMnt &&
@@ -129,17 +137,19 @@ export default function StartWizard() {
               <CardTitle>1. Connect a wallet</CardTitle>
               <CardDescription>Connect the wallet you will use for vault deposits.</CardDescription>
             </div>
-            <Badge variant={isConnected ? "success" : "warning"}>
-              {isConnected ? "Connected" : "Not connected"}
+            <Badge variant={isConnectedReady ? "success" : "warning"}>
+              {isMounted ? (isConnected ? "Connected" : "Not connected") : "Checking..."}
             </Badge>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Wallet</span>
-              <span>{address ? formatShortHash(address) : "—"}</span>
+              <span>{isConnectedReady && address ? formatShortHash(address) : "—"}</span>
             </div>
-            {!isConnected && (
-              <Button onClick={() => openConnectModal?.()}>Connect wallet</Button>
+            {(!isMounted || !isConnected) && (
+              <Button onClick={() => openConnectModal?.()} disabled={!isMounted}>
+                {isMounted ? "Connect wallet" : "Checking..."}
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -150,19 +160,21 @@ export default function StartWizard() {
               <CardTitle>2. Switch to Mantle Sepolia</CardTitle>
               <CardDescription>All hackathon flows run on Mantle Sepolia (chain {mantleConfig.chainId}).</CardDescription>
             </div>
-            <Badge variant={isConnected && isOnMantle ? "success" : "warning"}>
+            <Badge variant={isConnectedReady && isOnMantle ? "success" : "warning"}>
               {networkStatus}
             </Badge>
           </CardHeader>
           <CardContent>
-            {isConnected && !isOnMantle && (
+            {isConnectedReady && !isOnMantle && (
               <Button variant="outline" onClick={handleSwitchChain}>
                 Switch network
               </Button>
             )}
-            {!isConnected && (
+            {!isConnectedReady && (
               <div className="text-sm text-muted-foreground">
-                Connect a wallet to switch networks.
+                {isMounted
+                  ? "Connect a wallet to switch networks."
+                  : "Checking wallet connection..."}
               </div>
             )}
           </CardContent>
