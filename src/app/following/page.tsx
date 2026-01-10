@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
 import { useUser } from "@/app/context/user";
 import type { PostWithProfile } from "@/app/types";
@@ -18,6 +18,8 @@ export default function FollowingPage() {
   const [isDone, setIsDone] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("loading");
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const didInitialLoadRef = useRef(false);
+  const isFetchingRef = useRef(false);
   const {
     containerRef,
     activeIndex,
@@ -27,7 +29,8 @@ export default function FollowingPage() {
   } = useScrollSnapNavigation({ itemCount: posts.length });
 
   const loadPage = useCallback(async () => {
-    if (!contextUser?.user?.id || isFetchingMore || isDone) return;
+    if (!contextUser?.user?.id || isFetchingRef.current || isDone) return;
+    isFetchingRef.current = true;
     setIsFetchingMore(true);
     setStatus("loading");
     try {
@@ -36,7 +39,11 @@ export default function FollowingPage() {
         cursor,
         limit: 6,
       });
-      setPosts((prev) => [...prev, ...result.page]);
+      setPosts((prev) => {
+        const seen = new Set(prev.map((post) => post.id));
+        const nextPage = result.page.filter((post) => !seen.has(post.id));
+        return [...prev, ...nextPage];
+      });
       setCursor(result.continueCursor ?? null);
       setIsDone(result.isDone);
       setStatus("idle");
@@ -44,10 +51,12 @@ export default function FollowingPage() {
       setStatus("error");
     } finally {
       setIsFetchingMore(false);
+      isFetchingRef.current = false;
     }
-  }, [contextUser?.user?.id, cursor, isDone, isFetchingMore]);
+  }, [contextUser?.user?.id, cursor, isDone]);
 
   useEffect(() => {
+    didInitialLoadRef.current = false;
     if (!contextUser?.user?.id) {
       setStatus("idle");
       setPosts([]);
@@ -58,6 +67,12 @@ export default function FollowingPage() {
     setPosts([]);
     setCursor(null);
     setIsDone(false);
+  }, [contextUser?.user?.id]);
+
+  useEffect(() => {
+    if (!contextUser?.user?.id) return;
+    if (didInitialLoadRef.current) return;
+    didInitialLoadRef.current = true;
     loadPage();
   }, [contextUser?.user?.id, loadPage]);
 
@@ -73,6 +88,7 @@ export default function FollowingPage() {
   }, []);
 
   useEffect(() => {
+    if (posts.length === 0) return;
     if (!isDone && activeIndex >= Math.max(posts.length - 2, 0)) {
       void loadPage();
     }
@@ -126,8 +142,8 @@ export default function FollowingPage() {
                 ref={containerRef}
                 className="feed-scroll h-full overscroll-contain overflow-y-auto snap-y snap-mandatory"
               >
-                {posts.map((post, index) => (
-                  <PostMain post={post} key={index} />
+                {posts.map((post) => (
+                  <PostMain post={post} key={post.id} />
                 ))}
               </div>
               {posts.length > 1 ? (
@@ -136,7 +152,7 @@ export default function FollowingPage() {
                   onNext={() => scrollToIndex(activeIndex + 1)}
                   disablePrev={!hasPrev}
                   disableNext={!hasNext}
-                  className="fixed right-6 top-1/2 z-30 -translate-y-1/2"
+                  className="fixed right-6 top-1/2 z-40 -translate-y-1/2"
                 />
               ) : null}
             </div>

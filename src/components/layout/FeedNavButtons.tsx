@@ -21,7 +21,7 @@ export default function FeedNavButtons({
   const disabledStyles = "opacity-40 pointer-events-none";
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("pointer-events-auto flex flex-col gap-3", className)}>
       <button
         type="button"
         onClick={onPrev}

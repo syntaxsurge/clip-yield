@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react"
 import PostMainLikes from "./PostMainLikes"
 import useCreateBucketUrl from "../hooks/useCreateBucketUrl"
 import { PostMainCompTypes } from "../types"
@@ -25,6 +25,19 @@ export default function PostMain({ post }: PostMainCompTypes) {
     const videoRef = useRef<HTMLVideoElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
 
+    const safePlay = useCallback(() => {
+        const video = videoRef.current
+        if (!video) return
+        const playPromise = video.play()
+        if (playPromise) {
+            playPromise.catch((error) => {
+                if (error?.name !== "AbortError") {
+                    console.warn(error)
+                }
+            })
+        }
+    }, [])
+
     useEffect(() => {
         const video = videoRef.current
         const container = containerRef.current
@@ -33,14 +46,20 @@ export default function PostMain({ post }: PostMainCompTypes) {
         const observer = new IntersectionObserver(
             (entries) => {
                 const entry = entries[0]
-                entry?.isIntersecting ? video.play() : video.pause()
+                if (entry?.isIntersecting) {
+                    if (video.paused) {
+                        safePlay()
+                    }
+                } else if (!video.paused) {
+                    video.pause()
+                }
             },
             { threshold: [0.6] },
         )
 
         observer.observe(container)
         return () => observer.disconnect()
-    }, [])
+    }, [safePlay])
 
     useEffect(() => {
         let isMounted = true
@@ -120,7 +139,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
         if (isFeedMuted) {
             setIsFeedMuted(false)
         }
-        video.paused ? void video.play() : video.pause()
+        video.paused ? safePlay() : video.pause()
     }
 
     const toggleMute = (event: MouseEvent<HTMLButtonElement>) => {
@@ -128,7 +147,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
         toggleFeedMuted()
         const video = videoRef.current
         if (video?.paused) {
-            void video.play()
+            safePlay()
         }
     }
 

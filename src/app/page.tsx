@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import MainLayout from "./layouts/MainLayout"
 import ClientOnly from "./components/ClientOnly"
 import PostMain from "./components/PostMain"
@@ -16,13 +16,20 @@ export default function Home() {
   const [isDone, setIsDone] = useState(false);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const didInitialLoadRef = useRef(false);
+  const isFetchingRef = useRef(false);
 
   const loadPage = useCallback(async () => {
-    if (isFetchingMore || isDone) return;
+    if (isFetchingRef.current || isDone) return;
+    isFetchingRef.current = true;
     setIsFetchingMore(true);
     try {
       const result = await useGetAllPostsPage({ cursor, limit: 6 });
-      setPosts((prev) => [...prev, ...result.page]);
+      setPosts((prev) => {
+        const seen = new Set(prev.map((post) => post.id));
+        const nextPage = result.page.filter((post) => !seen.has(post.id));
+        return [...prev, ...nextPage];
+      });
       setCursor(result.continueCursor ?? null);
       setIsDone(result.isDone);
       setStatus("ready");
@@ -30,10 +37,13 @@ export default function Home() {
       setStatus("error");
     } finally {
       setIsFetchingMore(false);
+      isFetchingRef.current = false;
     }
-  }, [cursor, isDone, isFetchingMore]);
+  }, [cursor, isDone]);
 
   useEffect(() => {
+    if (didInitialLoadRef.current) return;
+    didInitialLoadRef.current = true;
     loadPage();
   }, [loadPage]);
 
@@ -58,6 +68,7 @@ export default function Home() {
   } = useScrollSnapNavigation({ itemCount });
 
   useEffect(() => {
+    if (itemCount === 0) return;
     if (!isDone && activeIndex >= Math.max(itemCount - 2, 0)) {
       void loadPage();
     }
@@ -105,8 +116,8 @@ export default function Home() {
                   ref={containerRef}
                   className="feed-scroll h-full overscroll-contain overflow-y-auto snap-y snap-mandatory"
                 >
-                {posts.map((post, index) => (
-                  <PostMain post={post} key={index} />
+                {posts.map((post) => (
+                  <PostMain post={post} key={post.id} />
                 ))}
                 </div>
                 {posts.length > 1 ? (
@@ -115,7 +126,7 @@ export default function Home() {
                     onNext={() => scrollToIndex(activeIndex + 1)}
                     disablePrev={!hasPrev}
                     disableNext={!hasNext}
-                    className="fixed right-6 top-1/2 z-30 -translate-y-1/2"
+                    className="fixed right-6 top-1/2 z-40 -translate-y-1/2"
                   />
                 ) : null}
               </div>

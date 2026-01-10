@@ -1,20 +1,31 @@
 import { AiOutlineLoading3Quarters } from "react-icons/ai"
 import moment from "moment"
-import { useEffect } from "react"
+import { useCallback, useRef } from "react"
 import Link from "next/link"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import { PostUserCompTypes } from "@/app/types"
 
 export default function PostUser({ post }: PostUserCompTypes) {
 
-    useEffect(() => {
-        const video = document.getElementById(`video${post?.id}`) as HTMLVideoElement
+    const videoRef = useRef<HTMLVideoElement>(null)
 
-        setTimeout(() => {
-            video.addEventListener('mouseenter', () => { video.play() })
-            video.addEventListener('mouseleave', () => { video.pause() })
-        }, 50)
+    const handleMouseEnter = useCallback(() => {
+        const video = videoRef.current
+        if (!video) return
+        const playPromise = video.play()
+        if (playPromise) {
+            playPromise.catch((error) => {
+                if (error?.name !== "AbortError") {
+                    console.warn(error)
+                }
+            })
+        }
+    }, [])
 
+    const handleMouseLeave = useCallback(() => {
+        const video = videoRef.current
+        if (!video) return
+        video.pause()
     }, [])
 
     return (
@@ -26,10 +37,13 @@ export default function PostUser({ post }: PostUserCompTypes) {
                     </div>
                 ) : (
                     <Link href={`/post/${post.id}/${post.user_id}`}>
-                        <video 
+                        <video
                             id={`video${post.id}`}
+                            ref={videoRef}
                             muted
                             loop
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
                             className="aspect-[3/4] object-cover rounded-md" 
                             src={useCreateBucketUrl(post.video_url, "")}
                         />

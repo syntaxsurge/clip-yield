@@ -7,11 +7,19 @@ type ScrollSnapConfig = {
 
 export function useScrollSnapNavigation({
   itemCount,
-  lockDurationMs = 620,
+  lockDurationMs = 800,
 }: ScrollSnapConfig) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollLockRef = useRef(false);
+
+  const getItemOffset = useCallback((index: number) => {
+    const container = containerRef.current;
+    if (!container) return null;
+    const child = container.children.item(index) as HTMLElement | null;
+    if (!child) return null;
+    return child.offsetTop;
+  }, []);
 
   const clampIndex = useCallback(
     (index: number) => Math.max(0, Math.min(index, Math.max(itemCount - 1, 0))),
@@ -23,15 +31,17 @@ export function useScrollSnapNavigation({
       const container = containerRef.current;
       if (!container) return;
       const nextIndex = clampIndex(index);
+      const offset = getItemOffset(nextIndex);
+      if (offset == null) return;
       requestAnimationFrame(() => {
         container.scrollTo({
-          top: container.clientHeight * nextIndex,
+          top: offset,
           behavior: "smooth",
         });
       });
       setActiveIndex(nextIndex);
     },
-    [clampIndex],
+    [clampIndex, getItemOffset],
   );
 
   useEffect(() => {
@@ -46,9 +56,12 @@ export function useScrollSnapNavigation({
     if (activeIndex >= itemCount) {
       const clampedIndex = clampIndex(activeIndex);
       setActiveIndex(clampedIndex);
-      container.scrollTo({ top: container.clientHeight * clampedIndex });
+      const offset = getItemOffset(clampedIndex);
+      if (offset != null) {
+        container.scrollTo({ top: offset });
+      }
     }
-  }, [activeIndex, clampIndex, itemCount]);
+  }, [activeIndex, clampIndex, getItemOffset, itemCount]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -56,6 +69,7 @@ export function useScrollSnapNavigation({
 
     const handleWheel = (event: WheelEvent) => {
       if (itemCount <= 1) return;
+      if (!container.contains(event.target as Node)) return;
       event.preventDefault();
       if (scrollLockRef.current) return;
 
@@ -74,12 +88,15 @@ export function useScrollSnapNavigation({
       setActiveIndex(clampIndex(nextIndex));
     };
 
-    container.addEventListener("wheel", handleWheel, { passive: false });
     container.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("wheel", handleWheel, {
+      passive: false,
+      capture: true,
+    });
 
     return () => {
-      container.removeEventListener("wheel", handleWheel);
       container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("wheel", handleWheel, { capture: true });
     };
   }, [activeIndex, clampIndex, itemCount, lockDurationMs, scrollToIndex]);
 

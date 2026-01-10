@@ -159,6 +159,7 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    scroll-snap-type: y mandatory;
   }
 
   .feed-scroll::-webkit-scrollbar {
