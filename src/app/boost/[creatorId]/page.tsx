@@ -112,7 +112,7 @@ export default function BoostPage({ params }: BoostPageProps) {
                     Start KYC
                   </Link>
                 </Button>
-                <Button asChild variant="ghost">
+                <Button asChild variant="secondary">
                   <Link href={`/profile/${creatorId}`}>Back to profile</Link>
                 </Button>
               </div>

@@ -1,3 +1,5 @@
+import { getAddress, isAddress } from "viem";
+
 export function requirePublicEnv(
   value: string | undefined,
   name: string,
@@ -7,4 +9,15 @@ export function requirePublicEnv(
   }
 
   return value;
+}
+
+export function requirePublicAddress(
+  value: string | undefined,
+  name: string,
+): `0x${string}` {
+  const raw = requirePublicEnv(value, name);
+  if (!isAddress(raw)) {
+    throw new Error(`Invalid address for public env var: ${name}`);
+  }
+  return getAddress(raw);
 }

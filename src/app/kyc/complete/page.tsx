@@ -21,6 +21,24 @@ type SyncResponse = {
   error?: string;
 };
 
+type KycStatusResponse = {
+  ok: boolean;
+  walletAddress?: string;
+  verification?: {
+    verified: boolean;
+    txHash: string | null;
+    createdAt: number;
+    updatedAt: number;
+  } | null;
+  inquiry?: {
+    inquiryId: string;
+    status: string;
+    createdAt: number;
+    updatedAt: number;
+  } | null;
+  error?: string;
+};
+
 const FINAL_STATUSES = new Set([
   "approved",
   "completed",
@@ -49,14 +67,41 @@ export default function KycCompletePage() {
 
   const statusLabel = syncStatus ?? status ?? "processing";
   const isFinalStatus = FINAL_STATUSES.has(statusLabel);
+  const isDeclined =
+    statusLabel === "declined" ||
+    statusLabel === "rejected" ||
+    statusLabel === "failed";
+  const isSettled = Boolean(txHash) || isDeclined;
   const shouldPoll = useMemo(() => {
     if (!inquiryId) return false;
     if (txHash) return false;
     return !isFinalStatus;
   }, [inquiryId, isFinalStatus, txHash]);
 
+  const loadStatus = useCallback(async () => {
+    if (!referenceId) return;
+    try {
+      const res = await fetch(
+        `/api/kyc/status?wallet=${encodeURIComponent(referenceId)}`,
+      );
+      const payload = (await res.json()) as KycStatusResponse;
+      if (!res.ok || !payload.ok) {
+        setError(payload.error ?? "Unable to load KYC status.");
+        return;
+      }
+      if (payload.inquiry?.status) setSyncStatus(payload.inquiry.status);
+      if (payload.walletAddress) setWalletAddress(payload.walletAddress);
+      if (payload.verification?.txHash) setTxHash(payload.verification.txHash);
+      if (payload.verification?.updatedAt) {
+        setLastSyncedAt(payload.verification.updatedAt);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load KYC status.");
+    }
+  }, [referenceId]);
+
   const runSync = useCallback(async () => {
-    if (!inquiryId || isSyncing) return;
+    if (!inquiryId || isSyncing || txHash) return;
     setIsSyncing(true);
     setError(null);
 
@@ -85,12 +130,17 @@ export default function KycCompletePage() {
     } finally {
       setIsSyncing(false);
     }
-  }, [inquiryId, isSyncing, referenceId]);
+  }, [inquiryId, isSyncing, referenceId, txHash]);
 
   useEffect(() => {
     if (!inquiryId) return;
+    if ((isFinalStatus || isSettled) && referenceId) {
+      void loadStatus();
+      setIsSyncing(false);
+      return;
+    }
     void runSync();
-  }, [inquiryId, runSync]);
+  }, [inquiryId, isFinalStatus, isSettled, loadStatus, referenceId, runSync]);
 
   useEffect(() => {
     if (referenceId && !walletAddress) {
@@ -109,8 +159,6 @@ export default function KycCompletePage() {
   const formattedWallet = walletAddress ? formatShortHash(walletAddress) : "Unavailable";
   const syncedAtLabel = lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : "Not synced";
   const isApproved = statusLabel === "approved" || statusLabel === "completed";
-  const isDeclined = statusLabel === "declined" || statusLabel === "rejected" || statusLabel === "failed";
-  const isSettled = Boolean(txHash) || isDeclined;
 
   return (
     <MainLayout>
@@ -169,8 +217,11 @@ export default function KycCompletePage() {
           )}
 
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => void runSync()} disabled={!inquiryId || isSyncing}>
-              {isSyncing ? "Syncing..." : isSettled ? "Sync again" : "Refresh status"}
+            <Button
+              onClick={() => void runSync()}
+              disabled={!inquiryId || isSyncing || isSettled}
+            >
+              {isSettled ? "Synced" : isSyncing ? "Syncing..." : "Refresh status"}
             </Button>
             <Button asChild variant="secondary">
               <Link href={returnTo}>Return to ClipYield</Link>

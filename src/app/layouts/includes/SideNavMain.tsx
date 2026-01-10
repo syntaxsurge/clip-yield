@@ -18,11 +18,17 @@ export default function SideNavMain() {
 
     const contextUser = useUser()
     const pathname = usePathname()
-    const isProjectsRoute = pathname.startsWith("/projects")
+    const [hydrated, setHydrated] = useState(false)
+    const currentPath = hydrated ? pathname ?? "" : ""
+    const isProjectsRoute = currentPath.startsWith("/projects")
     const defaultColor = "hsl(var(--foreground))"
     const activeColor = "var(--brand-accent-text)"
 
     useEffect(() => { setRandomUsers() }, [setRandomUsers])
+
+    useEffect(() => {
+        setHydrated(true)
+    }, [])
 
     useEffect(() => {
         if (!contextUser?.user?.id) {
@@ -60,14 +66,14 @@ export default function SideNavMain() {
                     <Link href="/">
                         <MenuItem 
                             iconString="For You" 
-                            colorString={pathname == '/' ? activeColor : defaultColor} 
+                            colorString={currentPath === '/' ? activeColor : defaultColor} 
                             sizeString="25"
                         />
                     </Link>
                     <Link href="/following">
                         <MenuItem
                             iconString="Following"
-                            colorString={pathname == '/following' ? activeColor : defaultColor}
+                            colorString={currentPath === '/following' ? activeColor : defaultColor}
                             sizeString="25"
                         />
                     </Link>

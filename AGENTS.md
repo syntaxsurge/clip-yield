@@ -366,6 +366,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 ## API endpoints
 - `/api/kyc/start` creates a Persona inquiry and returns the hosted flow URL
 - `/api/kyc/sync` fetches Persona inquiry status and triggers on-chain KYC updates
+- `/api/creator-vault/resolve` verifies creator KYC and provisions or returns the creator boost vault
 - `/api/mantle/rollup-info` returns `{ ok, info }` rollup status via `rollup_getInfo` for finality UX
 - `/api/boost-pass/remix-pack` verifies Boost Pass ownership and returns the remix pack JSON
 - `/api/sponsor/remix-pack` verifies sponsor perks eligibility and returns the sponsor remix pack JSON

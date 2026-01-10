@@ -182,6 +182,14 @@ export default function YieldPanel({
     query: { enabled: parsedAmount > 0n && isOnMantle },
   });
 
+  const { data: previewAssetsFromShares } = useReadContract({
+    address: vault,
+    abi: vaultAbi,
+    functionName: "convertToAssets",
+    args: shareBalance ? [shareBalance] : undefined,
+    query: { enabled: Boolean(shareBalance) && isOnMantle },
+  });
+
   const { data: nativeBalance } = useBalance({
     address: user,
     query: { enabled: Boolean(user) && isOnMantle },
@@ -197,9 +205,26 @@ export default function YieldPanel({
   const wmntDecimalsValue = typeof wmntDecimals === "number" ? wmntDecimals : 18;
   const shareDecimalsValue = typeof vaultDecimals === "number" ? vaultDecimals : 18;
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
+  const nativeBalanceValue = nativeBalance?.value ?? 0n;
+  const wmntBalanceValue = wmntBalance?.value ?? 0n;
+  const shareBalanceValue = typeof shareBalance === "bigint" ? shareBalance : 0n;
+  const maxWithdrawValue =
+    typeof previewAssetsFromShares === "bigint" ? previewAssetsFromShares : 0n;
 
   const canTransact = isConnected && isOnMantle && parsedAmount > 0n;
   const needsApproval = allowanceValue < parsedAmount;
+  const hasMntForWrap = nativeBalanceValue >= parsedAmount;
+  const hasWmntForActions = wmntBalanceValue >= parsedAmount;
+  const canWrap = canTransact && hasMntForWrap;
+  const canApprove = canTransact && hasWmntForActions && needsApproval;
+  const canDeposit =
+    canTransact && isVerified && hasWmntForActions && !needsApproval;
+  const canWithdraw =
+    canTransact &&
+    isVerified &&
+    shareBalanceValue > 0n &&
+    maxWithdrawValue >= parsedAmount;
+  const canUnwrap = canTransact && hasWmntForActions;
   const canEstimateFee =
     Boolean(publicClient && user && isOnMantle && parsedAmount > 0n) &&
     isVerified &&
@@ -401,9 +426,11 @@ export default function YieldPanel({
       )}
 
       {actionError && (
-        <Alert variant="destructive">
+        <Alert variant="warning">
           <AlertTitle>Transaction failed</AlertTitle>
-          <AlertDescription>{actionError}</AlertDescription>
+          <AlertDescription className="break-words whitespace-pre-wrap text-foreground">
+            {actionError}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -427,7 +454,9 @@ export default function YieldPanel({
       {receiptError && (
         <Alert variant="warning">
           <AlertTitle>Receipt logging failed</AlertTitle>
-          <AlertDescription>{receiptError}</AlertDescription>
+          <AlertDescription className="break-words whitespace-pre-wrap">
+            {receiptError}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -525,7 +554,7 @@ export default function YieldPanel({
                   value: parsedAmount,
                 })
               }
-              disabled={!canTransact || pendingAction === "wrap"}
+              disabled={!canWrap || pendingAction === "wrap"}
             >
               {pendingAction === "wrap" ? "Wrapping..." : "Wrap MNT to WMNT"}
             </Button>
@@ -540,14 +569,14 @@ export default function YieldPanel({
                   args: [vault, parsedAmount],
                 })
               }
-              disabled={!canTransact || pendingAction === "approve" || !needsApproval}
+              disabled={!canApprove || pendingAction === "approve"}
             >
               {pendingAction === "approve" ? "Approving..." : "Approve vault"}
             </Button>
 
             <Button
               onClick={handleDeposit}
-              disabled={!canTransact || !isVerified || pendingAction === "deposit" || needsApproval}
+              disabled={!canDeposit || pendingAction === "deposit"}
             >
               {pendingAction === "deposit" ? "Depositing..." : "Deposit"}
             </Button>
@@ -562,7 +591,7 @@ export default function YieldPanel({
                   args: [parsedAmount, user as Address, user as Address],
                 })
               }
-              disabled={!canTransact || !isVerified || pendingAction === "withdraw"}
+              disabled={!canWithdraw || pendingAction === "withdraw"}
             >
               {pendingAction === "withdraw" ? "Withdrawing..." : "Withdraw WMNT"}
             </Button>
@@ -577,10 +606,36 @@ export default function YieldPanel({
                   args: [parsedAmount],
                 })
               }
-              disabled={!canTransact || pendingAction === "unwrap"}
+              disabled={!canUnwrap || pendingAction === "unwrap"}
             >
               {pendingAction === "unwrap" ? "Unwrapping..." : "Unwrap WMNT"}
             </Button>
+          </div>
+
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-4 text-sm">
+            <p className="font-semibold">What these actions do</p>
+            <ul className="mt-2 space-y-1 text-muted-foreground">
+              <li>
+                <span className="font-medium text-foreground">Wrap MNT</span>{" "}
+                converts your MNT into WMNT so the vault can accept deposits.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Approve vault</span>{" "}
+                grants the vault permission to move your WMNT for deposits.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Deposit</span>{" "}
+                sends WMNT into the vault and mints vault shares.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Withdraw WMNT</span>{" "}
+                redeems WMNT back to your wallet from the vault.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">Unwrap WMNT</span>{" "}
+                converts WMNT back into native MNT.
+              </li>
+            </ul>
           </div>
         </CardContent>
       </Card>
