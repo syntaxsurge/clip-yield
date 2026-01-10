@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import PostMainLikes from "./PostMainLikes"
 import useCreateBucketUrl from "../hooks/useCreateBucketUrl"
 import { PostMainCompTypes } from "../types"
@@ -19,17 +19,24 @@ export default function PostMain({ post }: PostMainCompTypes) {
     const [isFollowing, setIsFollowing] = useState(false)
     const [isFollowLoading, setIsFollowLoading] = useState(false)
 
-    useEffect(() => {
-        const video = document.getElementById(`video-${post?.id}`) as HTMLVideoElement
-        const postMainElement = document.getElementById(`PostMain-${post.id}`);
+    const videoRef = useRef<HTMLVideoElement>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
 
-        if (postMainElement) {
-            let observer = new IntersectionObserver((entries) => {
-                entries[0].isIntersecting ? video.play() : video.pause()
-            }, { threshold: [0.6] });
-        
-            observer.observe(postMainElement);
-        }
+    useEffect(() => {
+        const video = videoRef.current
+        const container = containerRef.current
+        if (!video || !container) return
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[0]
+                entry?.isIntersecting ? video.play() : video.pause()
+            },
+            { threshold: [0.6] },
+        )
+
+        observer.observe(container)
+        return () => observer.disconnect()
     }, [])
 
     useEffect(() => {
@@ -104,84 +111,109 @@ export default function PostMain({ post }: PostMainCompTypes) {
         return isSponsorCampaignActive(sponsorCampaign)
     }, [sponsorCampaign])
 
+    const togglePlayback = () => {
+        const video = videoRef.current
+        if (!video) return
+        video.paused ? void video.play() : video.pause()
+    }
+
+    const handleKeyToggle = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault()
+            togglePlayback()
+        }
+    }
+
     return (
         <>
             <div
                 id={`PostMain-${post.id}`}
-                className="flex border-b border-gray-200 py-6 dark:border-white/10"
+                ref={containerRef}
+                className="relative flex h-[calc(100vh-60px)] w-full snap-start items-center justify-center overflow-hidden border-b border-gray-200 dark:border-white/10"
             >
+                <div className="flex w-full max-w-[920px] flex-col items-center gap-6 py-6 md:flex-row md:items-end">
+                    <div className="flex w-full flex-1 flex-col gap-3">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <Link href={`/profile/${post.profile.user_id}`}>
+                                    <img
+                                        className="h-[52px] w-[52px] rounded-full object-cover"
+                                        src={useCreateBucketUrl(post?.profile?.image)}
+                                        alt={post.profile.name}
+                                    />
+                                </Link>
+                                <div>
+                                    <Link href={`/profile/${post.profile.user_id}`}>
+                                        <span className="font-bold hover:underline cursor-pointer text-gray-900 dark:text-white">
+                                            {post.profile.name}
+                                        </span>
+                                    </Link>
+                                    <div className="text-xs text-gray-500 dark:text-white/60">
+                                        @{post.profile.username
+                                            ? post.profile.username
+                                            : formatShortHash(post.profile.user_id)}
+                                    </div>
+                                </div>
+                            </div>
 
-                <div className="cursor-pointer">
-                    <img className="rounded-full max-h-[60px]" width="60" src={useCreateBucketUrl(post?.profile?.image)} />
-                </div>
-
-                <div className="pl-3 w-full px-4">
-                    <div className="flex items-start justify-between pb-0.5 gap-3">
-                        <div>
-                            <Link href={`/profile/${post.profile.user_id}`}>
-                                <span className="font-bold hover:underline cursor-pointer text-gray-900 dark:text-white">
-                                    {post.profile.name}
-                                </span>
-                            </Link>
-                            <div className="text-xs text-gray-500 dark:text-white/60">
-                                @
-                                {post.profile.username
-                                    ? post.profile.username
-                                    : formatShortHash(post.profile.user_id)}
+                            <div className="flex items-center gap-2">
+                                {isSponsored ? (
+                                    <Link
+                                        href={`/sponsor/${post.id}`}
+                                        className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-400/10 dark:text-emerald-200"
+                                    >
+                                        Sponsored
+                                    </Link>
+                                ) : null}
+                                {contextUser?.user?.id === post.profile.user_id ? null : (
+                                    <button
+                                        onClick={() => void handleFollow()}
+                                        disabled={isFollowLoading}
+                                        aria-pressed={isFollowing}
+                                        className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
+                                            isFollowing
+                                                ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+                                                : "border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] dark:hover:bg-[#35151d]"
+                                        }`}
+                                    >
+                                        {isFollowing ? "Following" : "Follow"}
+                                    </button>
+                                )}
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            {isSponsored ? (
-                                <Link
-                                    href={`/sponsor/${post.id}`}
-                                    className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-400/10 dark:text-emerald-200"
-                                >
-                                    Sponsored
-                                </Link>
-                            ) : null}
-                            {contextUser?.user?.id === post.profile.user_id ? null : (
-                                <button
-                                    onClick={() => void handleFollow()}
-                                    disabled={isFollowLoading}
-                                    aria-pressed={isFollowing}
-                                    className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
-                                        isFollowing
-                                            ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
-                                            : "border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] dark:hover:bg-[#35151d]"
-                                    }`}
-                                >
-                                    {isFollowing ? "Following" : "Follow"}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                    <p className="text-[15px] pb-0.5 break-words md:max-w-[400px] max-w-[300px] text-gray-800 dark:text-white/80">
-                        {post.text}
-                    </p>
+                        {post.text?.trim() ? (
+                            <p className="line-clamp-2 text-[15px] break-words text-gray-800 dark:text-white/80 md:max-w-[520px]">
+                                {post.text}
+                            </p>
+                        ) : null}
 
-                    <div className="mt-2.5 flex">
                         <div
-                            className="relative min-h-[480px] max-h-[580px] max-w-[260px] flex items-center bg-black rounded-xl cursor-pointer"
+                            className="relative mx-auto flex aspect-[9/16] h-[70vh] max-h-[740px] w-full max-w-[420px] items-center overflow-hidden rounded-2xl bg-black"
+                            onClick={togglePlayback}
+                            onKeyDown={handleKeyToggle}
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Toggle playback"
                         >
-                            <video 
+                            <video
                                 id={`video-${post.id}`}
+                                ref={videoRef}
                                 loop
-                                controls
                                 muted
-                                className="rounded-xl object-cover mx-auto h-full" 
+                                playsInline
+                                className="h-full w-full object-cover"
                                 src={useCreateBucketUrl(post?.video_url, "")}
                             />
-                            <img 
-                                className="absolute right-2 bottom-10" 
-                                width="90" 
+                            <img
+                                className="absolute right-2 bottom-10 w-[84px]"
                                 src="/images/clip-yield-logo.png"
                                 alt="ClipYield"
                             />
                         </div>
-                        
-                        <PostMainLikes post={post} />
                     </div>
+
+                    <PostMainLikes post={post} />
                 </div>
             </div>
         </>

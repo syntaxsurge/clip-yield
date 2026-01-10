@@ -46,35 +46,47 @@ export default function FollowingPage() {
 
   return (
     <MainLayout>
-      <div className="mx-auto mt-[80px] w-full max-w-[690px] px-3 pb-16">
+      <div className="mx-auto mt-[60px] h-[calc(100vh-60px)] w-full max-w-[920px] px-4">
         <ClientOnly>
           {!contextUser?.user?.id ? (
-            <EmptyState
-              title="Follow creators"
-              description="Connect your wallet to see clips from creators you follow."
-              primaryAction={{
-                label: "Connect wallet",
-                onClick: () => void contextUser?.openConnect(),
-              }}
-            />
+            <div className="flex h-full items-center justify-center">
+              <EmptyState
+                title="Follow creators"
+                description="Connect your wallet to see clips from creators you follow."
+                primaryAction={{
+                  label: "Connect wallet",
+                  onClick: () => void contextUser?.openConnect(),
+                }}
+              />
+            </div>
           ) : status === "loading" ? (
-            <EmptyState
-              title="Loading followed clips…"
-              description="Hang tight while we pull in your creators."
-            />
+            <div className="flex h-full items-center justify-center">
+              <EmptyState
+                title="Loading followed clips…"
+                description="Hang tight while we pull in your creators."
+              />
+            </div>
           ) : status === "error" ? (
-            <EmptyState
-              title="Couldn’t load followed clips"
-              description="Please try again in a moment."
-            />
+            <div className="flex h-full items-center justify-center">
+              <EmptyState
+                title="Couldn’t load followed clips"
+                description="Please try again in a moment."
+              />
+            </div>
           ) : posts.length === 0 ? (
-            <EmptyState
-              title="No followed clips yet"
-              description="Follow a creator from the For You feed to start curating your list."
-              secondaryAction={{ label: "Explore For You", href: "/" }}
-            />
+            <div className="flex h-full items-center justify-center">
+              <EmptyState
+                title="No followed clips yet"
+                description="Follow a creator from the For You feed to start curating your list."
+                secondaryAction={{ label: "Explore For You", href: "/" }}
+              />
+            </div>
           ) : (
-            posts.map((post, index) => <PostMain post={post} key={index} />)
+            <div className="h-full overflow-y-auto snap-y snap-mandatory">
+              {posts.map((post, index) => (
+                <PostMain post={post} key={index} />
+              ))}
+            </div>
           )}
         </ClientOnly>
       </div>

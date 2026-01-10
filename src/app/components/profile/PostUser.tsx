@@ -1,6 +1,5 @@
 import { AiOutlineLoading3Quarters } from "react-icons/ai"
-import { SiSoundcharts } from "react-icons/si"
-import { BiErrorCircle } from "react-icons/bi"
+import moment from "moment"
 import { useEffect } from "react"
 import Link from "next/link"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
@@ -40,10 +39,8 @@ export default function PostUser({ post }: PostUserCompTypes) {
                     <p className="text-[15px] pt-1 break-words text-gray-700 dark:text-white/80">
                         {post.text}
                     </p>
-                    <div className="flex items-center gap-1 -ml-1 text-xs font-bold text-gray-600 dark:text-white/60">
-                        <SiSoundcharts size="15"/>
-                        3%
-                        <BiErrorCircle  size="16"/>
+                    <div className="text-xs font-semibold text-gray-600 dark:text-white/60">
+                        Posted {moment(post.created_at).fromNow()}
                     </div>
                 </div>
             </div>
