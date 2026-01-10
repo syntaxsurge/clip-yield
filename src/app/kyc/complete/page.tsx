@@ -13,11 +13,11 @@ type SyncResponse = {
   ok: boolean;
   status?: string;
   walletAddress?: string;
-  result?: {
-    txHash?: string;
-    alreadyVerified?: boolean;
-    skippedOnchain?: boolean;
-  };
+  verified?: boolean;
+  alreadyVerified?: boolean;
+  txHash?: string | null;
+  vaultAddress?: string | null;
+  vaultError?: string | null;
   error?: string;
 };
 
@@ -32,10 +32,16 @@ const FINAL_STATUSES = new Set([
 export default function KycCompletePage() {
   const searchParams = useSearchParams();
   const inquiryId = searchParams.get("inquiry-id");
+  const referenceId =
+    searchParams.get("reference-id") ??
+    searchParams.get("referenceId") ??
+    searchParams.get("subject");
   const status = searchParams.get("status");
   const returnTo = searchParams.get("returnTo") ?? "/yield";
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(
+    referenceId ?? null,
+  );
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -55,7 +61,10 @@ export default function KycCompletePage() {
       const res = await fetch("/api/kyc/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inquiryId }),
+        body: JSON.stringify({
+          inquiryId,
+          referenceId: referenceId ?? undefined,
+        }),
       });
 
       const payload = (await res.json()) as SyncResponse;
@@ -66,19 +75,25 @@ export default function KycCompletePage() {
 
       if (payload.status) setSyncStatus(payload.status);
       if (payload.walletAddress) setWalletAddress(payload.walletAddress);
-      if (payload.result?.txHash) setTxHash(payload.result.txHash);
+      if (payload.txHash) setTxHash(payload.txHash);
       setLastSyncedAt(Date.now());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sync KYC status.");
     } finally {
       setIsSyncing(false);
     }
-  }, [inquiryId, isSyncing]);
+  }, [inquiryId, isSyncing, referenceId]);
 
   useEffect(() => {
     if (!inquiryId) return;
     void runSync();
   }, [inquiryId, runSync]);
+
+  useEffect(() => {
+    if (referenceId && !walletAddress) {
+      setWalletAddress(referenceId);
+    }
+  }, [referenceId, walletAddress]);
 
   useEffect(() => {
     if (!inquiryId || !shouldPoll) return;

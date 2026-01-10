@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { anyApi } from "convex/server";
-import { getAddress, isAddress } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  getAddress,
+  http,
+  isAddress,
+  zeroAddress,
+  type Address,
+  type Hex,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { convexHttpClient } from "@/lib/convex/http";
 import { getServerEnv, requireServerEnv } from "@/lib/env/server";
+import { mantleSepolia } from "@/lib/web3/mantle";
+import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const BodySchema = z.object({
   inquiryId: z.string().min(1),
+  referenceId: z.string().optional(),
 });
 
 type PersonaInquiryResponse = {
@@ -22,19 +35,68 @@ type PersonaInquiryResponse = {
   };
 };
 
+const factoryAbi = [
+  {
+    type: "function",
+    name: "vaultOf",
+    stateMutability: "view",
+    inputs: [{ name: "creator", type: "address" }],
+    outputs: [{ name: "", type: "address" }],
+  },
+  {
+    type: "function",
+    name: "createVault",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "creator", type: "address" }],
+    outputs: [{ name: "vaultAddr", type: "address" }],
+  },
+] as const;
+
+const boostVaultRoleAbi = [
+  {
+    type: "function",
+    name: "YIELD_DONOR_ROLE",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "bytes32" }],
+  },
+  {
+    type: "function",
+    name: "hasRole",
+    stateMutability: "view",
+    inputs: [
+      { name: "role", type: "bytes32" },
+      { name: "account", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "grantRole",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "role", type: "bytes32" },
+      { name: "account", type: "address" },
+    ],
+    outputs: [],
+  },
+] as const;
+
 async function fetchPersonaInquiry(inquiryId: string) {
   const personaApiKey = requireServerEnv("PERSONA_API_KEY");
   const personaVersion = getServerEnv("PERSONA_VERSION") ?? "2023-01-05";
 
-  const res = await fetch(`https://api.withpersona.com/api/v1/inquiries/${inquiryId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${personaApiKey}`,
-      "Persona-Version": personaVersion,
-      Accept: "application/json",
+  const res = await fetch(`https://api.withpersona.com/api/v1/inquiries/${inquiryId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${personaApiKey}`,
+        "Persona-Version": personaVersion,
+        Accept: "application/json",
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+  );
 
   if (!res.ok) {
     const errorBody = await res.text();
@@ -42,6 +104,166 @@ async function fetchPersonaInquiry(inquiryId: string) {
   }
 
   return (await res.json()) as PersonaInquiryResponse;
+}
+
+function resolveRpcUrl() {
+  return (
+    getServerEnv("MANTLE_SEPOLIA_RPC_URL") ??
+    mantleSepolia.rpcUrls.default.http[0]
+  );
+}
+
+function resolveAddress(name: string, fallbackName?: string): Address {
+  const value =
+    getServerEnv(name) ?? (fallbackName ? getServerEnv(fallbackName) : undefined);
+
+  if (!value || !isAddress(value)) {
+    throw new Error(`Missing or invalid ${name.replace(/_/g, " ").toLowerCase()}.`);
+  }
+
+  return getAddress(value);
+}
+
+function createMantleClients() {
+  const rpcUrl = resolveRpcUrl();
+  const privateKey = requireServerEnv("KYC_MANAGER_PRIVATE_KEY");
+  const account = privateKeyToAccount(privateKey as `0x${string}`);
+
+  const transport = http(rpcUrl);
+
+  return {
+    publicClient: createPublicClient({
+      chain: mantleSepolia,
+      transport,
+    }),
+    walletClient: createWalletClient({
+      chain: mantleSepolia,
+      transport,
+      account,
+    }),
+  };
+}
+
+async function ensureSponsorHubRole({
+  publicClient,
+  walletClient,
+  vault,
+  sponsorHub,
+}: {
+  publicClient: ReturnType<typeof createMantleClients>["publicClient"];
+  walletClient: ReturnType<typeof createMantleClients>["walletClient"];
+  vault: Address;
+  sponsorHub: Address;
+}) {
+  const yieldDonorRole = (await publicClient.readContract({
+    address: vault,
+    abi: boostVaultRoleAbi,
+    functionName: "YIELD_DONOR_ROLE",
+  })) as Hex;
+
+  const alreadyGranted = (await publicClient.readContract({
+    address: vault,
+    abi: boostVaultRoleAbi,
+    functionName: "hasRole",
+    args: [yieldDonorRole, sponsorHub],
+  })) as boolean;
+
+  if (alreadyGranted) return;
+
+  const txHash = await walletClient.writeContract({
+    address: vault,
+    abi: boostVaultRoleAbi,
+    functionName: "grantRole",
+    args: [yieldDonorRole, sponsorHub],
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash: txHash });
+}
+
+async function provisionCreatorVault({
+  publicClient,
+  walletClient,
+  creatorWallet,
+}: {
+  publicClient: ReturnType<typeof createMantleClients>["publicClient"];
+  walletClient: ReturnType<typeof createMantleClients>["walletClient"];
+  creatorWallet: Address;
+}) {
+  const existing = await convexHttpClient.query(
+    anyApi.creatorVaults.getByWalletInternal,
+    { wallet: creatorWallet },
+  );
+
+  if (existing?.vault && isAddress(existing.vault)) {
+    return { vault: getAddress(existing.vault), txHash: existing.txHash ?? null };
+  }
+
+  const factoryAddress = resolveAddress(
+    "BOOST_FACTORY_ADDRESS",
+    "NEXT_PUBLIC_BOOST_FACTORY_ADDRESS",
+  );
+  const sponsorHub = resolveAddress(
+    "SPONSOR_HUB_ADDRESS",
+    "NEXT_PUBLIC_SPONSOR_HUB_ADDRESS",
+  );
+
+  const onchainVault = (await publicClient.readContract({
+    address: factoryAddress,
+    abi: factoryAbi,
+    functionName: "vaultOf",
+    args: [creatorWallet],
+  })) as Address;
+
+  if (onchainVault && onchainVault !== zeroAddress) {
+    await ensureSponsorHubRole({
+      publicClient,
+      walletClient,
+      vault: onchainVault,
+      sponsorHub,
+    });
+
+    await convexHttpClient.mutation(anyApi.creatorVaults.insertVaultInternal, {
+      wallet: creatorWallet,
+      vault: onchainVault,
+    });
+
+    return { vault: onchainVault, txHash: null };
+  }
+
+  const txHash = await walletClient.writeContract({
+    address: factoryAddress,
+    abi: factoryAbi,
+    functionName: "createVault",
+    args: [creatorWallet],
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+  const vault = (await publicClient.readContract({
+    address: factoryAddress,
+    abi: factoryAbi,
+    functionName: "vaultOf",
+    args: [creatorWallet],
+  })) as Address;
+
+  if (!vault || vault === zeroAddress) {
+    throw new Error("Vault creation did not return a valid address.");
+  }
+
+  await ensureSponsorHubRole({
+    publicClient,
+    walletClient,
+    vault,
+    sponsorHub,
+  });
+
+  await convexHttpClient.mutation(anyApi.creatorVaults.insertVaultInternal, {
+    wallet: creatorWallet,
+    vault,
+    txHash,
+  });
+
+  return { vault, txHash };
 }
 
 export async function POST(req: Request) {
@@ -58,7 +280,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
-  const { inquiryId } = parsed.data;
+  const { inquiryId, referenceId } = parsed.data;
 
   let inquiryResponse: PersonaInquiryResponse;
   try {
@@ -71,7 +293,7 @@ export async function POST(req: Request) {
   }
 
   const status = inquiryResponse?.data?.attributes?.status?.toLowerCase();
-  const referenceId = inquiryResponse?.data?.attributes?.["reference-id"];
+  const personaReference = inquiryResponse?.data?.attributes?.["reference-id"];
 
   if (!status) {
     return NextResponse.json(
@@ -82,7 +304,9 @@ export async function POST(req: Request) {
 
   let walletAddress: string | null = null;
 
-  if (referenceId && isAddress(referenceId)) {
+  if (personaReference && isAddress(personaReference)) {
+    walletAddress = getAddress(personaReference);
+  } else if (referenceId && isAddress(referenceId)) {
     walletAddress = getAddress(referenceId);
   } else {
     const existing = await convexHttpClient.query(anyApi.internal_kyc.getInquiryById, {
@@ -100,13 +324,79 @@ export async function POST(req: Request) {
     );
   }
 
-  let result: unknown;
-  try {
-    result = await convexHttpClient.action(anyApi.kyc.syncInquiryStatus, {
+  await convexHttpClient.mutation(anyApi.kyc.upsertInquiry, {
+    inquiryId,
+    walletAddress,
+    status,
+  });
+
+  const approvedStatuses = new Set(["approved", "completed"]);
+
+  if (!approvedStatuses.has(status)) {
+    return NextResponse.json({
+      ok: true,
       inquiryId,
-      walletAddress,
       status,
+      walletAddress,
+      verified: false,
     });
+  }
+
+  const existingVerification = await convexHttpClient.query(
+    anyApi.internal_kyc.getWalletVerification,
+    { walletAddress },
+  );
+
+  if (existingVerification?.verified) {
+    return NextResponse.json({
+      ok: true,
+      inquiryId,
+      status,
+      walletAddress,
+      verified: true,
+      alreadyVerified: true,
+      txHash: existingVerification.txHash ?? null,
+    });
+  }
+
+  let txHash: `0x${string}`;
+  let vaultAddress: Address | null = null;
+  let vaultError: string | null = null;
+
+  try {
+    const registryAddress = resolveAddress(
+      "KYC_REGISTRY_ADDRESS",
+      "NEXT_PUBLIC_KYC_REGISTRY_ADDRESS",
+    );
+
+    const { publicClient, walletClient } = createMantleClients();
+
+    txHash = await walletClient.writeContract({
+      address: registryAddress,
+      abi: kycRegistryAbi,
+      functionName: "setVerified",
+      args: [getAddress(walletAddress), true],
+    });
+
+    await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+    await convexHttpClient.mutation(anyApi.internal_kyc.setWalletVerified, {
+      walletAddress,
+      verified: true,
+      txHash,
+    });
+
+    try {
+      const result = await provisionCreatorVault({
+        publicClient,
+        walletClient,
+        creatorWallet: getAddress(walletAddress),
+      });
+      vaultAddress = result.vault;
+    } catch (error) {
+      vaultError =
+        error instanceof Error ? error.message : "Vault provisioning failed.";
+    }
   } catch (error) {
     return NextResponse.json(
       {
@@ -114,7 +404,8 @@ export async function POST(req: Request) {
         inquiryId,
         status,
         walletAddress,
-        error: error instanceof Error ? error.message : "KYC sync failed.",
+        error:
+          error instanceof Error ? error.message : "KYC on-chain update failed.",
       },
       { status: 500 },
     );
@@ -125,6 +416,9 @@ export async function POST(req: Request) {
     inquiryId,
     status,
     walletAddress,
-    result,
+    verified: true,
+    txHash,
+    vaultAddress,
+    vaultError,
   });
 }
