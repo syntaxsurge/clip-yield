@@ -235,14 +235,14 @@ export default function Profile({ params }: ProfilePageTypes) {
                                         className={`flex item-center rounded-md py-1.5 px-6 text-[15px] font-semibold border ${
                                             isFollowing
                                                 ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
-                                                : "border-[#F02C56] bg-[#F02C56] text-white hover:bg-[#e0264c]"
+                                                : "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
                                         }`}
                                     >
                                         {isFollowing ? "Following" : "Follow"}
                                     </button>
                                     <Link
                                         href={`/boost/${id}`}
-                                        className="flex item-center rounded-md border border-[#F02C56] px-6 py-1.5 text-[15px] font-semibold text-[#F02C56] hover:bg-[#ffeef2] dark:hover:bg-[#35151d]"
+                                        className="flex item-center rounded-md border border-[color:var(--brand-accent)] px-6 py-1.5 text-[15px] font-semibold text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-soft)]"
                                     >
                                         Boost with yield
                                     </Link>

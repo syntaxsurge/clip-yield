@@ -973,7 +973,7 @@ export const Timeline = () => {
               </>
             }
             onClick={handleDelete}
-            className="border-red-500/20 bg-red-500/10 text-red-50 hover:bg-red-500/15"
+            className="border-[color:var(--brand-accent)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-accent-strong)] hover:bg-[color:var(--brand-accent-soft)]"
           />
         </div>
 
@@ -1190,14 +1190,14 @@ export const Timeline = () => {
           ) : null}
 
           <div
-            className="pointer-events-none absolute top-0 bottom-0 z-50 w-[2px] bg-red-500"
+            className="pointer-events-none absolute top-0 bottom-0 z-50 w-[2px] bg-[color:var(--brand-accent)]"
             style={{
               left: `${TRACK_LABEL_WIDTH_PX + playheadTime * zoom}px`,
             }}
           />
           <button
             type="button"
-            className="absolute top-0 z-50 h-12 w-6 -translate-x-1/2 cursor-ew-resize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+            className="absolute top-0 z-50 h-12 w-6 -translate-x-1/2 cursor-ew-resize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-accent)] focus-visible:ring-opacity-50"
             data-timeline-interactive="true"
             style={{
               left: `${TRACK_LABEL_WIDTH_PX + playheadTime * zoom}px`,
@@ -1208,7 +1208,7 @@ export const Timeline = () => {
             }}
             aria-label="Drag playhead"
           >
-            <div className="mx-auto mt-1 h-0 w-0 border-x-[6px] border-x-transparent border-t-[10px] border-t-red-500" />
+            <div className="mx-auto mt-1 h-0 w-0 border-x-[6px] border-x-transparent border-t-[10px] border-t-[color:var(--brand-accent)]" />
           </button>
 
           <div className="divide-y divide-white/10">

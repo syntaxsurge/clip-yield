@@ -58,9 +58,9 @@ export function SoraHistoryPanel() {
   const statusTone = (job: SoraJob) => {
     switch (job.status) {
       case "completed":
-        return "border-emerald-500/20 bg-emerald-500/10 text-emerald-50";
+        return "border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] text-[color:var(--brand-success)]";
       case "failed":
-        return "border-red-500/20 bg-red-500/10 text-red-50";
+        return "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-accent-strong)]";
       case "downloading":
       case "polling":
       case "creating":
@@ -165,7 +165,9 @@ export function SoraHistoryPanel() {
                     ) : null}
                   </div>
                   {job.status === "failed" && job.error ? (
-                    <div className="text-xs text-red-200/90">{job.error}</div>
+                    <div className="text-xs text-[color:var(--brand-accent-strong)]">
+                      {job.error}
+                    </div>
                   ) : null}
                 </div>
 

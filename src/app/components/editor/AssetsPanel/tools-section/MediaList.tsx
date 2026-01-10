@@ -200,7 +200,7 @@ export default function MediaList({ query = "", typeFilter }: Props) {
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-9 w-9 rounded-full bg-black/40 text-red-200 hover:bg-black/60 hover:text-red-100"
+                      className="h-9 w-9 rounded-full bg-black/40 text-[color:var(--brand-accent-strong)] hover:bg-black/60 hover:text-[color:var(--brand-accent)]"
                       onClick={() =>
                         setDeleteTarget({
                           id: mediaFile.id,

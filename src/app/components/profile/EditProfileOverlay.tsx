@@ -272,11 +272,11 @@ export default function EditProfileOverlay() {
           <button
             disabled={isUpdating}
             onClick={() => void handleSave()}
-            className="flex items-center bg-[#F02C56] text-white border rounded-md px-3 py-[6px]"
+            className="flex items-center rounded-md border border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] px-3 py-[6px] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
           >
             {isUpdating ? (
               <BiLoaderCircle
-                color="#ffffff"
+                color="var(--brand-ink)"
                 className="my-1 mx-2.5 animate-spin"
               />
             ) : (

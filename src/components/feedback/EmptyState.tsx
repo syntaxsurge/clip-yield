@@ -17,7 +17,8 @@ type EmptyStateProps = {
 };
 
 const actionClasses: Record<NonNullable<EmptyStateAction["variant"]>, string> = {
-  primary: "bg-[#F02C56] text-white hover:bg-[#e02650]",
+  primary:
+    "bg-[color:var(--brand-accent)] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]",
   secondary:
     "border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10",
 };

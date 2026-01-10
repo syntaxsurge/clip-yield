@@ -28,7 +28,7 @@ export default function Home() {
                 />
               </div>
             ) : (
-              <div className="h-full overflow-y-auto snap-y snap-mandatory">
+              <div className="feed-scroll h-full overflow-y-auto snap-y snap-mandatory">
                 {allPosts.map((post, index) => (
                   <PostMain post={post} key={index} />
                 ))}

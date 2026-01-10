@@ -159,7 +159,7 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                             className="rounded-full bg-gray-200 p-2 cursor-pointer text-gray-700 dark:bg-white/10 dark:text-white"
                         >
                             {!hasClickedLike ? (
-                                <AiFillHeart color={likesByPost.length > 0 && userLiked ? '#ff2626' : ''} size="25"/>
+                            <AiFillHeart color={likesByPost.length > 0 && userLiked ? 'var(--brand-accent)' : ''} size="25"/>
                             ) : (
                                 <BiLoaderCircle className="animate-spin" size="25"/>
                             )}

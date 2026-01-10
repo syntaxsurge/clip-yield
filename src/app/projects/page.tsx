@@ -500,7 +500,7 @@ export default function Projects() {
                   key={id}
                   className={cn(
                     "group relative overflow-hidden border-gray-200 transition-colors hover:border-gray-300 dark:border-white/10 dark:hover:border-white/20",
-                    id === currentProjectId && "border-[#F02C56]/40",
+                    id === currentProjectId && "border-[color:var(--brand-accent)]",
                   )}
                 >
                   <Link

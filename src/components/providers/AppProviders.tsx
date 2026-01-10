@@ -20,12 +20,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <Web3Provider>
           <UserProvider>
             <NextTopLoader
-              color="#F02C56"
+              color="var(--brand-accent)"
               height={3}
               showSpinner={false}
               initialPosition={0.15}
               zIndex={9999}
-              shadow="0 0 10px #F02C56,0 0 5px #F02C56"
+              shadow="0 0 10px rgba(246, 157, 4, 0.65),0 0 5px rgba(246, 157, 4, 0.4)"
             />
             <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
           </UserProvider>

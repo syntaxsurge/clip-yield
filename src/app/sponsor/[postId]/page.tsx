@@ -120,11 +120,11 @@ export default function SponsorPage({ params }: SponsorPageProps) {
                   </div>
 
                   {campaign ? (
-                    <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm">
-                      <div className="font-semibold text-emerald-700">
+                    <div className="rounded-xl border border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] p-4 text-sm">
+                      <div className="font-semibold text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]">
                         Active sponsor on-chain
                       </div>
-                      <div className="mt-2 space-y-1 text-emerald-900">
+                      <div className="mt-2 space-y-1 text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]">
                         <div>
                           Sponsor wallet:{" "}
                           <span className="font-mono text-xs">

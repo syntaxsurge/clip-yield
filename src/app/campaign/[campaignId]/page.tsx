@@ -22,9 +22,11 @@ type CampaignPageProps = {
 };
 
 const statusStyles: Record<CampaignReceipt["status"], string> = {
-  pending: "bg-amber-100 text-amber-800",
-  confirmed: "bg-emerald-100 text-emerald-800",
-  failed: "bg-rose-100 text-rose-800",
+  pending:
+    "bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-ink)] dark:text-[color:var(--brand-accent-strong)]",
+  confirmed:
+    "bg-[color:var(--brand-success-soft)] text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]",
+  failed: "bg-[color:var(--brand-accent)] text-[color:var(--brand-ink)]",
 };
 
 export default function CampaignReceiptPage({ params }: CampaignPageProps) {

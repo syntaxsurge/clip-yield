@@ -20,6 +20,7 @@ export default function SideNavMain() {
     const pathname = usePathname()
     const isProjectsRoute = pathname.startsWith("/projects")
     const defaultColor = "hsl(var(--foreground))"
+    const activeColor = "var(--brand-accent)"
 
     useEffect(() => { setRandomUsers() }, [setRandomUsers])
 
@@ -59,21 +60,21 @@ export default function SideNavMain() {
                     <Link href="/">
                         <MenuItem 
                             iconString="For You" 
-                            colorString={pathname == '/' ? '#F02C56' : defaultColor} 
+                            colorString={pathname == '/' ? activeColor : defaultColor} 
                             sizeString="25"
                         />
                     </Link>
                     <Link href="/following">
                         <MenuItem
                             iconString="Following"
-                            colorString={pathname == '/following' ? '#F02C56' : defaultColor}
+                            colorString={pathname == '/following' ? activeColor : defaultColor}
                             sizeString="25"
                         />
                     </Link>
                     <Link href="/projects">
                         <MenuItem
                             iconString="Projects"
-                            colorString={isProjectsRoute ? '#F02C56' : defaultColor}
+                            colorString={isProjectsRoute ? activeColor : defaultColor}
                             sizeString="25"
                         />
                     </Link>
@@ -92,7 +93,7 @@ export default function SideNavMain() {
                         </div>
                     </ClientOnly>
 
-                    <button className="lg:block hidden text-[#F02C56] pt-1.5 pl-2 text-[13px]">See all</button>
+                    <button className="lg:block hidden text-[color:var(--brand-accent)] pt-1.5 pl-2 text-[13px]">See all</button>
 
                     {contextUser?.user?.id ? (
                         <div >
@@ -116,7 +117,7 @@ export default function SideNavMain() {
                                 </div>
                             </ClientOnly>
 
-                            <button className="lg:block hidden text-[#F02C56] pt-1.5 pl-2 text-[13px]">See more</button>
+                            <button className="lg:block hidden text-[color:var(--brand-accent)] pt-1.5 pl-2 text-[13px]">See more</button>
                         </div>
                     ) : null}
                     <div className="lg:block hidden border-b lg:ml-2 mt-2 dark:border-white/10" />

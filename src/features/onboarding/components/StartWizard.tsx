@@ -276,7 +276,9 @@ export default function StartWizard() {
               </div>
             )}
             {receipt.isSuccess && (
-              <div className="text-xs text-emerald-600">WMNT wrapped successfully.</div>
+              <div className="text-xs text-[color:var(--brand-success)]">
+                WMNT wrapped successfully.
+              </div>
             )}
           </CardContent>
         </Card>

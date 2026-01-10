@@ -379,7 +379,7 @@ export function MediaTimelineTrack({
                       : clip.type === "image"
                         ? "border-sky-400/40 bg-sky-500/15"
                         : clip.type === "audio"
-                          ? "border-emerald-400/40 bg-emerald-500/15"
+                          ? "border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)]"
                           : "border-white/10 bg-white/5"
                   } ${
                     activeElement === "media" &&

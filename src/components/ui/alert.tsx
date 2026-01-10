@@ -10,9 +10,9 @@ const alertVariants = cva(
         default: "",
         info: "border-border/60 bg-muted/30 text-foreground",
         success:
-          "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200",
+          "border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]",
         warning:
-          "border-yellow-500/40 bg-yellow-500/10 text-yellow-900 dark:text-yellow-100",
+          "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-accent)] dark:text-[color:var(--brand-accent-strong)]",
         destructive:
           "border-destructive/40 bg-destructive/10 text-destructive dark:border-destructive/30",
       },

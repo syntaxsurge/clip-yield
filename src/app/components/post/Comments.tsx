@@ -84,13 +84,13 @@ export default function Comments({ params }: CommentsCompTypes) {
                         onClick={() => addComment()}
                         className={`
                             font-semibold text-sm ml-5 pr-1
-                            ${comment ? 'text-[#F02C56] cursor-pointer' : 'text-gray-400 dark:text-white/40'}
+                            ${comment ? 'text-[color:var(--brand-accent)] cursor-pointer' : 'text-gray-400 dark:text-white/40'}
                         `}
                     >
                         Post
                     </button>
                 ) : (
-                    <BiLoaderCircle className="animate-spin" color="#E91E62" size="20" />
+                    <BiLoaderCircle className="animate-spin" color="var(--brand-accent)" size="20" />
                 )}
                 
             </div>

@@ -29,7 +29,7 @@ export default function TextInput({ string, inputType, placeholder, error, onUpd
             autoComplete="off"
         />
 
-        <div className="text-red-500 text-[14px] font-semibold">
+        <div className="text-[color:var(--brand-accent-strong)] text-[14px] font-semibold">
             {error ? (error) : null}
         </div>
     </>

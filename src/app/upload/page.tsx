@@ -136,7 +136,7 @@ export default function Upload() {
                                 </p>
                                 <label 
                                     htmlFor="fileInput" 
-                                    className="px-2 py-1.5 mt-8 text-white text-[15px] w-[80%] bg-[#F02C56] rounded-sm cursor-pointer"
+                                    className="px-2 py-1.5 mt-8 text-[15px] w-[80%] rounded-sm cursor-pointer bg-[color:var(--brand-accent)] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
                                 >
                                     Select file
                                 </label>
@@ -171,7 +171,7 @@ export default function Upload() {
                                 {isUploading ? (
                                     <div className="absolute flex items-center justify-center z-20 bg-black h-full w-full rounded-[50px] bg-opacity-50">
                                         <div className="mx-auto flex items-center justify-center gap-1">
-                                            <BiLoaderCircle className="animate-spin" color="#F12B56" size={30} />
+                                            <BiLoaderCircle className="animate-spin" color="var(--brand-accent)" size={30} />
                                             <div className="text-white font-bold">Uploading...</div>
                                         </div>
                                     </div>
@@ -222,7 +222,7 @@ export default function Upload() {
                                 <div className="flex justify-end max-w-[130px] w-full h-full text-center my-auto">
                                     <button
                                       onClick={() => router.push("/projects?create=1")}
-                                      className="px-8 py-1.5 text-white text-[15px] bg-[#F02C56] rounded-sm"
+                                      className="px-8 py-1.5 text-[15px] rounded-sm bg-[color:var(--brand-accent)] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
                                     >
                                         Edit
                                     </button>
@@ -268,14 +268,14 @@ export default function Upload() {
                                 <button 
                                     disabled={isUploading}
                                     onClick={() => createNewPost()}
-                                    className="px-10 py-2.5 mt-8 border text-[16px] text-white bg-[#F02C56] rounded-sm"
+                                    className="px-10 py-2.5 mt-8 border text-[16px] rounded-sm border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
                                 >
-                                    {isUploading ? <BiLoaderCircle className="animate-spin" color="#ffffff" size={25} /> : 'Post'}
+                                    {isUploading ? <BiLoaderCircle className="animate-spin" color="var(--brand-ink)" size={25} /> : 'Post'}
                                 </button>
                             </div>
 
                             {error ? (
-                                <div className="mt-4 text-red-600 dark:text-red-400">
+                                <div className="mt-4 text-[color:var(--brand-accent-strong)]">
                                     {error.message}
                                 </div>
                             ) : null}

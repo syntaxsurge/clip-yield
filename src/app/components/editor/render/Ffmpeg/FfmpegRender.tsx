@@ -600,7 +600,7 @@ export default function FfmpegRender({
               </h2>
               <button
                 onClick={handleCloseModal}
-                className="text-white text-4xl font-bold hover:text-red-400"
+                className="text-white text-4xl font-bold hover:text-[color:var(--brand-accent-strong)]"
                 aria-label="Close"
               >
                 &times;

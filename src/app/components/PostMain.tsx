@@ -129,7 +129,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
             <div
                 id={`PostMain-${post.id}`}
                 ref={containerRef}
-                className="relative flex h-[calc(100vh-60px)] w-full snap-start items-center justify-center overflow-hidden border-b border-gray-200 dark:border-white/10"
+                className="feed-item relative flex h-[calc(100vh-60px)] w-full items-center justify-center overflow-hidden border-b border-gray-200 dark:border-white/10"
             >
                 <div className="flex w-full max-w-[920px] flex-col items-center gap-6 py-6 md:flex-row md:items-end">
                     <div className="flex w-full flex-1 flex-col gap-3">
@@ -160,7 +160,7 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                 {isSponsored ? (
                                     <Link
                                         href={`/sponsor/${post.id}`}
-                                        className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-400/10 dark:text-emerald-200"
+                                        className="rounded-full border border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]"
                                     >
                                         Sponsored
                                     </Link>
@@ -170,12 +170,12 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                         onClick={() => void handleFollow()}
                                         disabled={isFollowLoading}
                                         aria-pressed={isFollowing}
-                                        className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
-                                            isFollowing
-                                                ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
-                                                : "border-[#F02C56] text-[#F02C56] hover:bg-[#ffeef2] dark:hover:bg-[#35151d]"
-                                        }`}
-                                    >
+                                    className={`border text-[15px] px-[21px] py-0.5 font-semibold rounded-md ${
+                                        isFollowing
+                                            ? "border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+                                            : "border-[color:var(--brand-accent)] text-[color:var(--brand-accent)] hover:bg-[color:var(--brand-accent-soft)]"
+                                    }`}
+                                >
                                         {isFollowing ? "Following" : "Follow"}
                                     </button>
                                 )}

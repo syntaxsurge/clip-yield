@@ -82,7 +82,7 @@ export default function TopNav() {
                                         <div className="p-1" key={index}>
                                             <Link 
                                                 href={`/profile/${profile?.id}`}
-                                                className="group flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[#F12B56] hover:text-white dark:text-white"
+                                                className="group flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-ink)] dark:text-white"
                                             >
                                                 <div className="flex items-center">
                                                     <img className="rounded-md" width="40" src={useCreateBucketUrl(profile?.image)} />
@@ -123,7 +123,7 @@ export default function TopNav() {
                             ) : !userContext?.user?.id ? (
                                 <button
                                     onClick={() => void userContext?.openConnect()}
-                                    className="flex items-center bg-[#F02C56] text-white border rounded-md px-3 py-[6px]"
+                                    className="flex items-center rounded-md border border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] px-3 py-[6px] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
                                 >
                                     <span className="whitespace-nowrap mx-4 font-medium text-[15px]">Connect</span>
                                 </button>

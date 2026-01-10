@@ -96,7 +96,7 @@ export default function PostMainLikes({ post }: PostMainLikesCompTypes) {
                         aria-label="Like"
                     >
                         {!hasClickedLike ? (
-                            <AiFillHeart color={likes?.length > 0 && userLiked ? '#ff2626' : ''} size="24"/>
+                            <AiFillHeart color={likes?.length > 0 && userLiked ? 'var(--brand-accent)' : ''} size="24"/>
                         ) : (
                             <BiLoaderCircle className="animate-spin" size="24"/>
                         )}
