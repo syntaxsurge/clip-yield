@@ -18,7 +18,7 @@ export const useGeneralStore = create<GeneralStore>()(
         persist(
             (set) => ({
                 isEditProfileOpen: false,
-                isFeedMuted: true,
+                isFeedMuted: false,
                 randomUsers: [],
 
                 setIsEditProfileOpen: (val: boolean) => set({ isEditProfileOpen: val }),

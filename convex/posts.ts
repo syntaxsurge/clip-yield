@@ -1,5 +1,6 @@
 import { mutation, query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import type { Doc } from "./_generated/dataModel";
 
 type ProfileSummary = {
@@ -100,6 +101,18 @@ export const list = query({
   },
 });
 
+export const listPaginated = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("posts")
+      .order("desc")
+      .paginate(args.paginationOpts);
+    const page = await attachProfiles(ctx, result.page);
+    return { ...result, page };
+  },
+});
+
 export const byFollowing = query({
   args: { wallet: v.string() },
   handler: async (ctx, args) => {
@@ -123,6 +136,37 @@ export const byFollowing = query({
     const posts = postBuckets.flat();
     posts.sort((a, b) => b.createdAt - a.createdAt);
     return await attachProfiles(ctx, posts);
+  },
+});
+
+export const byFollowingPaginated = query({
+  args: { wallet: v.string(), paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const following = await ctx.db
+      .query("follows")
+      .withIndex("by_follower", (q) => q.eq("followerId", args.wallet))
+      .collect();
+
+    if (following.length === 0) {
+      return { page: [], isDone: true, continueCursor: null };
+    }
+
+    const followingIds = following.map((record) => record.followingId);
+    const baseQuery = ctx.db.query("posts").order("desc");
+    const filteredQuery =
+      followingIds.length === 1
+        ? baseQuery.filter((q) =>
+            q.eq(q.field("userId"), followingIds[0]),
+          )
+        : baseQuery.filter((q) =>
+            q.or(
+              ...followingIds.map((id) => q.eq(q.field("userId"), id)),
+            ),
+          );
+
+    const result = await filteredQuery.paginate(args.paginationOpts);
+    const page = await attachProfiles(ctx, result.page);
+    return { ...result, page };
   },
 });
 

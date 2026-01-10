@@ -42,7 +42,13 @@ export default function Post({ params }: PostPageTypes) {
             if (nextIndex < 0 || nextIndex >= postsByUser.length) return
             const nextPost = postsByUser[nextIndex]
             if (!nextPost) return
-            router.push(`/post/${nextPost.id}/${userId}`)
+            const url = `/post/${nextPost.id}/${userId}`
+            if (typeof document !== "undefined" && "startViewTransition" in document) {
+                // @ts-expect-error View transitions are not typed yet.
+                document.startViewTransition(() => router.push(url))
+            } else {
+                router.push(url)
+            }
         },
         [postsByUser, router, userId],
     )
@@ -70,7 +76,7 @@ export default function Post({ params }: PostPageTypes) {
 
             window.setTimeout(() => {
                 scrollLockRef.current = false
-            }, 360)
+            }, 520)
         }
 
         panel.addEventListener("wheel", handleWheel, { passive: false })

@@ -1,30 +1,90 @@
 "use client"
 
-import { useEffect } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import MainLayout from "./layouts/MainLayout"
-import { usePostStore } from "@/app/stores/post"
 import ClientOnly from "./components/ClientOnly"
 import PostMain from "./components/PostMain"
 import EmptyState from "@/components/feedback/EmptyState"
 import FeedNavButtons from "@/components/layout/FeedNavButtons"
 import { useScrollSnapNavigation } from "@/hooks/useScrollSnapNavigation"
+import useGetAllPostsPage from "@/app/hooks/useGetAllPostsPage"
+import type { PostWithProfile } from "@/app/types"
 
 export default function Home() {
-  let { allPosts, setAllPosts } = usePostStore();
+  const [posts, setPosts] = useState<PostWithProfile[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [isDone, setIsDone] = useState(false);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const loadPage = useCallback(async () => {
+    if (isFetchingMore || isDone) return;
+    setIsFetchingMore(true);
+    try {
+      const result = await useGetAllPostsPage({ cursor, limit: 6 });
+      setPosts((prev) => [...prev, ...result.page]);
+      setCursor(result.continueCursor ?? null);
+      setIsDone(result.isDone);
+      setStatus("ready");
+    } catch {
+      setStatus("error");
+    } finally {
+      setIsFetchingMore(false);
+    }
+  }, [cursor, isDone, isFetchingMore]);
+
+  useEffect(() => {
+    loadPage();
+  }, [loadPage]);
+
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  const itemCount = posts.length;
   const {
     containerRef,
     activeIndex,
     hasNext,
     hasPrev,
     scrollToIndex,
-  } = useScrollSnapNavigation({ itemCount: allPosts.length });
-  useEffect(() => { setAllPosts() }, [setAllPosts])
+  } = useScrollSnapNavigation({ itemCount });
+
+  useEffect(() => {
+    if (!isDone && activeIndex >= Math.max(itemCount - 2, 0)) {
+      void loadPage();
+    }
+  }, [activeIndex, itemCount, isDone, loadPage]);
+
+  const showEmpty = useMemo(
+    () => status === "ready" && posts.length === 0,
+    [posts.length, status],
+  );
+
   return (
     <>
       <MainLayout>
         <div className="mx-auto mt-[60px] h-[calc(100vh-60px)] w-full max-w-[920px] px-4">
           <ClientOnly>
-            {allPosts.length === 0 ? (
+            {status === "loading" && posts.length === 0 ? (
+              <div className="flex h-full items-center justify-center">
+                <EmptyState
+                  title="Loading clips…"
+                  description="Hang tight while we pull in the latest feed."
+                />
+              </div>
+            ) : status === "error" ? (
+              <div className="flex h-full items-center justify-center">
+                <EmptyState
+                  title="We couldn’t load clips"
+                  description="Please try again in a moment."
+                />
+              </div>
+            ) : showEmpty ? (
               <div className="flex h-full items-center justify-center">
                 <EmptyState
                   title="No clips yet"
@@ -42,11 +102,11 @@ export default function Home() {
                   ref={containerRef}
                   className="feed-scroll h-full overscroll-contain overflow-y-auto snap-y snap-mandatory"
                 >
-                {allPosts.map((post, index) => (
+                {posts.map((post, index) => (
                   <PostMain post={post} key={index} />
                 ))}
                 </div>
-                {allPosts.length > 1 ? (
+                {posts.length > 1 ? (
                   <FeedNavButtons
                     onPrev={() => scrollToIndex(activeIndex - 1)}
                     onNext={() => scrollToIndex(activeIndex + 1)}

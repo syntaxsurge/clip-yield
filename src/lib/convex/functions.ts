@@ -5,7 +5,9 @@ const asMutation = (name: string) =>
   name as unknown as FunctionReference<"mutation">;
 
 export const listPosts = asQuery("posts:list");
+export const listPostsPaginated = asQuery("posts:listPaginated");
 export const listFollowingPosts = asQuery("posts:byFollowing");
+export const listFollowingPostsPaginated = asQuery("posts:byFollowingPaginated");
 export const listPostsByUser = asQuery("posts:byUser");
 export const listLikedPostsByUser = asQuery("posts:likedByUser");
 export const getPost = asQuery("posts:get");

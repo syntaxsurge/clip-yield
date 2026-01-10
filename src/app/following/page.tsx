@@ -1,20 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
 import { useUser } from "@/app/context/user";
-import useGetFollowingPosts from "@/app/hooks/useGetFollowingPosts";
 import type { PostWithProfile } from "@/app/types";
 import ClientOnly from "@/app/components/ClientOnly";
 import PostMain from "@/app/components/PostMain";
 import EmptyState from "@/components/feedback/EmptyState";
 import FeedNavButtons from "@/components/layout/FeedNavButtons";
 import { useScrollSnapNavigation } from "@/hooks/useScrollSnapNavigation";
+import useGetFollowingPostsPage from "@/app/hooks/useGetFollowingPostsPage";
 
 export default function FollowingPage() {
   const contextUser = useUser();
   const [posts, setPosts] = useState<PostWithProfile[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [isDone, setIsDone] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("loading");
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const {
     containerRef,
     activeIndex,
@@ -23,35 +26,59 @@ export default function FollowingPage() {
     scrollToIndex,
   } = useScrollSnapNavigation({ itemCount: posts.length });
 
+  const loadPage = useCallback(async () => {
+    if (!contextUser?.user?.id || isFetchingMore || isDone) return;
+    setIsFetchingMore(true);
+    setStatus("loading");
+    try {
+      const result = await useGetFollowingPostsPage({
+        wallet: contextUser.user.id,
+        cursor,
+        limit: 6,
+      });
+      setPosts((prev) => [...prev, ...result.page]);
+      setCursor(result.continueCursor ?? null);
+      setIsDone(result.isDone);
+      setStatus("idle");
+    } catch {
+      setStatus("error");
+    } finally {
+      setIsFetchingMore(false);
+    }
+  }, [contextUser?.user?.id, cursor, isDone, isFetchingMore]);
+
   useEffect(() => {
     if (!contextUser?.user?.id) {
       setStatus("idle");
       setPosts([]);
+      setCursor(null);
+      setIsDone(false);
       return;
     }
+    setPosts([]);
+    setCursor(null);
+    setIsDone(false);
+    loadPage();
+  }, [contextUser?.user?.id, loadPage]);
 
-    let isMounted = true;
-    setStatus("loading");
-
-    const loadFollowing = async () => {
-      try {
-        const results = await useGetFollowingPosts(contextUser.user.id);
-        if (!isMounted) return;
-        setPosts(results);
-        setStatus("idle");
-      } catch {
-        if (!isMounted) return;
-        setPosts([]);
-        setStatus("error");
-      }
-    };
-
-    loadFollowing();
-
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      isMounted = false;
+      document.body.style.overflow = prevOverflow;
     };
-  }, [contextUser?.user?.id]);
+  }, []);
+
+  useEffect(() => {
+    if (!isDone && activeIndex >= Math.max(posts.length - 2, 0)) {
+      void loadPage();
+    }
+  }, [activeIndex, isDone, loadPage, posts.length]);
+
+  const showEmpty = useMemo(
+    () => status === "idle" && posts.length === 0,
+    [posts.length, status],
+  );
 
   return (
     <MainLayout>
@@ -68,7 +95,7 @@ export default function FollowingPage() {
                 }}
               />
             </div>
-          ) : status === "loading" ? (
+          ) : status === "loading" && posts.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <EmptyState
                 title="Loading followed clips…"
@@ -82,7 +109,7 @@ export default function FollowingPage() {
                 description="Please try again in a moment."
               />
             </div>
-          ) : posts.length === 0 ? (
+          ) : showEmpty ? (
             <div className="flex h-full items-center justify-center">
               <EmptyState
                 title="No followed clips yet"

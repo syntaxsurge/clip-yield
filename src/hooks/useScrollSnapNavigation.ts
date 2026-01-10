@@ -7,7 +7,7 @@ type ScrollSnapConfig = {
 
 export function useScrollSnapNavigation({
   itemCount,
-  lockDurationMs = 360,
+  lockDurationMs = 520,
 }: ScrollSnapConfig) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -23,10 +23,12 @@ export function useScrollSnapNavigation({
       const container = containerRef.current;
       if (!container) return;
       const nextIndex = clampIndex(index);
+    requestAnimationFrame(() => {
       container.scrollTo({
         top: container.clientHeight * nextIndex,
         behavior: "smooth",
       });
+    });
       setActiveIndex(nextIndex);
     },
     [clampIndex],
