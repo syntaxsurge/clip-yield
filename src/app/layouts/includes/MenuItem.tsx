@@ -16,7 +16,7 @@ export default function MenuItem({ iconString, colorString, sizeString }: MenuIt
 
     return (
         <>
-            <div className="w-full flex items-center hover:bg-gray-100 p-2.5 rounded-md">
+            <div className="w-full flex items-center rounded-md p-2.5 hover:bg-gray-100 dark:hover:bg-white/10">
                 <div className="flex items-center lg:mx-0 mx-auto">
 
                     {icons()}

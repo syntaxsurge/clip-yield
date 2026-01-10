@@ -11,6 +11,7 @@ import { useUser } from "@/app/context/user";
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
 import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
+import ThemeToggle from "@/components/ui/theme-toggle";
 
 export default function TopNav() {
     const userContext = useUser();
@@ -42,27 +43,30 @@ export default function TopNav() {
 
     return (
         <>
-            <div id="TopNav" className="fixed left-0 top-0 z-30 flex h-[64px] w-full items-center border-b bg-white">
+            <div
+                id="TopNav"
+                className="fixed left-0 top-0 z-30 flex h-[60px] w-full items-center border-b border-gray-200 bg-white dark:border-white/10 dark:bg-black"
+            >
                 <div className="flex items-center justify-between gap-6 w-full px-4 mx-auto max-w-[1150px]">
 
                     <Link href="/" className="flex items-center gap-2 shrink-0">
-                        <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
+                        <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white">
                             <img
                                 className="h-full w-full object-cover"
                                 src="/images/clip-yield-logo.png"
                                 alt="ClipYield"
                             />
                         </span>
-                        <span className="text-lg font-semibold tracking-tight text-gray-900">
+                        <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
                             ClipYield
                         </span>
                     </Link>
 
-                    <div className="relative hidden md:flex items-center justify-end bg-[#F1F1F2] p-1 rounded-full max-w-[430px] w-full">
+                    <div className="relative hidden md:flex items-center justify-end rounded-full bg-[#F1F1F2] p-1 max-w-[430px] w-full dark:bg-white/10">
                             <input 
                                 type="text" 
                                 onChange={handleSearchName}
-                                className="w-full pl-3 my-2 bg-transparent placeholder-[#838383] text-[15px] focus:outline-none"
+                                className="w-full pl-3 my-2 bg-transparent text-[15px] text-gray-900 placeholder-[#838383] focus:outline-none dark:text-white dark:placeholder-white/60"
                                 placeholder="Search accounts"
                             />
 
@@ -92,15 +96,17 @@ export default function TopNav() {
                     <div className="flex items-center gap-3">
                             <button
                                 onClick={() => void goTo()}
-                                className="flex items-center border rounded-sm py-[6px] hover:bg-gray-100 pl-1.5"
+                                className="flex items-center border rounded-sm py-[6px] hover:bg-gray-100 pl-1.5 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
                             >
-                                <AiOutlinePlus color="#000000" size="22"/>
+                                <AiOutlinePlus color="currentColor" size="22"/>
                                 <span className="px-2 font-medium text-[15px]">Upload</span>
                             </button>
 
+                            <ThemeToggle />
+
                             {userContext?.isLoading ? (
-                                <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-gray-200">
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-500" />
+                                <div className="flex h-[38px] w-[38px] items-center justify-center rounded-full border border-gray-200 dark:border-white/10">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-500 dark:border-white/30 dark:border-t-white" />
                                 </div>
                             ) : !userContext?.user?.id ? (
                                 <button

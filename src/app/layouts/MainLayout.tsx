@@ -7,7 +7,7 @@ import TopNav from "./includes/TopNav";
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     return (
       	<>
-			<div className="min-h-screen w-full bg-white">
+			<div className="min-h-screen w-full bg-white dark:bg-black">
 				<TopNav />
 				<SideNavMain />
 				<div className="w-full pl-[90px] pr-4 pt-0 lg:pl-[330px]">

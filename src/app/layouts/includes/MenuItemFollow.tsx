@@ -9,7 +9,7 @@ export default function MenuItemFollow({ user }: MenuItemFollowCompTypes) {
         <>
             <Link 
                 href={`/profile/${user?.id}`}
-                className="flex items-center hover:bg-gray-100 rounded-md w-full py-1.5 px-2"
+                className="flex items-center rounded-md w-full py-1.5 px-2 hover:bg-gray-100 dark:hover:bg-white/10"
             >
                 <img 
                     className="rounded-full lg:mx-0 mx-auto" 
@@ -18,7 +18,7 @@ export default function MenuItemFollow({ user }: MenuItemFollowCompTypes) {
                 />
                 <div className="lg:pl-2.5 lg:block hidden">
                     <div className="flex items-center">
-                        <p className="font-bold text-[14px] truncate">
+                        <p className="font-bold text-[14px] truncate dark:text-white">
                             {user?.name}
                         </p>
                         <p className="ml-1 rounded-full bg-[#58D5EC] h-[14px] relative">
@@ -26,7 +26,7 @@ export default function MenuItemFollow({ user }: MenuItemFollowCompTypes) {
                         </p>
                     </div>
 
-                    <p className="font-light text-[12px] text-gray-600">
+                    <p className="font-light text-[12px] text-gray-600 dark:text-white/60">
                         {user?.name}
                     </p>
                 </div>
