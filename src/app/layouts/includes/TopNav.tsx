@@ -30,6 +30,7 @@ export default function TopNav() {
                     { label: "Start onboarding", href: "/start" },
                     { label: "KYC verification", href: "/kyc" },
                     { label: "Yield vault", href: "/yield" },
+                    { label: "Movement wallet demo", href: "/movement" },
                 ],
             },
             {
