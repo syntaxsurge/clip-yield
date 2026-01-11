@@ -270,6 +270,7 @@ export default function YieldPanel({
     data: vaultReceipt,
     isLoading: receiptLoading,
     error: receiptLoadError,
+    refetch: refetchVaultReceipt,
   } = useQuery({
     queryKey: [
       "vault-receipt",
@@ -291,8 +292,11 @@ export default function YieldPanel({
       });
     },
     enabled: Boolean(user && isOnMantle),
-    staleTime: 15_000,
-    refetchInterval: 15_000,
+    staleTime: 10_000,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status && status !== "confirmed" ? 8_000 : false;
+    },
     retry: 1,
   });
 
@@ -316,6 +320,7 @@ export default function YieldPanel({
       refetchTotalAssets(),
       refetchTotalSupply(),
       refetchKycStatus(),
+      refetchVaultReceipt(),
     ];
     if (parsedAmount > 0n) {
       tasks.push(refetchPreviewShares());
@@ -335,6 +340,7 @@ export default function YieldPanel({
     refetchShareBalance,
     refetchTotalAssets,
     refetchTotalSupply,
+    refetchVaultReceipt,
     refetchWmntBalance,
     shareBalanceValue,
     walletReady,
@@ -436,12 +442,12 @@ export default function YieldPanel({
       }
     }
 
-  if (onDeposit) {
-    await onDeposit({
-      txHash,
-      assetsWei: parsedAmount.toString(),
-      wallet: user,
-      vault,
+    if (onDeposit) {
+      await onDeposit({
+        txHash,
+        assetsWei: parsedAmount.toString(),
+        wallet: user,
+        vault,
       });
     }
   };
@@ -647,19 +653,25 @@ export default function YieldPanel({
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="amount">
-                Amount (WMNT)
-              </label>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+              <div className="space-y-1">
+                <label className="text-sm font-medium" htmlFor="amount">
+                  Amount used across actions (WMNT)
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  This amount powers wrap, unwrap, approve, deposit, and withdraw.
+                </p>
+              </div>
               <Input
                 id="amount"
                 inputMode="decimal"
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 placeholder="0.05"
+                className="mt-3"
               />
-              <div className="text-xs text-muted-foreground">
+              <div className="mt-2 text-xs text-muted-foreground">
                 Estimated shares: {formattedPreviewShares} {vaultSymbol || "cySHARE"}
               </div>
             </div>

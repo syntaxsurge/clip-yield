@@ -14,6 +14,8 @@ import { useCommentStore } from "@/app/stores/comment"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import FeedNavButtons from "@/components/layout/FeedNavButtons"
 import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer"
+import PostMainLikes from "@/app/components/PostMainLikes"
+import { formatShortHash } from "@/lib/utils"
 
 export default function Post({ params }: PostPageTypes) {
     const { postId, userId } = use(params)
@@ -119,13 +121,35 @@ export default function Post({ params }: PostPageTypes) {
                     <ClientOnly>
                         <div className="relative z-10 flex h-screen items-center justify-center bg-black/70 lg:min-w-[480px]">
                             {postById?.video_url ? (
-                                <ClipVideoPlayer
-                                    src={useCreateBucketUrl(postById.video_url, "")}
-                                    autoPlay
-                                    loop
-                                    showLogo={false}
-                                    className="aspect-[9/16] h-[86vh] max-h-[760px] w-full max-w-[440px]"
-                                />
+                                <div className="relative w-full max-w-[440px]">
+                                    <ClipVideoPlayer
+                                        src={useCreateBucketUrl(postById.video_url, "")}
+                                        autoPlay
+                                        loop
+                                        showLogo={false}
+                                        className="aspect-[9/16] h-[86vh] max-h-[760px] w-full"
+                                    />
+                                    <div className="pointer-events-none absolute inset-0">
+                                        <div className="absolute bottom-6 right-16 max-w-[65%] text-right text-white drop-shadow">
+                                            <div className="text-sm font-semibold">
+                                                {postById.profile.username
+                                                    ? `@${postById.profile.username}`
+                                                    : `@${formatShortHash(postById.profile.user_id)}`}
+                                            </div>
+                                            {postById.text?.trim() ? (
+                                                <p className="mt-1 line-clamp-2 text-xs text-white/85">
+                                                    {postById.text}
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                        <PostMainLikes
+                                            post={postById}
+                                            avatarUrl={useCreateBucketUrl(postById.profile.image)}
+                                            profileUrl={`/profile/${postById.profile.user_id}`}
+                                            className="pointer-events-auto absolute bottom-8 right-3"
+                                        />
+                                    </div>
+                                </div>
                             ) : null}
                         </div>
                     </ClientOnly>

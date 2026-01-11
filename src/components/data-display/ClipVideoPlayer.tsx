@@ -192,7 +192,7 @@ export function ClipVideoPlayer({
     <div
       ref={containerRef}
       className={cn(
-        "relative flex items-center justify-center overflow-hidden rounded-2xl bg-black",
+        "relative overflow-visible",
         className,
       )}
       onClick={togglePlayback}
@@ -201,69 +201,51 @@ export function ClipVideoPlayer({
       tabIndex={0}
       aria-label="Toggle playback"
     >
-      <video
-        ref={videoRef}
-        loop={loop}
-        playsInline
-        autoPlay={autoPlay}
-        className={cn("h-full w-full object-cover", videoClassName)}
-        src={src}
-        onPlay={() => {
-          setHasPlayed(true);
-          setIsPaused(false);
-        }}
-        onPause={() => setIsPaused(true)}
-        onWaiting={() => setIsBuffering(true)}
-        onCanPlay={() => setIsBuffering(false)}
-        onPlaying={() => {
-          setIsBuffering(false);
-          setIsPaused(false);
-          setHasPlayed(true);
-        }}
-        onLoadedMetadata={handleLoadedMetadata}
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => {
-          if (onEnded) onEnded();
-        }}
-      />
-
-      <VideoStatusOverlay isBuffering={isBuffering} isPaused={showPausedOverlay} />
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-
-      <div className="absolute inset-x-0 bottom-0 z-20 px-3 pb-3 pt-6">
-        <input
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={0.1}
-          value={currentTime}
-          onChange={handleSeekChange}
-          onPointerDown={handleSeekStart}
-          onPointerUp={handleSeekEnd}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-          aria-label="Playback position"
-          className="clip-slider h-1 w-full cursor-pointer rounded-full"
-          style={{
-            background: `linear-gradient(to right, #ffffff ${progress}%, rgba(255,255,255,0.2) ${progress}%)`,
+      <div className="relative h-full w-full overflow-hidden rounded-2xl bg-black">
+        <video
+          ref={videoRef}
+          loop={loop}
+          playsInline
+          autoPlay={autoPlay}
+          className={cn("h-full w-full object-cover", videoClassName)}
+          src={src}
+          onPlay={() => {
+            setHasPlayed(true);
+            setIsPaused(false);
+          }}
+          onPause={() => setIsPaused(true)}
+          onWaiting={() => setIsBuffering(true)}
+          onCanPlay={() => setIsBuffering(false)}
+          onPlaying={() => {
+            setIsBuffering(false);
+            setIsPaused(false);
+            setHasPlayed(true);
+          }}
+          onLoadedMetadata={handleLoadedMetadata}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={() => {
+            if (onEnded) onEnded();
           }}
         />
 
-        <div className="mt-2 flex items-center justify-between text-white">
-          <div
-            className="group relative flex items-center"
-            onClick={(event) => event.stopPropagation()}
-          >
+        <VideoStatusOverlay isBuffering={isBuffering} isPaused={showPausedOverlay} />
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+        <div
+          className="absolute left-3 top-3 z-20 flex items-center gap-2"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="group flex items-center gap-2 rounded-full bg-black/50 px-2 py-1.5 text-white">
             <button
               type="button"
               aria-label="Adjust volume"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              className="inline-flex h-8 w-8 items-center justify-center"
               onClick={(event) => event.stopPropagation()}
             >
               <VolumeIcon size={18} />
             </button>
-            <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 w-28 -translate-x-1/2 rounded-full bg-black/70 px-3 py-2 opacity-0 shadow-lg transition group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+            <div className="pointer-events-none w-24 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
               <input
                 type="range"
                 min={0}
@@ -284,25 +266,45 @@ export function ClipVideoPlayer({
               />
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={handleFullscreen}
-            aria-label="Toggle fullscreen"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-          >
-            <FiMaximize size={18} />
-          </button>
         </div>
+
+        <button
+          type="button"
+          onClick={handleFullscreen}
+          aria-label="Toggle fullscreen"
+          className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <FiMaximize size={18} />
+        </button>
+
+        {showLogo ? (
+          <img
+            className={cn("absolute right-2 bottom-10 w-[84px]", logoClassName)}
+            src="/images/clip-yield-logo.png"
+            alt="ClipYield"
+          />
+        ) : null}
       </div>
 
-      {showLogo ? (
-        <img
-          className={cn("absolute right-2 bottom-10 w-[84px]", logoClassName)}
-          src="/images/clip-yield-logo.png"
-          alt="ClipYield"
+      <div className="absolute inset-x-0 bottom-0 z-20 translate-y-full px-3">
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={0.1}
+          value={currentTime}
+          onChange={handleSeekChange}
+          onPointerDown={handleSeekStart}
+          onPointerUp={handleSeekEnd}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+          aria-label="Playback position"
+          className="clip-slider h-1 w-full cursor-pointer rounded-full"
+          style={{
+            background: `linear-gradient(to right, #ffffff ${progress}%, rgba(255,255,255,0.2) ${progress}%)`,
+          }}
         />
-      ) : null}
+      </div>
     </div>
   );
 }
