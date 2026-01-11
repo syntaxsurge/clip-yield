@@ -10,7 +10,7 @@ import { useGeneralStore } from "@/app/stores/general";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
@@ -22,7 +22,8 @@ export default function SettingsPage() {
   const { address } = useAccount();
   const chainId = useChainId();
   const { ready, authenticated, login } = usePrivy();
-  const { isFeedMuted, setIsFeedMuted } = useGeneralStore();
+  const { isFeedMuted, setIsFeedMuted, isAutoScrollEnabled, setIsAutoScrollEnabled } =
+    useGeneralStore();
 
   const isConnected = authenticated && Boolean(address);
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
@@ -124,16 +125,29 @@ export default function SettingsPage() {
                           Start For You and Following feeds muted.
                         </p>
                       </div>
-                      <Checkbox
-                        checked={isFeedMuted}
-                        onCheckedChange={(checked) => setIsFeedMuted(Boolean(checked))}
-                        aria-label="Mute clips by default"
-                      />
+                    <Switch
+                      checked={isFeedMuted}
+                      onCheckedChange={setIsFeedMuted}
+                      ariaLabel="Mute clips by default"
+                    />
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="font-medium">Auto-advance clips</div>
+                      <p className="text-xs text-muted-foreground">
+                        Scroll to the next clip after the current one finishes.
+                      </p>
                     </div>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="font-medium">Theme</div>
-                        <p className="text-xs text-muted-foreground">
+                    <Switch
+                      checked={isAutoScrollEnabled}
+                      onCheckedChange={setIsAutoScrollEnabled}
+                      ariaLabel="Auto-advance clips"
+                    />
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="font-medium">Theme</div>
+                      <p className="text-xs text-muted-foreground">
                           Toggle between light and dark mode.
                         </p>
                       </div>

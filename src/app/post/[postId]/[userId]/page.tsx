@@ -3,7 +3,7 @@
 import Comments from "@/app/components/post/Comments"
 import CommentsHeader from "@/app/components/post/CommentsHeader"
 import Link from "next/link"
-import { use, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { use, useCallback, useEffect, useMemo, useRef } from "react"
 import { AiOutlineClose } from "react-icons/ai"
 import { useRouter } from "nextjs-toploader/app"
 import ClientOnly from "@/app/components/ClientOnly"
@@ -13,7 +13,7 @@ import { useLikeStore } from "@/app/stores/like"
 import { useCommentStore } from "@/app/stores/comment"
 import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import FeedNavButtons from "@/components/layout/FeedNavButtons"
-import { VideoStatusOverlay } from "@/components/data-display/VideoStatusOverlay"
+import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer"
 
 export default function Post({ params }: PostPageTypes) {
     const { postId, userId } = use(params)
@@ -25,9 +25,6 @@ export default function Post({ params }: PostPageTypes) {
     const router = useRouter()
     const videoPanelRef = useRef<HTMLDivElement>(null)
     const scrollLockRef = useRef(false)
-    const [isBuffering, setIsBuffering] = useState(true)
-    const [isPaused, setIsPaused] = useState(false)
-    const [hasPlayed, setHasPlayed] = useState(false)
 
     useEffect(() => { 
         setPostById(postId)
@@ -90,14 +87,6 @@ export default function Post({ params }: PostPageTypes) {
         }
     }, [goNext, goPrev, postsByUser.length])
 
-    useEffect(() => {
-        setIsBuffering(true)
-        setIsPaused(false)
-        setHasPlayed(false)
-    }, [postId])
-
-    const showPausedOverlay = hasPlayed && isPaused
-
     return (
         <>
             <div 
@@ -128,40 +117,15 @@ export default function Post({ params }: PostPageTypes) {
                     />
 
                     <ClientOnly>
-                        {postById?.video_url ? (
-                            <video 
-                                className="fixed object-cover w-full my-auto z-[0] h-screen" 
-                                src={useCreateBucketUrl(postById?.video_url, "")}
-                            />
-                        ) : null}
-
-                        <div className="relative z-10 bg-black/70 lg:min-w-[480px]">
+                        <div className="relative z-10 flex h-screen items-center justify-center bg-black/70 lg:min-w-[480px]">
                             {postById?.video_url ? (
-                                <div className="relative h-screen mx-auto">
-                                    <video 
-                                        autoPlay
-                                        controls
-                                        loop
-                                        className="h-screen mx-auto" 
-                                        src={useCreateBucketUrl(postById.video_url, "")}
-                                        onPlay={() => {
-                                            setHasPlayed(true)
-                                            setIsPaused(false)
-                                        }}
-                                        onPause={() => setIsPaused(true)}
-                                        onWaiting={() => setIsBuffering(true)}
-                                        onCanPlay={() => setIsBuffering(false)}
-                                        onPlaying={() => {
-                                            setHasPlayed(true)
-                                            setIsPaused(false)
-                                            setIsBuffering(false)
-                                        }}
-                                    />
-                                    <VideoStatusOverlay
-                                        isBuffering={isBuffering}
-                                        isPaused={showPausedOverlay}
-                                    />
-                                </div>
+                                <ClipVideoPlayer
+                                    src={useCreateBucketUrl(postById.video_url, "")}
+                                    autoPlay
+                                    loop
+                                    showLogo={false}
+                                    className="aspect-[9/16] h-[86vh] max-h-[760px] w-full max-w-[440px]"
+                                />
                             ) : null}
                         </div>
                     </ClientOnly>

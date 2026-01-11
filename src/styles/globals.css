@@ -171,6 +171,44 @@
     scroll-snap-stop: always;
   }
 
+  .clip-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
+  .clip-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: transparent;
+  }
+
+  .clip-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 12px;
+    width: 12px;
+    border-radius: 9999px;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+    margin-top: -4px;
+  }
+
+  .clip-slider::-moz-range-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: transparent;
+  }
+
+  .clip-slider::-moz-range-thumb {
+    height: 12px;
+    width: 12px;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+  }
+
   * {
     @apply border-border;
   }

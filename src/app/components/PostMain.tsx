@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import PostMainLikes from "./PostMainLikes"
 import useCreateBucketUrl from "../hooks/useCreateBucketUrl"
 import { PostMainCompTypes } from "../types"
@@ -12,58 +12,19 @@ import { useUser } from "@/app/context/user"
 import useIsFollowing from "@/app/hooks/useIsFollowing"
 import useToggleFollow from "@/app/hooks/useToggleFollow"
 import { formatShortHash } from "@/lib/utils"
-import { FiVolume2, FiVolumeX } from "react-icons/fi"
 import { useGeneralStore } from "@/app/stores/general"
-import { VideoStatusOverlay } from "@/components/data-display/VideoStatusOverlay"
+import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer"
 
-export default function PostMain({ post }: PostMainCompTypes) {
+type PostMainProps = PostMainCompTypes & {
+    onAutoAdvance?: () => void
+}
+
+export default function PostMain({ post, onAutoAdvance }: PostMainProps) {
     const contextUser = useUser()
     const [sponsorCampaign, setSponsorCampaign] = useState<SponsorCampaign | null>(null)
     const [isFollowing, setIsFollowing] = useState(false)
     const [isFollowLoading, setIsFollowLoading] = useState(false)
-    const { isFeedMuted, setIsFeedMuted, toggleFeedMuted } = useGeneralStore()
-    const [isBuffering, setIsBuffering] = useState(true)
-    const [isPaused, setIsPaused] = useState(false)
-    const [hasPlayed, setHasPlayed] = useState(false)
-
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const containerRef = useRef<HTMLDivElement>(null)
-
-    const safePlay = useCallback(() => {
-        const video = videoRef.current
-        if (!video) return
-        const playPromise = video.play()
-        if (playPromise) {
-            playPromise.catch((error) => {
-                if (error?.name !== "AbortError") {
-                    console.warn(error)
-                }
-            })
-        }
-    }, [])
-
-    useEffect(() => {
-        const video = videoRef.current
-        const container = containerRef.current
-        if (!video || !container) return
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const entry = entries[0]
-                if (entry?.isIntersecting) {
-                    if (video.paused) {
-                        safePlay()
-                    }
-                } else if (!video.paused) {
-                    video.pause()
-                }
-            },
-            { threshold: [0.6] },
-        )
-
-        observer.observe(container)
-        return () => observer.disconnect()
-    }, [safePlay])
+    const { isAutoScrollEnabled } = useGeneralStore()
 
     useEffect(() => {
         let isMounted = true
@@ -137,38 +98,15 @@ export default function PostMain({ post }: PostMainCompTypes) {
         return isSponsorCampaignActive(sponsorCampaign)
     }, [sponsorCampaign])
 
-    const togglePlayback = () => {
-        const video = videoRef.current
-        if (!video) return
-        if (isFeedMuted) {
-            setIsFeedMuted(false)
-        }
-        video.paused ? safePlay() : video.pause()
-    }
-
-    const toggleMute = (event: MouseEvent<HTMLButtonElement>) => {
-        event.stopPropagation()
-        toggleFeedMuted()
-        const video = videoRef.current
-        if (video?.paused) {
-            safePlay()
-        }
-    }
-
-    const handleKeyToggle = (event: KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault()
-            togglePlayback()
-        }
-    }
-
-    const showPausedOverlay = hasPlayed && isPaused
+    const handleAutoAdvance = useCallback(() => {
+        if (!isAutoScrollEnabled) return
+        if (onAutoAdvance) onAutoAdvance()
+    }, [isAutoScrollEnabled, onAutoAdvance])
 
     return (
         <>
             <div
                 id={`PostMain-${post.id}`}
-                ref={containerRef}
                 className="feed-item relative flex h-[calc(100vh-60px)] w-full items-center justify-center overflow-hidden border-b border-gray-200 dark:border-white/10"
             >
                 <div className="flex w-full max-w-[920px] flex-col items-center gap-6 py-6 md:flex-row md:items-end">
@@ -228,53 +166,13 @@ export default function PostMain({ post }: PostMainCompTypes) {
                             </p>
                         ) : null}
 
-                        <div
-                            className="relative mx-auto flex aspect-[9/16] h-[70vh] max-h-[740px] w-full max-w-[420px] items-center overflow-hidden rounded-2xl bg-black"
-                            onClick={togglePlayback}
-                            onKeyDown={handleKeyToggle}
-                            role="button"
-                            tabIndex={0}
-                            aria-label="Toggle playback"
-                        >
-                            <video
-                                id={`video-${post.id}`}
-                                ref={videoRef}
-                                loop
-                                muted={isFeedMuted}
-                                playsInline
-                                className="h-full w-full object-cover"
-                                src={useCreateBucketUrl(post?.video_url, "")}
-                                onPlay={() => {
-                                    setHasPlayed(true)
-                                    setIsPaused(false)
-                                }}
-                                onPause={() => setIsPaused(true)}
-                                onWaiting={() => setIsBuffering(true)}
-                                onCanPlay={() => setIsBuffering(false)}
-                                onPlaying={() => {
-                                    setIsBuffering(false)
-                                    setIsPaused(false)
-                                    setHasPlayed(true)
-                                }}
-                            />
-                            <VideoStatusOverlay
-                                isBuffering={isBuffering}
-                                isPaused={showPausedOverlay}
-                            />
-                            <button
-                                type="button"
-                                onClick={toggleMute}
-                                className="absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition hover:bg-black/80"
-                                aria-label={isFeedMuted ? "Unmute video" : "Mute video"}
-                            >
-                                {isFeedMuted ? <FiVolumeX size={18} /> : <FiVolume2 size={18} />}
-                            </button>
-                            <img
-                                className="absolute right-2 bottom-10 w-[84px]"
-                                src="/images/clip-yield-logo.png"
-                                alt="ClipYield"
-                            />
-                        </div>
+                        <ClipVideoPlayer
+                            src={useCreateBucketUrl(post?.video_url, "")}
+                            observeVisibility
+                            loop={!isAutoScrollEnabled}
+                            onEnded={handleAutoAdvance}
+                            className="mx-auto aspect-[9/16] h-[70vh] max-h-[740px] w-full max-w-[420px]"
+                        />
                     </div>
 
                     <PostMainLikes post={post} />

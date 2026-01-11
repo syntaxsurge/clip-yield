@@ -142,8 +142,16 @@ export default function FollowingPage() {
                 ref={containerRef}
                 className="feed-scroll h-full overscroll-contain overflow-y-auto snap-y snap-mandatory"
               >
-                {posts.map((post) => (
-                  <PostMain post={post} key={post.id} />
+                {posts.map((post, index) => (
+                  <PostMain
+                    post={post}
+                    key={post.id}
+                    onAutoAdvance={() => {
+                      if (index < posts.length - 1) {
+                        scrollToIndex(index + 1);
+                      }
+                    }}
+                  />
                 ))}
               </div>
               {posts.length > 1 ? (
