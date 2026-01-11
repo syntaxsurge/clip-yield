@@ -73,6 +73,22 @@ export default function SponsorPage({ params }: SponsorPageProps) {
   }, [postId]);
 
   const sponsorActive = useMemo(() => isSponsorCampaignActive(campaign), [campaign]);
+  const formattedSponsorAmount = useMemo(() => {
+    if (!campaign) return "0";
+    try {
+      return formatUnits(BigInt(campaign.assets), 18);
+    } catch {
+      return campaign.assets;
+    }
+  }, [campaign]);
+  const formattedProtocolFee = useMemo(() => {
+    if (!campaign || !campaign.protocolFeeWei) return "0";
+    try {
+      return formatUnits(BigInt(campaign.protocolFeeWei), 18);
+    } catch {
+      return campaign.protocolFeeWei;
+    }
+  }, [campaign]);
 
   return (
     <MainLayout>
@@ -81,8 +97,8 @@ export default function SponsorPage({ params }: SponsorPageProps) {
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Sponsor this clip</h1>
             <p className="text-sm text-muted-foreground">
-              Deposit WMNT into the creator&apos;s boost vault. Yield pays the creator
-              immediately while your principal stays withdrawable.
+              Sponsor with WMNT to mint an invoice receipt and route protocol fees into
+              the yield vault.
             </p>
           </div>
 
@@ -131,7 +147,14 @@ export default function SponsorPage({ params }: SponsorPageProps) {
                             {formatShortHash(campaign.sponsorAddress)}
                           </span>
                         </div>
-                        <div>Amount: {formatUnits(BigInt(campaign.assets), 18)} WMNT</div>
+                        <div>Amount: {formattedSponsorAmount} WMNT</div>
+                        <div>Protocol fee: {formattedProtocolFee} WMNT</div>
+                        <div>
+                          Invoice receipt:{" "}
+                          {campaign.receiptTokenId
+                            ? `#${campaign.receiptTokenId}`
+                            : "Pending"}
+                        </div>
                         <div>
                           Status: {sponsorActive ? "Active" : "Expired"}
                         </div>

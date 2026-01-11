@@ -154,6 +154,20 @@ export default function YieldPanel({
     query: { enabled: isOnMantle },
   });
 
+  const shareDecimalsValue = typeof vaultDecimals === "number" ? vaultDecimals : 18;
+  const shareUnit = useMemo(
+    () => 10n ** BigInt(shareDecimalsValue),
+    [shareDecimalsValue],
+  );
+
+  const { data: assetsPerShare } = useReadContract({
+    address: vault,
+    abi: vaultAbi,
+    functionName: "convertToAssets",
+    args: [shareUnit],
+    query: { enabled: isOnMantle },
+  });
+
   const { data: shareBalance, refetch: refetchShareBalance } = useReadContract({
     address: vault,
     abi: vaultAbi,
@@ -231,7 +245,6 @@ export default function YieldPanel({
 
   const isVerified = Boolean(kycStatus);
   const wmntDecimalsValue = typeof wmntDecimals === "number" ? wmntDecimals : 18;
-  const shareDecimalsValue = typeof vaultDecimals === "number" ? vaultDecimals : 18;
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
   const nativeBalanceValue = nativeBalance?.value ?? 0n;
   const wmntBalanceValue =
@@ -281,6 +294,10 @@ export default function YieldPanel({
   const formattedTotalSupply = totalSupply
     ? formatUnits(totalSupply, shareDecimalsValue)
     : "0";
+  const formattedSharePrice =
+    typeof assetsPerShare === "bigint"
+      ? formatUnits(assetsPerShare, wmntDecimalsValue)
+      : "—";
   const formattedShareBalance = walletReady
     ? formatUnits(shareBalanceValue, shareDecimalsValue)
     : "—";
@@ -487,7 +504,8 @@ export default function YieldPanel({
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">{title ?? "ClipYield Vault"}</h1>
         <p className="text-sm text-muted-foreground">
-          {description ?? "KYC-gated ERC-4626 vault holding WMNT on Mantle Sepolia."}
+          {description ??
+            "KYC-gated ERC-4626 vault holding WMNT on Mantle Sepolia. Yield is funded by sponsorship invoice fees donated into the vault."}
         </p>
       </div>
 
@@ -549,6 +567,10 @@ export default function YieldPanel({
               <span>
                 {formattedTotalSupply} {vaultSymbol || "cySHARE"}
               </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Share price</span>
+              <span>{formattedSharePrice} WMNT</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">KYC registry</span>
@@ -647,6 +669,12 @@ export default function YieldPanel({
               <p className="font-semibold">KYC registry</p>
               <p className="text-xs text-muted-foreground">
                 On-chain registry that marks verified wallets allowed to deposit or withdraw.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-semibold">Yield source</p>
+              <p className="text-xs text-muted-foreground">
+                Sponsorship invoice fees are donated into the vault, increasing share value.
               </p>
             </div>
           </div>

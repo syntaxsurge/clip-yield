@@ -205,8 +205,8 @@ export default function KycCompletePage() {
           <h1 className="text-2xl font-semibold">KYC status</h1>
           <p className="text-sm text-muted-foreground">
             {isSettled
-              ? "Your inquiry is synced. You can proceed to boost or yield actions."
-              : "We are syncing your Persona inquiry so your wallet can unlock boost and yield actions as soon as verification is approved."}
+              ? "Your inquiry is synced. You can proceed to yield, boost, and invoice sponsorship actions."
+              : "We are syncing your Persona inquiry so your wallet can unlock yield, boost, and invoice sponsorship actions as soon as verification is approved."}
           </p>
 
           <Alert variant="info">

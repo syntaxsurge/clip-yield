@@ -1,308 +1,289 @@
 Project: ClipYield  
-One-liner: A creator-first short‑video platform where fans sponsor clips using KYC‑gated, yield‑bearing WMNT vaults on Mantle Sepolia—then unlock remix perks to create and re‑upload boosted edits.
+One-liner: A creator-first short‑video platform where sponsorships are tokenized as invoice receipts and protocol fee cash‑flows fund compliant, KYC‑gated yield vaults on Mantle Sepolia.
 
-## 1. For You Feed (Short‑form Consumer App)
+## 1. For You Feed (Consumer UX First)
 - **URL:** /
-- **Shot:** “For You” feed with vertical autoplay clips, right-rail actions (Like/Comment/Share), visible creator handle on each clip, and top navigation showing “For You” and “Following”.
+- **Shot:** Vertical autoplay feed with “For You” selected, right-rail actions (Like/Comment/Share), and visible “Sponsor”/“Boost” CTAs on each clip card.
 - **Steps:**
   1. **Current page:** New browser tab — confirm the tab is open and idle.
-  2. **Navigate:** Open URL directly: `/` → lands on `/` — confirm the top nav shows “For You” selected and the feed is autoplaying a clip.
-  3. **Action:** **Current page:** `/` — scroll the feed one clip down using the mouse wheel — confirm the next clip autoplays and the creator handle updates on-screen.
-  4. **Action:** **Current page:** `/` — click the “❤ Like” button on the right rail — confirm the like state toggles (icon fills/animates) and the like count increments.
-  5. **Action:** **Current page:** `/` — pause on the clip action area — confirm a visible “Sponsor” callout is present on the clip UI.
-  6. **Verify on-screen:** **Current page:** `/` — confirm you can see (1) an autoplaying clip, (2) a creator handle, and (3) “For You” selected in the top nav.
+  2. **Navigate:** Open URL directly: `/` → lands on `/` — confirm “For You” is selected and a clip is autoplaying.
+  3. **Action:** **Current page:** `/` — scroll one clip down — confirm the next clip autoplays and the creator handle changes.
+  4. **Action:** **Current page:** `/` — click “❤ Like” on the right rail — confirm the icon toggles and the count increments.
+  5. **Action:** **Current page:** `/` — pause on the clip CTA area — confirm “Sponsor” and “Boost” actions are visible on the clip UI.
+  6. **Verify on-screen:** **Current page:** `/` — confirm autoplay, creator handle, and “For You” selected are visible.
 - **Voiceover:**
-  > “This is ClipYield’s ‘For You’ feed: a TikTok-style short-video experience, but built around real on-chain value. Every clip is built for engagement, and every clip is sponsorable with real transactions on Mantle Sepolia. Now I’ll connect with Privy so we can comment, follow, and start signing transactions without exposing private keys.”
+  > “This is ClipYield’s consumer-first feed: fast autoplay clips with familiar social actions. The difference is that monetization isn’t off-platform—each clip can be boosted or sponsored as an on-chain cash-flow action on Mantle Sepolia. Next, we’ll open a clip detail to show comments and the financial actions anchored to real receipts.”
 
-## 2. Privy Embedded Wallet Connect (Seamless Wallet UX)
-- **URL:** /
-- **Shot:** Same feed, with a header “Connect wallet” button; then a Privy modal appears for login/connection; finally a connected wallet indicator appears.
-- **Steps:**
-  1. **Current page:** `/` — confirm the feed is visible and autoplaying.
-  2. **Navigate:** **Current page:** `/` — click “Connect wallet” in the header → confirm a Privy connection/login modal opens.
-  3. **Action:** **Current page:** Privy modal — select “Email” (or your preferred login method) — confirm the modal advances to an email step.
-  4. **(Only if needed) Enter values:**
-     - Email = `[EMAIL="demo@clipyield.xyz"]`
-  5. Click “Continue” — wait for the modal to complete — confirm the header shows a connected state (e.g., a wallet address like “0x…”) and the modal closes.
-  6. **Verify on-screen:** **Current page:** `/` — confirm the “Connect wallet” button is replaced by a connected wallet indicator in the header.
-- **Voiceover:**
-  > “Here’s the core sponsor-wallet requirement: we connect with Privy using an embedded wallet flow. I sign in with demo@clipyield.xyz, and ClipYield gives me a wallet connection that’s ready to sign transactions—without ever showing me a private key. Now that I’m connected, I’ll open a clip and show the social engagement loop.”
-
-## 3. Post Detail + Comments (Engagement Loop)
+## 2. Post Detail + Comments (Social Proof Loop)
 - **URL:** /post/[postId]/[userId]
-- **Shot:** Post detail view with the clip, a comments panel/list, and engagement actions; a visible “Sponsor” entry point for the clip.
+- **Shot:** Clip detail view with comments panel, comment input, and visible “Sponsor” entry point.
 - **Steps:**
-  1. **Current page:** `/` — confirm “For You” is selected and a clip is visible.
-  2. **Navigate:** **Current page:** `/` — click the “💬 Comments” button on the right rail → lands on `/post/[postId]/[userId]` — confirm a “Comments” heading/panel is visible next to the clip.
-  3. **Action:** **Current page:** `/post/[postId]/[userId]` — click the comment input labeled “Add a comment…” — confirm the cursor is active in the input.
-  4. **(Only if needed) Enter values:**
-     - Add a comment… = `[COMMENT_TEXT="Just sponsored this clip — love the remix perks 🚀"]`
-  5. Click “Post” — wait for the new comment to appear in the list.
-  6. **Verify on-screen:** **Current page:** `/post/[postId]/[userId]` — confirm your comment appears as a new list item with your identity.
+  1. **Current page:** `/` — confirm a clip is visible.
+  2. **Navigate:** **Current page:** `/` — click “💬 Comments” → lands on `/post/[postId]/[userId]` — confirm a “Comments” heading/panel is visible.
+  3. **Action:** **Current page:** `/post/[postId]/[userId]` — click the input labeled “Add a comment…” — confirm cursor is active.
+  4. **Enter values:**
+     - Add a comment… = `[COMMENT_TEXT="Sponsoring this clip as an on-chain invoice 🔥"]`
+  5. Click **Post** — wait for the comment to appear in the list.
+  6. **Verify on-screen:** **Current page:** `/post/[postId]/[userId]` — confirm the new comment row appears with your identity.
 - **Voiceover:**
-  > “On the post detail page, ClipYield keeps the UX familiar: comments, reactions, and discovery. I add ‘Just sponsored this clip — love the remix perks 🚀’ and we immediately see it appear. Next, I’ll go to the creator profile so we can follow them and prove the social graph.”
+  > “ClipYield keeps the social loop intact—comments and engagement drive discovery. I post ‘Sponsoring this clip as an on-chain invoice’ because that’s the RealFi story: sponsorships are not vague donations, they’re tokenized receipts with auditable terms. Next we’ll go to the creator profile and set up a boost vault.”
 
-## 4. Creator Profile + Follow (Creator Surface)
+## 3. Creator Profile + Follow (Creator Surface)
 - **URL:** /profile/[id]
-- **Shot:** Creator profile header (avatar/handle), Follow button, creator posts grid/list, and a visible “Boost” or “Sponsor” CTA.
+- **Shot:** Creator header with Follow button, posts grid/list, and clear “Boost” CTA for the creator.
 - **Steps:**
-  1. **Current page:** `/post/[postId]/[userId]` — confirm the comments panel and clip are visible.
-  2. **Navigate:** **Current page:** `/post/[postId]/[userId]` — click the creator handle (e.g., “@creator”) → lands on `/profile/[id]` — confirm the profile header is visible with a “Follow” button.
-  3. **Action:** **Current page:** `/profile/[id]` — click “Follow” — confirm the button label changes to “Following”.
-  4. **Action:** **Current page:** `/profile/[id]` — scroll to the creator’s posts list/grid — confirm multiple posts are visible.
-  5. **Action:** **Current page:** `/profile/[id]` — point out the creator CTA (“Boost” / “Sponsor”) — confirm it’s visible as a button or panel.
-  6. **Verify on-screen:** **Current page:** `/profile/[id]` — confirm you see “Following” plus the creator’s posts and a Boost/Sponsor entry point.
+  1. **Current page:** `/post/[postId]/[userId]` — confirm comments are visible.
+  2. **Navigate:** **Current page:** `/post/[postId]/[userId]` — click the creator handle → lands on `/profile/[id]` — confirm profile header loads with a “Follow” button.
+  3. **Action:** **Current page:** `/profile/[id]` — click **Follow** — confirm it changes to “Following” (or “Unfollow”).
+  4. **Action:** **Current page:** `/profile/[id]` — scroll the creator posts — confirm multiple posts render.
+  5. **Action:** **Current page:** `/profile/[id]` — point at the “Boost” call-to-action — confirm Boost CTA is visible.
+  6. **Verify on-screen:** **Current page:** `/profile/[id]` — confirm Following state and Boost CTA are visible.
 - **Voiceover:**
-  > “This is where creators become businesses. I follow the creator so they appear in my Following feed, and you can see the monetization CTAs like Boost and Sponsor. Now I’ll switch to the Following feed to prove the social graph works end-to-end.”
+  > “Profiles are where creators become investable businesses. I follow this creator so they show up in my social graph, and you can see the Boost action that routes value into a creator-specific vault. Next, I’ll prove the social feed works by switching to Following.”
 
-## 5. Following Feed (Social Graph Retention)
+## 4. Following Feed (Retention Engine)
 - **URL:** /following
-- **Shot:** “Following” feed view with clips only from followed creators; visible “Following” tab selected.
+- **Shot:** Following feed with clips filtered to followed creators; “Following” selected.
 - **Steps:**
-  1. **Current page:** `/profile/[id]` — confirm the button shows “Following”.
-  2. **Navigate:** **Current page:** `/profile/[id]` — click “Following” in the top navigation → lands on `/following` — confirm the page heading shows “Following”.
-  3. **Action:** **Current page:** `/following` — scroll one clip down — confirm the next clip loads/autoplays and the creator handle matches a followed creator.
-  4. **Action:** **Current page:** `/following` — click the creator handle on a clip — confirm it navigates to `/profile/[id]` with the same creator identity.
-  5. **Navigate:** **Current page:** `/profile/[id]` — click the browser Back button → lands on `/following` — confirm “Following” remains selected.
-  6. **Verify on-screen:** **Current page:** `/following` — confirm the feed is filtered to followed creators.
+  1. **Current page:** `/profile/[id]` — confirm “Following” state is visible on the button.
+  2. **Navigate:** **Current page:** `/profile/[id]` — click “Following” in the nav → lands on `/following` — confirm the heading/tab shows “Following”.
+  3. **Action:** **Current page:** `/following` — scroll one clip down — confirm next clip autoplays from a followed creator.
+  4. **Action:** **Current page:** `/following` — click the creator handle on a clip — confirm it matches the creator you followed.
+  5. **Action:** **Current page:** `/following` — click browser Back — confirm you return to `/following`.
+  6. **Verify on-screen:** **Current page:** `/following` — confirm “Following” tab is active and filtered content is visible.
 - **Voiceover:**
-  > “This Following feed is the retention engine. It’s not random content—it’s your creators. That matters because ClipYield’s incentives—boosts, sponsorships, and perks—work best when users return to creators they care about. Next, we’ll onboard to Mantle Sepolia so we can demonstrate real transaction signing with Privy.”
+  > “This is the retention layer: a real social graph. That matters because RealFi mechanics only work if users come back daily. Next, we’ll connect with Privy embedded wallets and onboard to Mantle Sepolia so we can demonstrate KYC, custody, and compliant yield.”
 
-## 6. Mantle Sepolia Onboarding Wizard (Network Readiness)
+## 5. Onboarding Wizard (Privy Wallet + Mantle Sepolia)
 - **URL:** /start
-- **Shot:** Mantle onboarding wizard showing connected wallet status, Mantle Sepolia readiness, and a faucet link step for test funds.
+- **Shot:** Onboarding wizard with steps for embedded wallet sign-in, chain readiness, and links to faucet/bridge.
 - **Steps:**
-  1. **Current page:** `/following` — confirm the feed is visible and your wallet is connected in the header.
-  2. **Navigate:** Open URL directly: `/start` → lands on `/start` — confirm a heading like “Start on Mantle Sepolia” and a step list is visible.
-  3. **Action:** **Current page:** `/start` — click “Open Mantle faucet” — confirm a new tab opens to `https://faucet.sepolia.mantle.xyz/`.
-  4. **Action:** **Current page:** Faucet tab — confirm the page shows the Mantle Sepolia faucet UI.
-  5. **Navigate:** **Current page:** Faucet tab — close the faucet tab and return to the `/start` tab — confirm the onboarding wizard is still visible.
-  6. **Verify on-screen:** **Current page:** `/start` — confirm the wizard shows “Wallet connected” and Mantle Sepolia readiness indicators.
+  1. **Current page:** `/following` — confirm the Following feed is visible.
+  2. **Navigate:** **Current page:** `/following` — click “Explore” → click “Start onboarding” → lands on `/start` — confirm a heading like “Start on Mantle Sepolia” is visible.
+  3. **Action:** **Current page:** `/start` — click “Connect” (Privy) — confirm the Privy sign-in modal opens.
+  4. **Action:** **Current page:** `/start` — complete Privy sign-in and create/connect an embedded wallet — confirm a wallet address like “0x…” appears as connected.
+  5. **Action:** **Current page:** `/start` — click “Open Faucet” — confirm a new tab opens to the Mantle Sepolia faucet.
+  6. **Verify on-screen:** **Current page:** `/start` — confirm Mantle Sepolia chain readiness is shown and wallet is connected.
 - **Voiceover:**
-  > “This onboarding is designed to be judge-friendly and user-friendly. We’re connected with Privy, and the app walks us to Mantle Sepolia’s official faucet so we can transact with real test funds. Now we’ll do the compliance gate—KYC—so yield and sponsorship interactions can be permissioned properly.”
+  > “Onboarding is Web2.5: Privy embedded wallets remove key-management friction, then the wizard ensures you’re ready on Mantle Sepolia. This is crucial for judges—users can sign transactions securely without wrestling with wallet UX. Next we’ll run KYC, because we’re tokenizing invoices and distributing yield.”
 
-## 7. KYC Start (Persona Hosted Flow)
+## 6. KYC Start (Compliant Gate)
 - **URL:** /kyc
-- **Shot:** KYC landing page with status + a single “Start Verification” CTA; then Persona hosted flow branding appears.
+- **Shot:** KYC landing page explaining compliance and showing a single “Start Verification” CTA.
 - **Steps:**
-  1. **Current page:** `/start` — confirm the onboarding wizard is visible.
-  2. **Navigate:** Open URL directly: `/kyc` → lands on `/kyc` — confirm a heading like “KYC Verification” and a “Start Verification” button is visible.
-  3. **Action:** **Current page:** `/kyc` — click “Start Verification” — confirm you are redirected to a Persona hosted flow and see Persona branding.
-  4. **Action:** **Current page:** Persona hosted flow — pause on the first screen — confirm an “Identity Verification” label is visible.
-  5. **Action:** **Current page:** Persona hosted flow — click “Continue” — confirm Persona advances to the next step.
-  6. **Verify on-screen:** **Current page:** Persona hosted flow — confirm you’re inside an active verification flow.
+  1. **Current page:** `/start` — confirm wallet is connected.
+  2. **Navigate:** **Current page:** `/start` — click “Explore” → click “KYC verification” → lands on `/kyc` — confirm “KYC Verification” heading is visible.
+  3. **Action:** **Current page:** `/kyc` — click “Start Verification” — confirm redirect to Persona hosted flow and Persona branding is visible.
+  4. **Action:** **Current page:** Persona hosted flow — click “Continue” — confirm next step loads.
+  5. **Action:** **Current page:** Persona hosted flow — complete the sandbox verification steps — confirm it reaches completion.
+  6. **Verify on-screen:** **Current page:** Persona hosted flow — confirm the flow completes without exposing private keys.
 - **Voiceover:**
-  > “This is ClipYield’s compliance gate. We start verification from /kyc and launch a Persona hosted KYC flow. This keeps the user experience clean while still enabling permissioned yield mechanics. Once KYC is complete, we return to ClipYield and show the verified state.”
+  > “KYC is not decorative here—it’s the compliance layer for tokenized invoices and yield distribution. We launch a Persona hosted flow from /kyc and complete verification. The user doesn’t touch key material; Privy handles signing, Persona handles identity. Next we return to ClipYield and sync the verified status.”
 
-## 8. KYC Completion (Verified Status)
+## 7. KYC Completion + Sync (No Webhooks Needed)
 - **URL:** /kyc/complete
-- **Shot:** KYC completion page with a visible status badge like “Verified” and a CTA to continue into vault interactions.
+- **Shot:** KYC completion screen with inquiry ID, status, wallet address, and a visible syncing/confirmed indicator.
 - **Steps:**
-  1. **Current page:** Persona hosted flow — confirm you’re at the completion/review step.
-  2. **Navigate:** **Current page:** Persona hosted flow — click the final completion button (e.g., “Finish”) → redirects to `/kyc/complete` — confirm a status badge like “KYC Verified” is visible.
-  3. **Action:** **Current page:** `/kyc/complete` — click “Continue to Yield” — confirm the button triggers navigation.
-  4. **Navigate:** **Current page:** `/kyc/complete` — wait for redirect → lands on `/yield` — confirm the “Yield Vault” heading appears.
-  5. **Navigate:** **Current page:** `/yield` — click the browser Back button → lands on `/kyc/complete` — confirm the “KYC Verified” badge remains visible.
-  6. **Verify on-screen:** **Current page:** `/kyc/complete` — confirm verification is complete and the user can proceed.
+  1. **Current page:** Persona hosted flow — confirm you are on the completed state.
+  2. **Navigate:** **Current page:** Persona hosted flow — click the completion button → lands on `/kyc/complete` — confirm “KYC status” heading is visible.
+  3. **Action:** **Current page:** `/kyc/complete` — click “Sync now” (or “Refresh Status”) — confirm a loading state appears.
+  4. **Action:** **Current page:** `/kyc/complete` — wait for sync to complete — confirm the wallet shows as “Verified”.
+  5. **Action:** **Current page:** `/kyc/complete` — click “Return to ClipYield” — confirm navigation returns to the app.
+  6. **Verify on-screen:** **Current page:** `/kyc/complete` — confirm a “Verified” badge and the connected wallet address are shown.
 - **Voiceover:**
-  > “KYC is complete, and we’re back on /kyc/complete with a clear Verified state. This is essential for compliant yield flows. Now, before we touch admin tools, I’ll show that admin routes are protected—regular users can’t just open /admin pages.”
+  > “Instead of webhook dependency, we sync on demand from /kyc/complete. The UI shows the inquiry details, then we press Sync and the wallet flips to Verified. This is a demo-friendly, locally testable workflow that still writes verification into the on-chain registry. Next we’ll open the yield vault and show custody and balances.”
 
-## 9. Admin Route Protection (Non‑Admin Access Denied)
-- **URL:** /admin/kyc
-- **Shot:** An “Access denied” screen that clearly explains the connected wallet is not authorized, with a “Switch account” button.
-- **Steps:**
-  1. **Current page:** `/kyc/complete` — confirm the “KYC Verified” badge is visible.
-  2. **Navigate:** Open URL directly: `/admin/kyc` → lands on `/admin/kyc` — confirm a heading like “Access denied” is visible.
-  3. **Action:** **Current page:** `/admin/kyc` — confirm the page displays your wallet address and says it’s not authorized.
-  4. **Action:** **Current page:** `/admin/kyc` — confirm the “Switch account” button is visible.
-  5. **Action:** **Current page:** `/admin/kyc` — do not click anything yet — confirm admin table content is not visible.
-  6. **Verify on-screen:** **Current page:** `/admin/kyc` — confirm non-admin users cannot access admin tools.
-- **Voiceover:**
-  > “This is a key security and UX improvement: even if someone guesses an admin URL, they hit an Access denied screen. Admin links don’t show up for regular users, and admin tools are gated by wallet allowlist. Now I’ll switch to the admin wallet so you can see the admin console become available.”
-
-## 10. Admin Login + KYC Console (Admin‑Only UI)
-- **URL:** /admin/kyc
-- **Shot:** Admin KYC console with a table of KYC records plus a visible “Admin” indicator in the header.
-- **Steps:**
-  1. **Current page:** `/admin/kyc` — confirm the “Access denied” screen is visible.
-  2. **Navigate:** **Current page:** `/admin/kyc` — click “Switch account” → confirm a Privy connection/login modal opens.
-  3. **Action:** **Current page:** Privy modal — select “External wallet” (or your admin login method) — confirm the modal advances to connection.
-  4. **Action:** **Current page:** Privy modal — complete login as the admin wallet — confirm the modal closes.
-  5. **Navigate:** **Current page:** `/admin/kyc` — wait for the page to refresh — confirm the “KYC Admin” heading and a KYC table are now visible.
-  6. **Verify on-screen:** **Current page:** `/admin/kyc` — confirm admin-only table content is visible and the header shows an admin-connected wallet state.
-- **Voiceover:**
-  > “Now we’re logged in as the admin wallet, and the admin console appears. This makes the experience clear: regular users never see admin controls, and admins get a dedicated operational console. With admin access verified, we’ll go back to the user flow and start signing real vault transactions with Privy.”
-
-## 11. Yield Vault (KYC‑Gated Deposit + Signing)
+## 8. Yield Vault (Custody + Compliant Yield Distribution)
 - **URL:** /yield
-- **Shot:** Vault UI showing KYC status, deposit panel with amount input, and transaction status/toasts.
+- **Shot:** Yield vault overview panels (TVL, shares), wallet status card, and action center (wrap/approve/deposit).
 - **Steps:**
-  1. **Current page:** `/admin/kyc` — confirm the “KYC Admin” table is visible.
-  2. **Navigate:** Open URL directly: `/yield` → lands on `/yield` — confirm a heading like “Yield Vault” and a “KYC Verified” badge is visible.
-  3. **Action:** **Current page:** `/yield` — click “Deposit” — confirm an amount input appears.
-  4. **(Only if needed) Enter values:**
-     - Amount (WMNT) = `[DEPOSIT_WMNT=5]`
-  5. Click “Confirm Deposit” — wait for a Privy signing/confirmation prompt and a “Transaction submitted” toast/state.
-  6. **Verify on-screen:** **Current page:** `/yield` — confirm your vault position updates (balance/shares) and a tx hash link or “Confirmed” state appears.
+  1. **Current page:** `/kyc/complete` — confirm “Verified” is visible.
+  2. **Navigate:** **Current page:** `/kyc/complete` — click “Explore” → click “Yield vault” → lands on `/yield` — confirm “ClipYield Vault” heading is visible.
+  3. **Action:** **Current page:** `/yield` — confirm “KYC” shows “Verified” — confirm the verified badge is visible in the wallet status panel.
+  4. **Action:** **Current page:** `/yield` — click “Wrap MNT to WMNT” — confirm a wallet signing prompt appears.
+  5. **Action:** **Current page:** `/yield` — approve the transaction — confirm a “Transaction submitted” toast appears with a MantleScan link.
+  6. **Verify on-screen:** **Current page:** `/yield` — confirm “WMNT available” updates to a non-zero number (or “WMNT balance” updates) after confirmation.
 - **Voiceover:**
-  > “This is the core on-chain proof: a KYC-gated yield vault on Mantle Sepolia. I deposit 5 WMNT and sign the transaction through Privy’s wallet flow. The app shows submission and confirmation states so users always know what’s happening. Next, we’ll do creator-directed funding using a per-creator Boost Vault.”
+  > “This is the custody layer: a KYC-gated ERC‑4626 vault holding WMNT on Mantle Sepolia. We wrap MNT into WMNT, sign once, and the UI confirms on-chain submission with MantleScan proof. This vault is where compliant yield distribution happens—next we’ll boost a creator and then sponsor a clip to mint an invoice receipt.”
 
-## 12. Creator Boost Vault (Deposit to a Creator)
+## 9. Creator Directory (Discovery for Cash-Flow Assets)
+- **URL:** /creators
+- **Shot:** Creator directory with suggested list and a clear “Boost” action per creator.
+- **Steps:**
+  1. **Current page:** `/yield` — confirm the vault UI is visible.
+  2. **Navigate:** **Current page:** `/yield` — click “Explore” → click “Creators” → lands on `/creators` — confirm “Creators” heading is visible.
+  3. **Action:** **Current page:** `/creators` — click a creator row labeled “@creator” — confirm it navigates to their profile.
+  4. **Action:** **Current page:** `/profile/[id]` — click “Boost” — confirm it navigates to the creator boost vault page.
+  5. **Action:** **Current page:** `/boost/[creatorId]` — pause on the vault panel — confirm creator identity is visible on the page.
+  6. **Verify on-screen:** **Current page:** `/boost/[creatorId]` — confirm the Boost Vault UI is loaded for that creator.
+- **Voiceover:**
+  > “Creators are the destination for value. The directory makes discovery easy, and every creator has a boost vault—this is how users route funds into creator-specific custody. Next we’ll deposit into the boost vault, then sponsor a clip to tokenize the invoice and generate revenue-funded yield.”
+
+## 10. Boost Vault (Creator-Directed Capital)
 - **URL:** /boost/[creatorId]
-- **Shot:** Per-creator boost vault page showing creator identity, deposit input, and your boost position.
+- **Shot:** Boost vault UI with amount input, approval state, and deposit action.
 - **Steps:**
-  1. **Current page:** `/yield` — confirm your vault position is visible.
-  2. **Navigate:** Open URL directly: `/boost/[creatorId]` → lands on `/boost/[creatorId]` — confirm the page shows the creator handle and a “Boost Vault” heading.
-  3. **Action:** **Current page:** `/boost/[creatorId]` — click “Deposit Boost” — confirm an amount input is visible.
-  4. **(Only if needed) Enter values:**
-     - Amount (WMNT) = `[BOOST_WMNT=1]`
-  5. Click “Confirm Boost Deposit” — wait for the Privy signing prompt and a “Boost deposit submitted” toast/state.
-  6. **Verify on-screen:** **Current page:** `/boost/[creatorId]` — confirm “Your Boost Position” updates and a tx hash link is displayed.
+  1. **Current page:** `/boost/[creatorId]` — confirm the creator handle and “Boost Vault” are visible.
+  2. **Action:** **Current page:** `/boost/[creatorId]` — click the amount field labeled “Amount (WMNT)” — confirm cursor is active.
+  3. **Enter values:**
+     - Amount (WMNT) = `[BOOST_WMNT=0.05]`
+  4. Click “Approve” (if shown) — wait for wallet prompt and “Approved” state.
+  5. Click “Deposit” — wait for “Transaction submitted” toast with explorer link.
+  6. **Verify on-screen:** **Current page:** `/boost/[creatorId]` — confirm your boost position/shares update and a tx link is visible.
 - **Voiceover:**
-  > “Boosting turns DeFi mechanics into creator funding. I deposit 1 WMNT into a creator-specific Boost Vault and sign through Privy. It’s transparent, composable, and it funds creators directly. Next we’ll sponsor a specific clip and generate an auditable campaign receipt.”
+  > “Boosting is creator-directed capital: you deposit WMNT into a creator-specific vault. It’s custody-first—assets are on-chain, and your position is tracked transparently. Now we’ll sponsor a specific clip, which mints a tokenized invoice receipt and funds yield through protocol revenue.”
 
-## 13. Sponsor a Clip (Create Campaign)
+## 11. Sponsor a Clip (Tokenized Invoice Creation)
 - **URL:** /sponsor/[postId]
-- **Shot:** Sponsorship page tied to a specific clip, showing a clip preview and sponsor amount panel with a primary CTA.
+- **Shot:** Sponsorship page with clip preview, sponsorship breakdown panel, and “Confirm Sponsorship” CTA that mentions Invoice Receipt NFT.
 - **Steps:**
-  1. **Current page:** `/boost/[creatorId]` — confirm your boost position is visible.
-  2. **Navigate:** Open URL directly: `/sponsor/[postId]` → lands on `/sponsor/[postId]` — confirm a “Sponsor” heading and the clip preview are visible.
-  3. **Action:** **Current page:** `/sponsor/[postId]` — click the input labeled “Amount (WMNT)” — confirm the cursor is active.
-  4. **(Only if needed) Enter values:**
-     - Amount (WMNT) = `[SPONSOR_WMNT=2]`
-  5. Click “Confirm Sponsorship” — wait for Privy signing and a “Campaign created” / “Transaction submitted” state.
-  6. **Verify on-screen:** **Current page:** `/sponsor/[postId]` — confirm a success state is visible (toast/status/redirect prompt).
+  1. **Current page:** `/post/[postId]/[userId]` — confirm the clip and actions are visible.
+  2. **Navigate:** **Current page:** `/post/[postId]/[userId]` — click “Sponsor” → lands on `/sponsor/[postId]` — confirm “Sponsor” heading and clip preview appear.
+  3. **Action:** **Current page:** `/sponsor/[postId]` — click input labeled “Amount (WMNT)” — confirm cursor is active.
+  4. **Enter values:**
+     - Amount (WMNT) = `[SPONSOR_WMNT=0.10]`
+  5. Click “Confirm Sponsorship” — wait for wallet prompt and “Transaction submitted” state.
+  6. **Verify on-screen:** **Current page:** `/sponsor/[postId]` — confirm a success state shows “Invoice Receipt NFT minted” (token ID visible) or a “View Receipt” button appears.
 - **Voiceover:**
-  > “Sponsorship is the creator revenue engine. I sponsor this clip with 2 WMNT and sign through Privy. The result is an on-chain action that’s easy for a consumer to do and easy for judges to verify. Next we’ll open the campaign receipt to see the terms hash and transaction status.”
+  > “This is the RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 0.10 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details. Next we open the campaign receipt page where the invoice token and transaction are auditable.”
 
-## 14. Campaign Receipt (On‑Chain Proof)
+## 12. Campaign Receipt (RWA Proof + Terms Hash)
 - **URL:** /campaign/[campaignId]
-- **Shot:** Campaign receipt showing campaign ID, terms hash, tx status, and a MantleScan link.
+- **Shot:** Campaign receipt with terms hash, tx status, MantleScan link, and Invoice Receipt NFT section (contract + token ID).
 - **Steps:**
-  1. **Current page:** `/sponsor/[postId]` — confirm the sponsorship success state is visible.
-  2. **Navigate:** Open URL directly: `/campaign/[campaignId]` → lands on `/campaign/[campaignId]` — confirm a “Campaign Receipt” heading and “Terms Hash” are visible.
-  3. **Action:** **Current page:** `/campaign/[campaignId]` — click “View Transaction on MantleScan” — confirm a new tab opens to `https://sepolia.mantlescan.xyz/` on the transaction page.
-  4. **Navigate:** **Current page:** MantleScan tab — close the tab and return to the receipt — confirm the receipt is still visible.
-  5. **Verify on-screen:** **Current page:** `/campaign/[campaignId]` — confirm the receipt shows terms hash + tx status + explorer proof.
+  1. **Current page:** `/sponsor/[postId]` — confirm sponsorship success state is visible.
+  2. **Navigate:** **Current page:** `/sponsor/[postId]` — click “View Receipt” → lands on `/campaign/[campaignId]` — confirm “Campaign Receipt” heading is visible.
+  3. **Action:** **Current page:** `/campaign/[campaignId]` — click “Copy Terms Hash” — wait for a “Copied” toast.
+  4. **Action:** **Current page:** `/campaign/[campaignId]` — click “View Transaction on MantleScan” — confirm new tab opens to MantleScan tx.
+  5. **Action:** **Current page:** `/campaign/[campaignId]` — click “View Invoice Receipt NFT” (or the NFT link) — confirm MantleScan opens on the NFT/token view.
+  6. **Verify on-screen:** **Current page:** `/campaign/[campaignId]` — confirm terms hash, tx status, and invoice token ID are all visible.
 - **Voiceover:**
-  > “This receipt is the judge-friendly proof: terms hash, transaction status, and a direct MantleScan link on Mantle Sepolia. Next we’ll open the Activity feed where every boost and sponsorship becomes a transparent event stream.”
+  > “This receipt is the compliance-friendly proof: a terms hash, on-chain tx status, and an Invoice Receipt NFT that tokenizes the sponsorship invoice. Judges can click straight to MantleScan and verify everything. Next, we’ll show how those sponsorship fees create yield by flowing into the yield vault, and we’ll surface it in the Activity feed and leaderboard.”
 
-## 15. On‑Chain Activity Feed (Transparent Ledger)
+## 13. Activity Feed (Auditable Ledger)
 - **URL:** /activity
-- **Shot:** Paginated activity list with event types, amounts, timestamps, and MantleScan links.
+- **Shot:** Activity list with event rows (Boost deposit, Sponsorship invoice, Vault events) and MantleScan links.
 - **Steps:**
   1. **Current page:** `/campaign/[campaignId]` — confirm the receipt is visible.
-  2. **Navigate:** Open URL directly: `/activity` → lands on `/activity` — confirm an “Activity” heading and event rows are visible.
-  3. **Action:** **Current page:** `/activity` — click “Next” in pagination — confirm new rows load and the page indicator updates.
-  4. **Action:** **Current page:** `/activity` — click “View on MantleScan” for an event row — confirm a new tab opens to `https://sepolia.mantlescan.xyz/`.
-  5. **Navigate:** **Current page:** MantleScan tab — close the tab and return to `/activity` — confirm the event list remains visible.
-  6. **Verify on-screen:** **Current page:** `/activity` — confirm event rows show tx links and clear event types.
+  2. **Navigate:** **Current page:** `/campaign/[campaignId]` — click “Explore” → click “Activity feed” → lands on `/activity` — confirm “Activity” heading and rows appear.
+  3. **Action:** **Current page:** `/activity` — click “Next” in pagination — confirm rows update and page indicator changes.
+  4. **Action:** **Current page:** `/activity` — click “View on MantleScan” on an invoice/sponsorship row — confirm MantleScan opens on the tx.
+  5. **Action:** **Current page:** `/activity` — click “Previous” — confirm you return to the prior page of events.
+  6. **Verify on-screen:** **Current page:** `/activity` — confirm event types include Sponsorship/Invoice and Boost/Vault actions.
 - **Voiceover:**
-  > “This Activity feed is the public ledger of engagement. Boosts and sponsorships aren’t claims—they’re verifiable events with explorer links. That transparency makes the consumer app credible. Next we’ll turn these confirmed events into rankings via the Leaderboard.”
+  > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer—nothing is hidden. Next we convert that verified activity into a leaderboard to drive incentives and repeat usage.”
 
-## 16. Leaderboard (Ranked Incentives)
+## 14. Leaderboard (Incentives + Growth)
 - **URL:** /leaderboard
-- **Shot:** Leaderboard with ranked creators/campaigns, totals, and clickable rows.
+- **Shot:** Ranked creators table with totals, and clickable rows to drill into profiles.
 - **Steps:**
-  1. **Current page:** `/activity` — confirm the activity list is visible.
-  2. **Navigate:** Open URL directly: `/leaderboard` → lands on `/leaderboard` — confirm a “Leaderboard” heading and ranked rows are visible.
-  3. **Action:** **Current page:** `/leaderboard` — click a creator row — confirm a detail view or navigation target appears (profile or highlight).
-  4. **Navigate:** **Current page:** `/leaderboard` — click the browser Back button if you navigated away — confirm you return to `/leaderboard`.
-  5. **Action:** **Current page:** `/leaderboard` — point out totals derived from activity — confirm totals are visible on-screen.
-  6. **Verify on-screen:** **Current page:** `/leaderboard` — confirm rankings and totals are displayed.
+  1. **Current page:** `/activity` — confirm event list is visible.
+  2. **Navigate:** **Current page:** `/activity` — click “Explore” → click “Leaderboard” → lands on `/leaderboard` — confirm “Leaderboard” heading and ranked rows appear.
+  3. **Action:** **Current page:** `/leaderboard` — click the boosted creator row — confirm a detail view or profile navigation occurs.
+  4. **Action:** **Current page:** `/profile/[id]` — confirm creator identity matches.
+  5. **Action:** **Current page:** `/profile/[id]` — click Back — confirm return to `/leaderboard`.
+  6. **Verify on-screen:** **Current page:** `/leaderboard` — confirm rankings reflect on-chain activity totals.
 - **Voiceover:**
-  > “Leaderboards convert on-chain actions into social incentives. Boosting and sponsoring translate into rankings users can compete on. Next, we’ll publish a Boost Pass epoch as the admin so perks become verifiable and redeemable.”
+  > “Leaderboards turn financial actions into social status. Because rankings are computed from confirmed on-chain events, incentives are auditable. Next we’ll show Boost Pass publication and perks—the reward layer that turns cash-flow into creator tools.”
 
-## 17. Admin Boost Pass (Publish Epochs On‑Chain)
+## 15. Admin Access Gate (Only Allowlisted Wallet)
+- **URL:** /admin/kyc
+- **Shot:** Attempted admin navigation showing “Access denied” (non-admin wallet), with a clear switch-wallet prompt.
+- **Steps:**
+  1. **Current page:** `/leaderboard` — confirm leaderboard is visible.
+  2. **Navigate:** **Current page:** `/leaderboard` — open URL directly: `/admin/kyc` → lands on `/admin/kyc` — confirm an “Access denied” or “Not authorized” message appears.
+  3. **Action:** **Current page:** `/admin/kyc` — click “Switch wallet” (or “Sign out”) — confirm Privy account modal opens.
+  4. **Action:** **Current page:** Privy modal — select the allowlisted admin wallet account — confirm connected wallet address changes.
+  5. **Action:** **Current page:** `/admin/kyc` — click “Retry” (or reload page) — confirm the admin console loads.
+  6. **Verify on-screen:** **Current page:** `/admin/kyc` — confirm “KYC Admin” heading and table of records appear.
+- **Voiceover:**
+  > “Admin routes are gated: if you’re not on the allowlist, you see an explicit access-denied screen instead of a silent failure. We switch to the admin wallet and immediately unlock the console. This keeps UX clean for normal users and secure for operations. Next we’ll publish a Boost Pass epoch.”
+
+## 16. Admin Boost Pass (Publish On-Chain Incentive Epoch)
 - **URL:** /admin/boost-pass
-- **Shot:** Admin Boost Pass page with snapshot/epoch controls and a publish action that produces an on-chain tx.
+- **Shot:** Admin Boost Pass screen showing snapshot rows and a “Publish Epoch” action.
 - **Steps:**
-  1. **Current page:** `/leaderboard` — confirm ranked rows are visible.
-  2. **Navigate:** Open URL directly: `/admin/boost-pass` → lands on `/admin/boost-pass` — confirm a “Boost Pass Admin” heading and snapshot/epoch UI is visible.
-  3. **Action:** **Current page:** `/admin/boost-pass` — click “Publish Epoch” — confirm a “Publishing…” state appears.
-  4. **Action:** **Current page:** `/admin/boost-pass` — sign the transaction when prompted — wait for an “Epoch published” toast/state.
-  5. **Action:** **Current page:** `/admin/boost-pass` — click “View on MantleScan” — confirm `https://sepolia.mantlescan.xyz/` opens on the tx page.
-  6. **Verify on-screen:** **Current page:** `/admin/boost-pass` — confirm the epoch status updates and shows an on-chain tx hash/link.
+  1. **Current page:** `/admin/kyc` — confirm KYC table is visible.
+  2. **Navigate:** **Current page:** `/admin/kyc` — click “Explore” → click “Boost Pass admin” → lands on `/admin/boost-pass` — confirm “Boost Pass Admin” heading is visible.
+  3. **Action:** **Current page:** `/admin/boost-pass` — select latest snapshot row — confirm it highlights/expands.
+  4. **Action:** **Current page:** `/admin/boost-pass` — click “Publish Epoch” — confirm wallet prompt appears.
+  5. Click “Confirm” in wallet — wait for “Epoch published” toast/state.
+  6. **Verify on-screen:** **Current page:** `/admin/boost-pass` — confirm epoch status updates and a tx hash link is visible.
 - **Voiceover:**
-  > “This is where incentives become real: the admin publishes Boost Pass epochs based on leaderboard snapshots, and it’s recorded on-chain. That makes perk eligibility verifiable. Next we’ll switch to the user-facing perks page to claim the Remix Pack.”
+  > “Now incentives become real: we publish a Boost Pass epoch on-chain from leaderboard snapshots. The tx hash is visible, so eligibility is verifiable. Next we switch back to a normal user wallet and claim perks—downloading a remix pack tied to these on-chain incentives.”
 
-## 18. Boost Pass Perks (Claim + Download Remix Pack)
+## 17. Boost Pass Perks (Remix Pack Unlock)
 - **URL:** /perks/boost-pass
-- **Shot:** Perks page showing ownership check and a “Download Remix Pack” button.
+- **Shot:** Perks page showing ownership status and “Download Remix Pack” + “Import to Projects”.
 - **Steps:**
-  1. **Current page:** `/admin/boost-pass` — confirm an epoch is published.
-  2. **Navigate:** Open URL directly: `/perks/boost-pass` → lands on `/perks/boost-pass` — confirm a “Boost Pass” heading and an ownership/eligibility status is visible.
-  3. **Action:** **Current page:** `/perks/boost-pass` — click “Download Remix Pack” — confirm a download starts or a “Download started” toast appears.
-  4. **Action:** **Current page:** `/perks/boost-pass` — confirm a visible success indicator remains (ownership badge or eligibility check).
-  5. **Action:** **Current page:** `/perks/boost-pass` — pause on the perks description — confirm it explains remix benefits.
-  6. **Verify on-screen:** **Current page:** `/perks/boost-pass` — confirm the user can download the Remix Pack after eligibility checks.
+  1. **Current page:** `/admin/boost-pass` — confirm epoch is published.
+  2. **Navigate:** **Current page:** `/admin/boost-pass` — click “Sign out” (or “Switch wallet”) — confirm wallet returns to a normal user account.
+  3. **Navigate:** **Current page:** Any app page — click “Explore” → click “Boost Pass perks” → lands on `/perks/boost-pass` — confirm Boost Pass heading and ownership status appear.
+  4. **Action:** **Current page:** `/perks/boost-pass` — click “Download Remix Pack” — confirm browser download or “Download started” toast.
+  5. Click “Import to Projects” — wait for redirect — confirm you land on `/projects`.
+  6. **Verify on-screen:** **Current page:** `/projects` — confirm a new project row appears or “Remix Pack imported” toast is shown.
 - **Voiceover:**
-  > “Now the incentives pay off. The perks page verifies Boost Pass eligibility and lets users download a Remix Pack immediately. This is how ClipYield turns on-chain participation into creator tools. Next we’ll go to Projects to see the imported Remix Pack ready to edit.”
+  > “Perks complete the loop: on-chain incentives unlock creator tools. We download a Remix Pack and import it into the editor in one click. Next we’ll open the project, generate or edit content, export, and upload back into the feed—so the RealFi layer drives real creation.”
+
+## 18. Settings (Wallet + Playback + AI BYOK)
+- **URL:** /settings
+- **Shot:** Settings page showing wallet status, playback preferences, and AI BYOK key controls.
+- **Steps:**
+  1. **Current page:** `/projects` — confirm project list is visible.
+  2. **Navigate:** **Current page:** `/projects` — click “Explore” → click “Settings” → lands on `/settings` — confirm “Settings” heading is visible.
+  3. **Action:** **Current page:** `/settings` — confirm wallet status section shows connected address.
+  4. **Action:** **Current page:** `/settings` — toggle a playback preference (e.g., “Autoplay”) — confirm the toggle state changes.
+  5. **Action:** **Current page:** `/settings` — locate AI BYOK key section — confirm an input or “Set key” control is visible.
+  6. **Verify on-screen:** **Current page:** `/settings` — confirm settings sections for wallet, playback, and AI keys are visible.
+- **Voiceover:**
+  > “Settings keeps the UX polished: wallet state, playback controls, and optional AI BYOK keys for creator tooling. This shows ClipYield is more than a contract demo—it’s a product. Next we’ll jump into the editor and export a remix.”
 
 ## 19. Projects List (Creator Workspace)
 - **URL:** /projects
-- **Shot:** Projects table/list with an imported Remix Pack project entry visible.
+- **Shot:** Projects list with an imported Remix Pack project row and Open action.
 - **Steps:**
-  1. **Current page:** `/perks/boost-pass` — confirm perks and download controls are visible.
-  2. **Navigate:** Open URL directly: `/projects` → lands on `/projects` — confirm a “Projects” heading and project rows are visible.
-  3. **Action:** **Current page:** `/projects` — locate the project row labeled “Boost Pass Remix Pack” — confirm it exists as a visible row.
-  4. **Action:** **Current page:** `/projects` — click “Open” on the “Boost Pass Remix Pack” row → lands on `/projects/[id]` — confirm the editor loads.
-  5. **Navigate:** **Current page:** `/projects/[id]` — wait for editor UI to finish loading — confirm timeline clips are visible.
-  6. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm the project opens successfully and the timeline is ready.
+  1. **Current page:** `/settings` — confirm settings heading is visible.
+  2. **Navigate:** **Current page:** `/settings` — click “Projects” in the sidebar/nav → lands on `/projects` — confirm project list heading appears.
+  3. **Action:** **Current page:** `/projects` — click “Open” on “Boost Pass Remix Pack” — confirm navigation to `/projects/[id]`.
+  4. **Action:** **Current page:** `/projects/[id]` — pause on the editor UI — confirm timeline and preview are visible.
+  5. **Action:** **Current page:** `/projects/[id]` — click “Back to Projects” — confirm return to `/projects`.
+  6. **Verify on-screen:** **Current page:** `/projects` — confirm the imported project row remains visible.
 - **Voiceover:**
-  > “This is the creator workspace. The Remix Pack isn’t just a collectible—it becomes a real editable project. We open it and the editor loads with assets ready to remix. Next we’ll use AI Studio and our BYOK Settings flow to generate a clip for the timeline.”
+  > “This is the creator workspace: Remix Packs turn into editable projects, not just collectibles. You open instantly, edit, and export. Now we’ll stay in the editor, render a final MP4, and upload it to complete the on-chain-to-content loop.”
 
-## 20. AI Studio + Settings (BYOK Sora)
-- **URL:** /projects/[id] → /settings
-- **Shot:** Editor library showing “AI Studio”, then Settings with an OpenAI key form.
-- **Steps:**
-  1. **Current page:** `/projects/[id]` — confirm the Library panel and “AI Studio” card are visible.
-  2. **Action:** **Current page:** `/projects/[id]` — click “AI Studio → Generate” — confirm you are redirected to `/settings?focus=openai` (or open the avatar menu → Settings).
-  3. **Action:** **Current page:** `/settings` — click into “OpenAI API key” and paste your key.
-     - OpenAI API key = `[OPENAI_KEY="sk-demo-key"]`
-  4. Click “Save key” — confirm a success toast and automatic return to `/projects/[id]`.
-  5. **Action:** **Current page:** `/projects/[id]` — open “AI Studio → Generate” again and enter a prompt.
-     - Prompt = `[SORA_PROMPT="A cinematic drone shot of a floating music festival at sunset"]`
-  6. Click “Generate clip” — confirm a “Sora job queued” toast, then open “History”.
-  7. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm the Sora job appears in History and the generated clip is available in the Library list.
-- **Voiceover:**
-  > “ClipYield’s editor ships with AI Studio. Because it’s BYOK, the first time I generate I’m redirected to Settings to add my OpenAI key. Once saved, I can prompt Sora, track the job in History, and pull the generated clip straight into the library.”
-
-## 21. Timeline Editor + Export (Remix Production)
+## 20. Timeline Editor + Export (Production Step)
 - **URL:** /projects/[id]
-- **Shot:** Full editor view with timeline, preview, and export controls with render progress.
+- **Shot:** Editor with timeline, preview playback, and export progress UI.
 - **Steps:**
-  1. **Current page:** `/projects/[id]` — confirm the AI-generated clip appears in the Library list.
-  2. **Action:** **Current page:** `/projects/[id]` — drag the generated clip onto the timeline — confirm a new clip block appears.
-  3. **Action:** **Current page:** `/projects/[id]` — click “Preview” — confirm the preview plays and the playhead moves.
-  4. **Action:** **Current page:** `/projects/[id]` — click “Export” — confirm an export modal or progress indicator appears.
-  5. **(Only if needed) Enter values:**
-     - Export name = `[EXPORT_NAME="clipyield_remix"]`
-  6. Click “Start Export” — wait for progress to reach 100% and an “Export complete” state.
-  7. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm “Export complete” and a “Download MP4” button/link is visible.
+  1. **Current page:** `/projects` — confirm project list is visible.
+  2. **Navigate:** **Current page:** `/projects` — click “Open” on the remix project → lands on `/projects/[id]` — confirm timeline editor loads.
+  3. **Action:** **Current page:** `/projects/[id]` — drag a clip block slightly — confirm clip block position changes.
+  4. **Action:** **Current page:** `/projects/[id]` — click “Preview” — confirm playback starts and playhead moves.
+  5. Click “Export” → click “Start Export” — wait for “Export complete” state.
+  6. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm “Export complete” and “Download MP4” are visible.
 - **Voiceover:**
-  > “Now we turn perks and AI into real content. We drop the generated clip onto the timeline, preview, export, and get a downloadable MP4 with clear render progress. Next we’ll upload this remix back into the feed.”
+  > “Now we convert incentives into output. We edit the timeline, preview, then export with a clear render progress and a downloadable MP4. This is how ClipYield turns on-chain actions into real creator production. Next we upload the finished remix back into the feed.”
 
-## 22. Upload Remix (Publish Back to Feed)
+## 21. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
-- **Shot:** Upload page with file picker + caption input and a publish CTA; then a visible success state after publish.
+- **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**
   1. **Current page:** `/projects/[id]` — confirm “Export complete” is visible.
-  2. **Navigate:** Open URL directly: `/upload` → lands on `/upload` — confirm an “Upload” heading and a video upload panel is visible.
-  3. **Action:** **Current page:** `/upload` — click “Choose File” — confirm the OS file picker opens.
-  4. **(Only if needed) Enter values:**
+  2. **Navigate:** **Current page:** `/projects/[id]` — click “Upload” in top nav → lands on `/upload` — confirm “Upload” heading is visible.
+  3. **Action:** **Current page:** `/upload` — click “Choose File” — confirm OS file picker opens.
+  4. **Enter values:**
      - Video file = `[FILE="clipyield_remix.mp4"]`
-     - Caption = `[CAPTION="Boost Pass Remix — sponsored on Mantle Sepolia 🚀"]`
-  5. Click “Publish” — wait for an “Uploaded” toast/state and redirect.
-  6. **Verify on-screen:** **Current page:** `/` — confirm the newly uploaded clip appears in the feed with the caption visible.
+     - Caption = `[CAPTION="Tokenized invoice sponsorship → Remix Pack → Exported edit 🚀"]`
+  5. Click “Publish” — wait for “Uploaded” toast and redirect to `/`.
+  6. **Verify on-screen:** **Current page:** `/` — confirm the new clip appears in the feed with the caption visible.
 - **Voiceover:**
-  > “This closes the loop. We upload the exported remix, publish it, and it’s live in the feed. This proves ClipYield isn’t just on-chain mechanics—it’s a full consumer creator pipeline.”
+  > “We close the loop by uploading the exported remix: ‘Tokenized invoice sponsorship → Remix Pack → Exported edit’. After publishing, the new post is live in the feed. Now we’ll wrap up with what we proved for RealFi: tokenized invoices, KYC gating, custody, and revenue-funded yield.”
 
 ## Final Wrap-Up
-- **URL:** /profile/[id]
-- **Shot:** Creator profile showing follower state, visible Boost/Sponsor CTAs, and the creator’s posts including the new remix.
+- **URL:** /campaign/[campaignId]
+- **Shot:** Campaign receipt showing terms hash, MantleScan tx link, and Invoice Receipt NFT token ID + contract.
 - **Steps:**
-  1. **Current page:** `/` — confirm the new remix appears in the feed.
-  2. **Verify final state:** Open URL directly: `/profile/[id]` — confirm “Following” state is visible, Boost/Sponsor CTAs are visible, and the new remix post appears in the creator’s posts list/grid.
+  1. **Current page:** `/` — confirm the newly uploaded clip is visible.
+  2. **Verify final state:** Open URL directly: `/campaign/[campaignId]` — confirm the receipt shows terms hash, tx status, and the Invoice Receipt NFT details.
 - **Voiceover:**
-  > “We proved a complete loop: Privy-powered wallet onboarding and transaction signing, KYC gating, yield vault deposits, creator boosts, clip sponsorship receipts, transparent activity and leaderboards, and Boost Pass perks that unlock Remix Packs creators can edit and re-upload. ClipYield makes on-chain funding feel native to short-form video. Try it at [DEMO_URL].”
+  > “We proved an end-to-end RealFi product on Mantle Sepolia: consumer video UX, Privy wallet onboarding, Persona KYC, custody via ERC‑4626 vaults, sponsorships tokenized as invoice receipt NFTs, and compliant yield funded by real protocol cash-flow. It’s auditable, demoable, and user-friendly. Try it at [DEMO_URL].”

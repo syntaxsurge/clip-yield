@@ -8,6 +8,10 @@ type SponsorCampaignInput = {
   vaultAddress: string;
   sponsorAddress: string;
   assets: string;
+  protocolFeeWei: string;
+  campaignId: string;
+  receiptTokenId: string;
+  invoiceReceiptAddress: string;
   txHash: string;
 };
 

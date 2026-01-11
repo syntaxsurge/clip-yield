@@ -3,14 +3,26 @@ pragma solidity ^0.8.23;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC4626 } from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
 interface IKycRegistry {
     function isVerified(address user) external view returns (bool);
 }
 
-interface IClipYieldBoostVault {
-    function asset() external view returns (address);
-    function donateYield(uint256 assets) external;
+interface IInvoiceReceipts {
+    struct Receipt {
+        bytes32 campaignId;
+        bytes32 termsHash;
+        bytes32 postIdHash;
+        address sponsor;
+        address creator;
+        address boostVault;
+        uint256 sponsorAmount;
+        uint256 protocolFee;
+        uint64 createdAt;
+    }
+
+    function mintReceipt(address to, Receipt calldata receipt) external returns (uint256 tokenId);
 }
 
 contract ClipYieldSponsorHub {
@@ -19,65 +31,121 @@ contract ClipYieldSponsorHub {
     error InvalidAddress();
     error InvalidAmount();
     error InvalidTermsHash();
-    error NotVerified(address sponsor);
+    error InvalidPostHash();
+    error InvalidFeeBps();
+    error NotVerified(address wallet);
     error WrongAsset(address vault, address expected, address actual);
 
     event ClipSponsored(
-        bytes32 indexed clipHash,
+        bytes32 indexed campaignId,
+        uint256 indexed receiptTokenId,
         address indexed sponsor,
-        address indexed vault,
-        uint256 assets
-    );
-
-    event SponsoredCampaign(
-        bytes32 indexed clipHash,
-        address indexed sponsor,
-        address indexed creator,
-        address vault,
-        uint256 assets,
+        address creator,
+        address boostVault,
+        uint256 amount,
+        uint256 protocolFee,
         bytes32 termsHash
     );
 
     IERC20 public immutable wmnt;
     IKycRegistry public immutable kyc;
+    address public immutable yieldVault;
+    IInvoiceReceipts public immutable receipts;
+    uint16 public immutable protocolFeeBps;
 
-    constructor(address wmnt_, address kyc_) {
-        if (wmnt_ == address(0) || kyc_ == address(0)) revert InvalidAddress();
+    constructor(
+        address wmnt_,
+        address kyc_,
+        address yieldVault_,
+        address receipts_,
+        uint16 protocolFeeBps_
+    ) {
+        if (
+            wmnt_ == address(0) ||
+            kyc_ == address(0) ||
+            yieldVault_ == address(0) ||
+            receipts_ == address(0)
+        ) {
+            revert InvalidAddress();
+        }
+        if (protocolFeeBps_ > 10_000) revert InvalidFeeBps();
+
         wmnt = IERC20(wmnt_);
         kyc = IKycRegistry(kyc_);
+        yieldVault = yieldVault_;
+        receipts = IInvoiceReceipts(receipts_);
+        protocolFeeBps = protocolFeeBps_;
     }
 
-    function sponsorClip(bytes32 clipHash, address vault, uint256 assets) external {
-        _sponsor(vault, assets);
-        emit ClipSponsored(clipHash, msg.sender, vault, assets);
-    }
-
-    function sponsorWithTerms(
-        bytes32 clipHash,
+    function sponsorClip(
         address creator,
-        address vault,
-        uint256 assets,
-        bytes32 termsHash
-    ) external {
-        if (creator == address(0)) revert InvalidAddress();
+        address boostVault,
+        bytes32 postIdHash,
+        bytes32 termsHash,
+        uint256 amount
+    ) external returns (bytes32 campaignId, uint256 receiptTokenId) {
+        if (creator == address(0) || boostVault == address(0)) revert InvalidAddress();
+        if (amount == 0) revert InvalidAmount();
         if (termsHash == bytes32(0)) revert InvalidTermsHash();
-
-        _sponsor(vault, assets);
-        emit SponsoredCampaign(clipHash, msg.sender, creator, vault, assets, termsHash);
-    }
-
-    function _sponsor(address vault, uint256 assets) internal {
-        if (vault == address(0)) revert InvalidAddress();
-        if (assets == 0) revert InvalidAmount();
+        if (postIdHash == bytes32(0)) revert InvalidPostHash();
         if (!kyc.isVerified(msg.sender)) revert NotVerified(msg.sender);
+        if (!kyc.isVerified(creator)) revert NotVerified(creator);
 
-        address vaultAsset = IClipYieldBoostVault(vault).asset();
+        address vaultAsset = IERC4626(boostVault).asset();
         if (vaultAsset != address(wmnt)) {
-            revert WrongAsset(vault, address(wmnt), vaultAsset);
+            revert WrongAsset(boostVault, address(wmnt), vaultAsset);
         }
 
-        wmnt.safeTransferFrom(msg.sender, address(this), assets);
-        wmnt.forceApprove(vault, assets);
-        IClipYieldBoostVault(vault).donateYield(assets);
+        uint256 fee = (amount * protocolFeeBps) / 10_000;
+        uint256 payout = amount - fee;
+
+        wmnt.safeTransferFrom(msg.sender, address(this), amount);
+
+        if (fee > 0) {
+            wmnt.safeTransfer(yieldVault, fee);
+        }
+
+        if (payout > 0) {
+            wmnt.forceApprove(boostVault, payout);
+            IERC4626(boostVault).deposit(payout, creator);
+        }
+
+        campaignId = keccak256(
+            abi.encodePacked(
+                block.chainid,
+                msg.sender,
+                creator,
+                boostVault,
+                postIdHash,
+                termsHash,
+                amount,
+                block.timestamp
+            )
+        );
+
+        IInvoiceReceipts.Receipt memory receipt = IInvoiceReceipts.Receipt({
+            campaignId: campaignId,
+            termsHash: termsHash,
+            postIdHash: postIdHash,
+            sponsor: msg.sender,
+            creator: creator,
+            boostVault: boostVault,
+            sponsorAmount: amount,
+            protocolFee: fee,
+            createdAt: uint64(block.timestamp)
+        });
+
+        receiptTokenId = receipts.mintReceipt(msg.sender, receipt);
+
+        emit ClipSponsored(
+            campaignId,
+            receiptTokenId,
+            msg.sender,
+            creator,
+            boostVault,
+            amount,
+            fee,
+            termsHash
+        );
     }
 }

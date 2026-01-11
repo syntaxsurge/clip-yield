@@ -1,0 +1,106 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      { "name": "kycRegistry", "type": "address" },
+      { "name": "owner", "type": "address" }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "error",
+    "name": "InvalidAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidRecipient",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotMinter",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotVerified",
+    "inputs": [{ "name": "wallet", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "kyc",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "minter",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "mintReceipt",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "to", "type": "address" },
+      {
+        "name": "receipt",
+        "type": "tuple",
+        "components": [
+          { "name": "campaignId", "type": "bytes32" },
+          { "name": "termsHash", "type": "bytes32" },
+          { "name": "postIdHash", "type": "bytes32" },
+          { "name": "sponsor", "type": "address" },
+          { "name": "creator", "type": "address" },
+          { "name": "boostVault", "type": "address" },
+          { "name": "sponsorAmount", "type": "uint256" },
+          { "name": "protocolFee", "type": "uint256" },
+          { "name": "createdAt", "type": "uint64" }
+        ]
+      }
+    ],
+    "outputs": [{ "name": "tokenId", "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "nextTokenId",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }]
+  },
+  {
+    "type": "function",
+    "name": "receipts",
+    "stateMutability": "view",
+    "inputs": [{ "name": "tokenId", "type": "uint256" }],
+    "outputs": [
+      { "name": "campaignId", "type": "bytes32" },
+      { "name": "termsHash", "type": "bytes32" },
+      { "name": "postIdHash", "type": "bytes32" },
+      { "name": "sponsor", "type": "address" },
+      { "name": "creator", "type": "address" },
+      { "name": "boostVault", "type": "address" },
+      { "name": "sponsorAmount", "type": "uint256" },
+      { "name": "protocolFee", "type": "uint256" },
+      { "name": "createdAt", "type": "uint64" }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "setMinter",
+    "stateMutability": "nonpayable",
+    "inputs": [{ "name": "newMinter", "type": "address" }],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "tokenURI",
+    "stateMutability": "view",
+    "inputs": [{ "name": "tokenId", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "string" }]
+  }
+]

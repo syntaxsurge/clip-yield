@@ -74,8 +74,8 @@ export default function BoostPage({ params }: BoostPageProps) {
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Boost {creatorLabel}</h1>
             <p className="text-sm text-muted-foreground">
-              Deposit WMNT into this creator's boost vault. Yield is streamed
-              to the creator while your principal stays withdrawable.
+              Deposit WMNT into this creator&apos;s boost vault to back their work.
+              Your shares stay withdrawable and unlock boost perks.
             </p>
           </div>
 

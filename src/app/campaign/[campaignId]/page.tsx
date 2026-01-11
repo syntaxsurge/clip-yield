@@ -13,7 +13,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatShortHash } from "@/lib/utils";
-import { explorerTxUrl } from "@/lib/web3/mantleConfig";
+import {
+  explorerAddressUrl,
+  explorerTokenUrl,
+  explorerTxUrl,
+} from "@/lib/web3/mantleConfig";
 import { formatUnits } from "viem";
 
 type CampaignPageProps = {
@@ -68,6 +72,25 @@ export default function CampaignReceiptPage({ params }: CampaignPageProps) {
     }
   }, [receipt]);
 
+  const formattedProtocolFee = useMemo(() => {
+    if (!receipt || !receipt.protocolFeeWei) return "0";
+    try {
+      return formatUnits(BigInt(receipt.protocolFeeWei), 18);
+    } catch {
+      return receipt.protocolFeeWei;
+    }
+  }, [receipt]);
+
+  const formattedNetAmount = useMemo(() => {
+    if (!receipt || !receipt.protocolFeeWei) return "0";
+    try {
+      const net = BigInt(receipt.assetsWei) - BigInt(receipt.protocolFeeWei);
+      return formatUnits(net, 18);
+    } catch {
+      return receipt.assetsWei;
+    }
+  }, [receipt]);
+
   return (
     <MainLayout>
       <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
@@ -99,7 +122,7 @@ export default function CampaignReceiptPage({ params }: CampaignPageProps) {
                 <Card>
                   <CardHeader>
                     <CardTitle>Receipt details</CardTitle>
-                    <CardDescription>Campaign ID: {campaignId}</CardDescription>
+                    <CardDescription>Receipt ID: {campaignId}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
@@ -131,6 +154,20 @@ export default function CampaignReceiptPage({ params }: CampaignPageProps) {
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Amount</span>
                       <span>{formattedAssets} WMNT</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Protocol fee</span>
+                      <span>{formattedProtocolFee} WMNT</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Net to creator vault</span>
+                      <span>{formattedNetAmount} WMNT</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-muted-foreground">Campaign ID</div>
+                      <div className="break-all font-mono text-xs">
+                        {receipt.campaignId}
+                      </div>
                     </div>
                     <div className="space-y-1">
                       <div className="text-muted-foreground">Terms hash</div>
@@ -201,6 +238,50 @@ export default function CampaignReceiptPage({ params }: CampaignPageProps) {
                   </CardContent>
                 </Card>
               </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Invoice receipt (RWA)</CardTitle>
+                  <CardDescription>
+                    Tokenized sponsorship invoice minted to the sponsor wallet.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Contract</span>
+                    {receipt.invoiceReceiptAddress ? (
+                      <a
+                        className="font-mono text-xs underline underline-offset-2"
+                        href={explorerAddressUrl(receipt.invoiceReceiptAddress)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {formatShortHash(receipt.invoiceReceiptAddress)}
+                      </a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Pending</span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Token ID</span>
+                    {receipt.invoiceReceiptAddress && receipt.receiptTokenId ? (
+                      <a
+                        className="font-mono text-xs underline underline-offset-2"
+                        href={explorerTokenUrl(
+                          receipt.invoiceReceiptAddress,
+                          receipt.receiptTokenId,
+                        )}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        #{receipt.receiptTokenId}
+                      </a>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Pending</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
             </div>
           )}

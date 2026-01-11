@@ -10,6 +10,7 @@ export default buildModule("ClipYieldModule", (m) => {
   const shareName = m.getParameter("shareName", "ClipYield Vault Share");
   const shareSymbol = m.getParameter("shareSymbol", "cySHARE");
   const creatorCutBps = m.getParameter("creatorCutBps", 1500);
+  const protocolFeeBps = m.getParameter("protocolFeeBps", 500);
 
   const kyc = m.contract("KycRegistry", [admin]);
   const vault = m.contract("ClipYieldVault", [asset, kyc, admin, shareName, shareSymbol]);
@@ -19,7 +20,17 @@ export default buildModule("ClipYieldModule", (m) => {
     creatorCutBps,
     admin,
   ]);
-  const sponsorHub = m.contract("ClipYieldSponsorHub", [asset, kyc]);
+  const invoiceReceipts = m.contract("ClipYieldInvoiceReceipts", [kyc, admin]);
+  const sponsorHub = m.contract("ClipYieldSponsorHub", [
+    asset,
+    kyc,
+    vault,
+    invoiceReceipts,
+    protocolFeeBps,
+  ]);
 
-  return { kyc, vault, boostFactory, sponsorHub };
+  m.call(invoiceReceipts, "setMinter", [sponsorHub]);
+  m.call(kyc, "setVerified", [sponsorHub, true]);
+
+  return { kyc, vault, boostFactory, sponsorHub, invoiceReceipts };
 });

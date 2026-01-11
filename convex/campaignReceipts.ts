@@ -16,6 +16,10 @@ export const create = mutation({
     sponsorAddress: v.string(),
     boostVault: v.string(),
     assetsWei: v.string(),
+    protocolFeeWei: v.string(),
+    campaignId: v.string(),
+    receiptTokenId: v.string(),
+    invoiceReceiptAddress: v.string(),
     termsHash: v.string(),
     txHash: v.string(),
     sponsorName: v.string(),
@@ -34,6 +38,12 @@ export const create = mutation({
     }
     if (!isAddress(args.boostVault)) {
       throw new Error("Invalid boost vault address.");
+    }
+    if (!isAddress(args.invoiceReceiptAddress)) {
+      throw new Error("Invalid invoice receipt address.");
+    }
+    if (!args.campaignId.startsWith("0x") || args.campaignId.length !== 66) {
+      throw new Error("Invalid campaign id.");
     }
     const sponsorName = args.sponsorName.trim();
     const objective = args.objective.trim();
@@ -68,6 +78,20 @@ export const create = mutation({
     if (assets <= 0n) {
       throw new Error("Assets must be greater than zero.");
     }
+    let protocolFee: bigint;
+    let receiptTokenId: bigint;
+    try {
+      protocolFee = BigInt(args.protocolFeeWei);
+      receiptTokenId = BigInt(args.receiptTokenId);
+    } catch {
+      throw new Error("Invalid protocol fee or receipt token id.");
+    }
+    if (protocolFee < 0n) {
+      throw new Error("Protocol fee must be zero or greater.");
+    }
+    if (receiptTokenId <= 0n) {
+      throw new Error("Receipt token id must be greater than zero.");
+    }
 
     const id = await ctx.db.insert("campaignReceipts", {
       postId: args.postId,
@@ -76,6 +100,10 @@ export const create = mutation({
       sponsorAddress: getAddress(args.sponsorAddress),
       boostVault: getAddress(args.boostVault),
       assetsWei: assets.toString(),
+      protocolFeeWei: protocolFee.toString(),
+      campaignId: args.campaignId,
+      receiptTokenId: receiptTokenId.toString(),
+      invoiceReceiptAddress: getAddress(args.invoiceReceiptAddress),
       termsHash: args.termsHash,
       txHash: args.txHash,
       sponsorName,

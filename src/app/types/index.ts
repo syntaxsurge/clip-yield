@@ -249,6 +249,10 @@ export interface SponsorCampaign {
   vaultAddress: string;
   sponsorAddress: string;
   assets: string;
+  protocolFeeWei: string;
+  campaignId: string;
+  receiptTokenId: string;
+  invoiceReceiptAddress: string;
   txHash: string;
   createdAt: number;
 }
@@ -260,6 +264,10 @@ export interface CampaignReceipt {
   sponsorAddress: string;
   boostVault: string;
   assetsWei: string;
+  protocolFeeWei: string;
+  campaignId: string;
+  receiptTokenId: string;
+  invoiceReceiptAddress: string;
   termsHash: string;
   txHash: string;
   sponsorName: string;

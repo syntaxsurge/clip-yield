@@ -350,8 +350,8 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/upload` upload a new video post
 - `/profile/[id]` creator profile with posts
 - `/post/[postId]/[userId]` post detail + comments
-- `/sponsor/[postId]` sponsor a clip via WMNT deposits into creator boost vaults
-- `/campaign/[campaignId]` campaign receipt with on-chain terms hash + tx status
+- `/sponsor/[postId]` sponsor a clip with WMNT, minting invoice receipt NFTs and routing protocol fees into the yield vault
+- `/campaign/[campaignId]` campaign receipt with terms hash, tx status, and invoice receipt details
 - `/activity` paginated on-chain activity feed with MantleScan links
 - `/leaderboard` boost and sponsorship rankings from confirmed on-chain activity
 - `/yield` KYC-gated WMNT vault interactions on Mantle Sepolia
@@ -377,14 +377,15 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 
 ## Architecture Overview
 - Next.js 15 App Router under `src/app` with short-form feed routes plus editor routes
-- Convex backend in `convex/` with `profiles`, `posts` (Convex file storage), `comments`, `likes`, `follows`, `projects`, creator vaults (`creatorVaults`), sponsor campaigns (`sponsorCampaigns`), campaign receipts (`campaignReceipts` with L2 inclusion metadata), vault tx logs (`vaultTx` with L2 inclusion metadata), activity events (`activityEvents`), leaderboard snapshots (`leaderboardSnapshots`), boost pass epochs/claims (`boostPassEpochs`, `boostPassClaims`), KYC tables (`kycInquiries`, `walletVerifications`), plus `admin.truncateAll` for `convex:reset`
+- Convex backend in `convex/` with `profiles`, `posts` (Convex file storage), `comments`, `likes`, `follows`, `projects`, creator vaults (`creatorVaults`), sponsor campaigns (`sponsorCampaigns` with invoice receipt + protocol fee metadata), campaign receipts (`campaignReceipts` with L2 inclusion metadata and invoice receipt fields), vault tx logs (`vaultTx` with L2 inclusion metadata), activity events (`activityEvents`), leaderboard snapshots (`leaderboardSnapshots`), boost pass epochs/claims (`boostPassEpochs`, `boostPassClaims`), KYC tables (`kycInquiries`, `walletVerifications`), plus `admin.truncateAll` for `convex:reset`
 - Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with a cron recompute of leaderboards
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence (`src/app/store`)
 - AI generation uses Sora BYOK keys stored via encrypted cookies (`OPENAI_BYOK_COOKIE_SECRET`) and `/api/sora` routes, surfaced in the editor library AI Studio
 - Mantle Sepolia wallet stack using Privy embedded wallets + wagmi + viem (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`)
 - Admin routes are gated by an allowlist in `NEXT_PUBLIC_ADMIN_WALLET_ADDRESSES` and enforced via `src/app/admin/layout.tsx`
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
-- RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldBoostPass) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
+- RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldInvoiceReceipts, ClipYieldBoostPass) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
+- SponsorHub mints invoice receipt NFTs and donates protocol fees to the yield vault, while net WMNT mints boost vault shares for creators
 - Persona hosted-flow KYC uses redirect + `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles
 

@@ -52,16 +52,6 @@ function resolveBoostFactoryAddress() {
   return getAddress(value);
 }
 
-function resolveSponsorHubAddress() {
-  const value =
-    getServerEnv("SPONSOR_HUB_ADDRESS") ??
-    getServerEnv("NEXT_PUBLIC_SPONSOR_HUB_ADDRESS");
-  if (!value || !isAddress(value)) {
-    return undefined;
-  }
-  return getAddress(value);
-}
-
 export async function POST(req: Request) {
   const payload = await req.json().catch(() => null);
   const parsed = BodySchema.safeParse(payload);
@@ -159,7 +149,6 @@ export async function POST(req: Request) {
       {
         creatorWallet: walletAddress,
         factoryAddress: resolveBoostFactoryAddress(),
-        sponsorHubAddress: resolveSponsorHubAddress(),
         managerPrivateKey:
           process.env.NODE_ENV === "development"
             ? getServerEnv("KYC_MANAGER_PRIVATE_KEY")

@@ -9,7 +9,6 @@ import {
   isAddress,
   zeroAddress,
   type Address,
-  type Hex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { convexHttpClient } from "@/lib/convex/http";
@@ -52,35 +51,6 @@ const factoryAbi = [
   },
 ] as const;
 
-const boostVaultRoleAbi = [
-  {
-    type: "function",
-    name: "YIELD_DONOR_ROLE",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "bytes32" }],
-  },
-  {
-    type: "function",
-    name: "hasRole",
-    stateMutability: "view",
-    inputs: [
-      { name: "role", type: "bytes32" },
-      { name: "account", type: "address" },
-    ],
-    outputs: [{ name: "", type: "bool" }],
-  },
-  {
-    type: "function",
-    name: "grantRole",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "role", type: "bytes32" },
-      { name: "account", type: "address" },
-    ],
-    outputs: [],
-  },
-] as const;
 
 async function fetchPersonaInquiry(inquiryId: string) {
   const personaApiKey = requireServerEnv("PERSONA_API_KEY");
@@ -144,42 +114,6 @@ function createMantleClients() {
   };
 }
 
-async function ensureSponsorHubRole({
-  publicClient,
-  walletClient,
-  vault,
-  sponsorHub,
-}: {
-  publicClient: ReturnType<typeof createMantleClients>["publicClient"];
-  walletClient: ReturnType<typeof createMantleClients>["walletClient"];
-  vault: Address;
-  sponsorHub: Address;
-}) {
-  const yieldDonorRole = (await publicClient.readContract({
-    address: vault,
-    abi: boostVaultRoleAbi,
-    functionName: "YIELD_DONOR_ROLE",
-  })) as Hex;
-
-  const alreadyGranted = (await publicClient.readContract({
-    address: vault,
-    abi: boostVaultRoleAbi,
-    functionName: "hasRole",
-    args: [yieldDonorRole, sponsorHub],
-  })) as boolean;
-
-  if (alreadyGranted) return;
-
-  const txHash = await walletClient.writeContract({
-    address: vault,
-    abi: boostVaultRoleAbi,
-    functionName: "grantRole",
-    args: [yieldDonorRole, sponsorHub],
-  });
-
-  await publicClient.waitForTransactionReceipt({ hash: txHash });
-}
-
 async function provisionCreatorVault({
   publicClient,
   walletClient,
@@ -204,10 +138,6 @@ async function provisionCreatorVault({
     "BOOST_FACTORY_ADDRESS",
     "NEXT_PUBLIC_BOOST_FACTORY_ADDRESS",
   );
-  const sponsorHub = resolveAddress(
-    "SPONSOR_HUB_ADDRESS",
-    "NEXT_PUBLIC_SPONSOR_HUB_ADDRESS",
-  );
 
   const onchainVault = (await publicClient.readContract({
     address: factoryAddress,
@@ -217,13 +147,6 @@ async function provisionCreatorVault({
   })) as Address;
 
   if (onchainVault && onchainVault !== zeroAddress) {
-    await ensureSponsorHubRole({
-      publicClient,
-      walletClient,
-      vault: onchainVault,
-      sponsorHub,
-    });
-
     await convexHttpClient.mutation(anyApi.creatorVaults.upsertVaultFromServer, {
       wallet: creatorWallet,
       vault: onchainVault,
@@ -252,13 +175,6 @@ async function provisionCreatorVault({
   if (!vault || vault === zeroAddress) {
     throw new Error("Vault creation did not return a valid address.");
   }
-
-  await ensureSponsorHubRole({
-    publicClient,
-    walletClient,
-    vault,
-    sponsorHub,
-  });
 
   await convexHttpClient.mutation(anyApi.creatorVaults.upsertVaultFromServer, {
     wallet: creatorWallet,

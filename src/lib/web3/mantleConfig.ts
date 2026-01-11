@@ -19,3 +19,7 @@ export function explorerTxUrl(txHash: string) {
 export function explorerAddressUrl(address: string) {
   return `${mantleConfig.explorerBase}/address/${address}`;
 }
+
+export function explorerTokenUrl(address: string, tokenId: string | number | bigint) {
+  return `${mantleConfig.explorerBase}/token/${address}?a=${tokenId.toString()}`;
+}

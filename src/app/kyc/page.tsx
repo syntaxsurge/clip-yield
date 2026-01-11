@@ -189,7 +189,7 @@ export default function KycStartPage() {
           <p className="text-sm text-muted-foreground">
             {isVerified
               ? "Your wallet is already verified. KYC details are shown below."
-              : "Start verification to unlock boost and yield actions."}
+              : "Start verification to unlock vault actions and invoice sponsorships."}
           </p>
 
           {statusLoading && (

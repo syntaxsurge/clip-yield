@@ -129,12 +129,14 @@ async function main() {
   const vaultKey = pickDeploymentKey(deployed, "#ClipYieldVault");
   const factoryKey = findDeploymentKey(deployed, "#ClipYieldBoostVaultFactory");
   const sponsorHubKey = findDeploymentKey(deployed, "#ClipYieldSponsorHub");
+  const invoiceKey = findDeploymentKey(deployed, "#ClipYieldInvoiceReceipts");
   const boostPassKey = findDeploymentKey(deployed, "#ClipYieldBoostPass");
 
   const kycRegistry = deployed[kycKey];
   const clipYieldVault = deployed[vaultKey];
   const boostFactory = factoryKey ? deployed[factoryKey] : null;
   const sponsorHub = sponsorHubKey ? deployed[sponsorHubKey] : null;
+  const invoiceReceipts = invoiceKey ? deployed[invoiceKey] : null;
   const boostPass = boostPassKey ? deployed[boostPassKey] : null;
 
   await writeAbi(kycKey, "KycRegistry");
@@ -144,6 +146,9 @@ async function main() {
   }
   if (sponsorHubKey) {
     await writeAbi(sponsorHubKey, "ClipYieldSponsorHub");
+  }
+  if (invoiceKey) {
+    await writeAbi(invoiceKey, "ClipYieldInvoiceReceipts");
   }
   if (boostPassKey) {
     await writeAbi(boostPassKey, "ClipYieldBoostPass");
@@ -175,6 +180,18 @@ async function main() {
       sponsorHub,
     );
     updatedEnv = upsertEnvValue(updatedEnv, "SPONSOR_HUB_ADDRESS", sponsorHub);
+  }
+  if (invoiceReceipts) {
+    updatedEnv = upsertEnvValue(
+      updatedEnv,
+      "NEXT_PUBLIC_INVOICE_RECEIPTS_ADDRESS",
+      invoiceReceipts,
+    );
+    updatedEnv = upsertEnvValue(
+      updatedEnv,
+      "INVOICE_RECEIPTS_ADDRESS",
+      invoiceReceipts,
+    );
   }
   if (boostPass) {
     updatedEnv = upsertEnvValue(

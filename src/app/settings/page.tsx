@@ -78,7 +78,7 @@ export default function SettingsPage() {
                       </Badge>
                     </div>
                     <CardDescription>
-                      Your wallet powers KYC, yield vaults, and sponsorship signatures.
+                      Your wallet powers KYC, yield vaults, and invoice sponsorship receipts.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">

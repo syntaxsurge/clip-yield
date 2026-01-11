@@ -20,6 +20,10 @@ export const mantleSepoliaContracts = {
     process.env.NEXT_PUBLIC_SPONSOR_HUB_ADDRESS,
     "NEXT_PUBLIC_SPONSOR_HUB_ADDRESS",
   ),
+  invoiceReceipts: requirePublicAddress(
+    process.env.NEXT_PUBLIC_INVOICE_RECEIPTS_ADDRESS,
+    "NEXT_PUBLIC_INVOICE_RECEIPTS_ADDRESS",
+  ),
   boostPass: requirePublicAddress(
     process.env.NEXT_PUBLIC_BOOST_PASS_ADDRESS,
     "NEXT_PUBLIC_BOOST_PASS_ADDRESS",

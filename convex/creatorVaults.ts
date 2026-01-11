@@ -28,87 +28,6 @@ const factoryAbi = [
   },
 ] as const;
 
-const boostVaultRoleAbi = [
-  {
-    type: "function",
-    name: "YIELD_DONOR_ROLE",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "bytes32" }],
-  },
-  {
-    type: "function",
-    name: "hasRole",
-    stateMutability: "view",
-    inputs: [
-      { name: "role", type: "bytes32" },
-      { name: "account", type: "address" },
-    ],
-    outputs: [{ name: "", type: "bool" }],
-  },
-  {
-    type: "function",
-    name: "grantRole",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "role", type: "bytes32" },
-      { name: "account", type: "address" },
-    ],
-    outputs: [],
-  },
-] as const;
-
-function resolveSponsorHubAddress(override?: string) {
-  const sponsorHub =
-    override ??
-    getEnv("SPONSOR_HUB_ADDRESS") ??
-    getEnv("NEXT_PUBLIC_SPONSOR_HUB_ADDRESS");
-
-  if (!sponsorHub || !isAddress(sponsorHub)) {
-    throw new Error("Missing or invalid sponsor hub address.");
-  }
-
-  return getAddress(sponsorHub);
-}
-
-async function ensureSponsorHubRole({
-  publicClient,
-  walletClient,
-  vault,
-  sponsorHub,
-}: {
-  publicClient: ReturnType<typeof createMantleClients>["publicClient"];
-  walletClient: ReturnType<typeof createMantleClients>["walletClient"];
-  vault: `0x${string}`;
-  sponsorHub: `0x${string}`;
-}) {
-  const sponsorHubAddress = resolveSponsorHubAddress(sponsorHub);
-
-  const yieldDonorRole = (await publicClient.readContract({
-    address: vault,
-    abi: boostVaultRoleAbi,
-    functionName: "YIELD_DONOR_ROLE",
-  })) as `0x${string}`;
-
-  const alreadyGranted = (await publicClient.readContract({
-    address: vault,
-    abi: boostVaultRoleAbi,
-    functionName: "hasRole",
-    args: [yieldDonorRole, sponsorHubAddress],
-  })) as boolean;
-
-  if (alreadyGranted) return;
-
-  const txHash = await walletClient.writeContract({
-    address: vault,
-    abi: boostVaultRoleAbi,
-    functionName: "grantRole",
-    args: [yieldDonorRole, sponsorHubAddress],
-  });
-
-  await publicClient.waitForTransactionReceipt({ hash: txHash });
-}
-
 export const getByWallet = query({
   args: { wallet: v.string() },
   handler: async (ctx, args) => {
@@ -201,7 +120,6 @@ export const provisionCreatorVault = action({
   args: {
     creatorWallet: v.string(),
     factoryAddress: v.optional(v.string()),
-    sponsorHubAddress: v.optional(v.string()),
     managerPrivateKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -235,7 +153,6 @@ export const provisionCreatorVault = action({
 
     const privateKey = args.managerPrivateKey ?? requireEnv("KYC_MANAGER_PRIVATE_KEY");
     const { publicClient, walletClient } = createMantleClients(privateKey);
-    const sponsorHubAddress = resolveSponsorHubAddress(args.sponsorHubAddress);
 
     const onchainVault = (await publicClient.readContract({
       address: factoryAddress,
@@ -245,12 +162,6 @@ export const provisionCreatorVault = action({
     })) as `0x${string}`;
 
     if (onchainVault && onchainVault !== zeroAddress) {
-      await ensureSponsorHubRole({
-        publicClient,
-        walletClient,
-        vault: onchainVault,
-        sponsorHub: sponsorHubAddress,
-      });
       await ctx.runMutation(anyApi.creatorVaults.insertVaultInternal, {
         wallet: creatorWallet,
         vault: onchainVault,
@@ -277,13 +188,6 @@ export const provisionCreatorVault = action({
     if (!vault || vault === zeroAddress) {
       throw new Error("Vault creation did not return a valid address.");
     }
-
-    await ensureSponsorHubRole({
-      publicClient,
-      walletClient,
-      vault,
-      sponsorHub: sponsorHubAddress,
-    });
 
     await ctx.runMutation(anyApi.creatorVaults.insertVaultInternal, {
       wallet: creatorWallet,

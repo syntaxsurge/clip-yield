@@ -3,7 +3,10 @@
     "type": "constructor",
     "inputs": [
       { "name": "wmnt_", "type": "address" },
-      { "name": "kyc_", "type": "address" }
+      { "name": "kyc_", "type": "address" },
+      { "name": "yieldVault_", "type": "address" },
+      { "name": "receipts_", "type": "address" },
+      { "name": "protocolFeeBps_", "type": "uint16" }
     ],
     "stateMutability": "nonpayable"
   },
@@ -19,13 +22,23 @@
   },
   {
     "type": "error",
+    "name": "InvalidFeeBps",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidPostHash",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidTermsHash",
     "inputs": []
   },
   {
     "type": "error",
     "name": "NotVerified",
-    "inputs": [{ "name": "sponsor", "type": "address" }]
+    "inputs": [{ "name": "wallet", "type": "address" }]
   },
   {
     "type": "error",
@@ -41,22 +54,13 @@
     "name": "ClipSponsored",
     "anonymous": false,
     "inputs": [
-      { "name": "clipHash", "type": "bytes32", "indexed": true },
+      { "name": "campaignId", "type": "bytes32", "indexed": true },
+      { "name": "receiptTokenId", "type": "uint256", "indexed": true },
       { "name": "sponsor", "type": "address", "indexed": true },
-      { "name": "vault", "type": "address", "indexed": true },
-      { "name": "assets", "type": "uint256", "indexed": false }
-    ]
-  },
-  {
-    "type": "event",
-    "name": "SponsoredCampaign",
-    "anonymous": false,
-    "inputs": [
-      { "name": "clipHash", "type": "bytes32", "indexed": true },
-      { "name": "sponsor", "type": "address", "indexed": true },
-      { "name": "creator", "type": "address", "indexed": true },
-      { "name": "vault", "type": "address", "indexed": false },
-      { "name": "assets", "type": "uint256", "indexed": false },
+      { "name": "creator", "type": "address", "indexed": false },
+      { "name": "boostVault", "type": "address", "indexed": false },
+      { "name": "amount", "type": "uint256", "indexed": false },
+      { "name": "protocolFee", "type": "uint256", "indexed": false },
       { "name": "termsHash", "type": "bytes32", "indexed": false }
     ]
   },
@@ -69,31 +73,44 @@
   },
   {
     "type": "function",
-    "name": "sponsorClip",
-    "stateMutability": "nonpayable",
-    "inputs": [
-      { "name": "clipHash", "type": "bytes32" },
-      { "name": "vault", "type": "address" },
-      { "name": "assets", "type": "uint256" }
-    ],
-    "outputs": []
+    "name": "protocolFeeBps",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint16" }]
   },
   {
     "type": "function",
-    "name": "sponsorWithTerms",
+    "name": "receipts",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "sponsorClip",
     "stateMutability": "nonpayable",
     "inputs": [
-      { "name": "clipHash", "type": "bytes32" },
       { "name": "creator", "type": "address" },
-      { "name": "vault", "type": "address" },
-      { "name": "assets", "type": "uint256" },
-      { "name": "termsHash", "type": "bytes32" }
+      { "name": "boostVault", "type": "address" },
+      { "name": "postIdHash", "type": "bytes32" },
+      { "name": "termsHash", "type": "bytes32" },
+      { "name": "amount", "type": "uint256" }
     ],
-    "outputs": []
+    "outputs": [
+      { "name": "campaignId", "type": "bytes32" },
+      { "name": "receiptTokenId", "type": "uint256" }
+    ]
   },
   {
     "type": "function",
     "name": "wmnt",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "yieldVault",
     "stateMutability": "view",
     "inputs": [],
     "outputs": [{ "name": "", "type": "address" }]

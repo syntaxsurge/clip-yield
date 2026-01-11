@@ -14,6 +14,7 @@ import {
 } from "wagmi";
 import {
   Address,
+  decodeEventLog,
   erc20Abi,
   formatUnits,
   getAddress,
@@ -102,6 +103,11 @@ export default function SponsorPanel({
   );
   const [perkMessage, setPerkMessage] = useState<string | null>(null);
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
+  const [receiptDetails, setReceiptDetails] = useState<{
+    campaignId: string;
+    receiptTokenId: string;
+    protocolFeeWei: string;
+  } | null>(null);
 
   const user = address as Address | undefined;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
@@ -109,9 +115,15 @@ export default function SponsorPanel({
   const wmnt = getAddress(mantleSepoliaContracts.wmnt as Address);
   const sponsorHub = getAddress(mantleSepoliaContracts.sponsorHub as Address);
   const kycRegistry = getAddress(mantleSepoliaContracts.kycRegistry as Address);
+  const invoiceReceipts = getAddress(
+    mantleSepoliaContracts.invoiceReceipts as Address,
+  );
+  const yieldVault = getAddress(
+    mantleSepoliaContracts.clipYieldVault as Address,
+  );
   const vault = useMemo(() => getAddress(vaultAddress), [vaultAddress]);
 
-  const clipHash = useMemo(() => {
+  const postIdHash = useMemo(() => {
     return keccak256(toHex(`post:${postId}`));
   }, [postId]);
 
@@ -178,6 +190,13 @@ export default function SponsorPanel({
     query: { enabled: Boolean(user) && isOnMantle },
   });
 
+  const { data: protocolFeeBps } = useReadContract({
+    address: sponsorHub,
+    abi: sponsorHubAbi,
+    functionName: "protocolFeeBps",
+    query: { enabled: isOnMantle },
+  });
+
   const { data: vaultSymbol } = useReadContract({
     address: vault,
     abi: erc20Abi,
@@ -224,6 +243,25 @@ export default function SponsorPanel({
 
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
   const shareBalanceValue = typeof shareBalance === "bigint" ? shareBalance : 0n;
+  const protocolFeeBpsValue =
+    typeof protocolFeeBps === "bigint" ? Number(protocolFeeBps) : null;
+  const protocolFeeWei =
+    parsedAmount > 0n && protocolFeeBpsValue !== null
+      ? (parsedAmount * BigInt(protocolFeeBpsValue)) / 10_000n
+      : null;
+  const netAmountWei = protocolFeeWei !== null ? parsedAmount - protocolFeeWei : null;
+  const formattedAmount =
+    parsedAmount > 0n ? formatUnits(parsedAmount, wmntDecimalsValue) : "—";
+  const formattedProtocolFee =
+    protocolFeeWei !== null ? formatUnits(protocolFeeWei, wmntDecimalsValue) : "—";
+  const formattedNetAmount =
+    netAmountWei !== null ? formatUnits(netAmountWei, wmntDecimalsValue) : "—";
+  const protocolFeeLabel =
+    protocolFeeBpsValue === null
+      ? "—"
+      : `${(protocolFeeBpsValue / 100).toFixed(
+          protocolFeeBpsValue % 100 === 0 ? 0 : 2,
+        )}%`;
 
   const isVerified = Boolean(kycStatus);
   const needsApproval = allowanceValue < parsedAmount;
@@ -256,13 +294,13 @@ export default function SponsorPanel({
         const gas = await publicClient.estimateContractGas({
           address: sponsorHub,
           abi: sponsorHubAbi,
-          functionName: "sponsorWithTerms",
+          functionName: "sponsorClip",
           args: [
-            clipHash,
             getAddress(creatorId),
             vault,
-            parsedAmount,
+            postIdHash,
             previewTermsHash,
+            parsedAmount,
           ],
           account: user,
         });
@@ -282,11 +320,11 @@ export default function SponsorPanel({
       isActive = false;
     };
   }, [
-    clipHash,
     creatorId,
     isOnMantle,
     needsApproval,
     parsedAmount,
+    postIdHash,
     previewTermsHash,
     publicClient,
     sponsorHub,
@@ -373,6 +411,7 @@ export default function SponsorPanel({
     }
 
     setActionError(null);
+    setReceiptDetails(null);
 
     if (parsedAmount <= 0n) {
       setActionError("Enter a sponsor amount.");
@@ -392,19 +431,79 @@ export default function SponsorPanel({
     const txHash = await runTx("sponsor", {
       address: sponsorHub,
       abi: sponsorHubAbi,
-      functionName: "sponsorWithTerms",
-      args: [clipHash, getAddress(creatorId), vault, parsedAmount, termsHash],
+      functionName: "sponsorClip",
+      args: [getAddress(creatorId), vault, postIdHash, termsHash, parsedAmount],
     });
 
     if (!txHash) return;
 
+    if (!publicClient) {
+      setActionError("Missing chain client for receipt parsing.");
+      return;
+    }
+
+    let onchainReceipt: {
+      campaignId: string;
+      receiptTokenId: string;
+      protocolFeeWei: string;
+    } | null = null;
+
+    try {
+      const receipt = await publicClient.getTransactionReceipt({
+        hash: txHash as `0x${string}`,
+      });
+
+      for (const log of receipt.logs) {
+        if (log.address.toLowerCase() !== sponsorHub.toLowerCase()) continue;
+        try {
+          const decoded = decodeEventLog({
+            abi: sponsorHubAbi,
+            data: log.data,
+            topics: log.topics,
+          });
+          if (decoded.eventName !== "ClipSponsored") continue;
+          const args = decoded.args as {
+            campaignId: `0x${string}`;
+            receiptTokenId: bigint;
+            protocolFee: bigint;
+          };
+          onchainReceipt = {
+            campaignId: args.campaignId,
+            receiptTokenId: args.receiptTokenId.toString(),
+            protocolFeeWei: args.protocolFee.toString(),
+          };
+          break;
+        } catch {
+          continue;
+        }
+      }
+    } catch (error) {
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : "Failed to read on-chain receipt logs.",
+      );
+      return;
+    }
+
+    if (!onchainReceipt) {
+      setActionError("Unable to locate the invoice receipt event on-chain.");
+      return;
+    }
+
+    setReceiptDetails(onchainReceipt);
+
     const campaignInput = {
       postId,
-      clipHash,
+      clipHash: postIdHash,
       creatorId,
       vaultAddress: vault,
       sponsorAddress: user as string,
       assets: parsedAmount.toString(),
+      protocolFeeWei: onchainReceipt.protocolFeeWei,
+      campaignId: onchainReceipt.campaignId,
+      receiptTokenId: onchainReceipt.receiptTokenId,
+      invoiceReceiptAddress: invoiceReceipts,
       txHash,
     };
 
@@ -415,11 +514,15 @@ export default function SponsorPanel({
 
       receiptId = (await useCreateCampaignReceipt({
         postId,
-        clipHash,
+        clipHash: postIdHash,
         creatorId: getAddress(creatorId),
         sponsorAddress: user,
         boostVault: vault,
         assetsWei: parsedAmount.toString(),
+        protocolFeeWei: onchainReceipt.protocolFeeWei,
+        campaignId: onchainReceipt.campaignId,
+        receiptTokenId: onchainReceipt.receiptTokenId,
+        invoiceReceiptAddress: invoiceReceipts,
         termsHash,
         txHash,
         sponsorName: terms.sponsorName,
@@ -535,7 +638,7 @@ export default function SponsorPanel({
         <Alert variant="warning">
           <AlertTitle>KYC required</AlertTitle>
           <AlertDescription>
-            Only verified sponsors can inject yield into creator vaults.
+            Only verified sponsors can mint compliant invoice receipts and fund creator vaults.
           </AlertDescription>
         </Alert>
       )}
@@ -573,10 +676,27 @@ export default function SponsorPanel({
         </Alert>
       )}
 
+      {receiptDetails && (
+        <Alert variant="success">
+          <AlertTitle>Invoice receipt minted</AlertTitle>
+          <AlertDescription className="space-y-1">
+            <div>
+              Token ID: <span className="font-mono">{receiptDetails.receiptTokenId}</span>
+            </div>
+            <div className="break-all">
+              Campaign ID:{" "}
+              <span className="font-mono">{receiptDetails.campaignId}</span>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Sponsor details</CardTitle>
-          <CardDescription>WMNT deposit goes to the creator vault.</CardDescription>
+          <CardDescription>
+            Protocol fees fund the yield vault while net WMNT mints creator boost shares.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
@@ -584,14 +704,52 @@ export default function SponsorPanel({
             <span className="font-mono text-xs">{formatShortHash(vault)}</span>
           </div>
           <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Yield vault</span>
+            <span className="font-mono text-xs">{formatShortHash(yieldVault)}</span>
+          </div>
+          <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Sponsor hub</span>
             <span className="font-mono text-xs">{formatShortHash(sponsorHub)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Invoice receipts</span>
+            <span className="font-mono text-xs">
+              {formatShortHash(invoiceReceipts)}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Wallet</span>
             <span className="font-mono text-xs">
               {user ? formatShortHash(user) : "Not connected"}
             </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Sponsorship breakdown</CardTitle>
+          <CardDescription>
+            Protocol fees donate to the yield vault; the net amount mints creator shares.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Sponsorship amount</span>
+            <span>{formattedAmount} WMNT</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">
+              Protocol fee ({protocolFeeLabel})
+            </span>
+            <span>{formattedProtocolFee} WMNT</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Net to creator vault</span>
+            <span>{formattedNetAmount} WMNT</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Invoice Receipt NFT mints to your wallet after confirmation.
           </div>
         </CardContent>
       </Card>
@@ -694,9 +852,9 @@ export default function SponsorPanel({
 
       <Card>
         <CardHeader>
-          <CardTitle>Sponsor with yield</CardTitle>
+          <CardTitle>Sponsor with invoice receipts</CardTitle>
           <CardDescription>
-            Sponsors earn vault upside while streaming yield to creators.
+            Protocol fees fund the yield vault and every sponsorship mints an on-chain receipt.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

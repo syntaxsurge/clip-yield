@@ -8,6 +8,10 @@ type CampaignReceiptInput = {
   sponsorAddress: string;
   boostVault: string;
   assetsWei: string;
+  protocolFeeWei: string;
+  campaignId: string;
+  receiptTokenId: string;
+  invoiceReceiptAddress: string;
   termsHash: string;
   txHash: string;
   sponsorName: string;
