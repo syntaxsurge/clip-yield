@@ -194,11 +194,13 @@ export default function YieldPanel({
     query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
   });
 
-  const { data: wmntBalance } = useBalance({
-    address: user,
-    token: wmnt,
+  const { data: wmntBalanceRaw } = useReadContract({
+    address: wmnt,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: user ? [user] : undefined,
     chainId: mantleSepoliaContracts.chainId,
-    query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
+    query: { enabled: Boolean(user), refetchInterval: 10_000 },
   });
 
   const isVerified = Boolean(kycStatus);
@@ -206,7 +208,8 @@ export default function YieldPanel({
   const shareDecimalsValue = typeof vaultDecimals === "number" ? vaultDecimals : 18;
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
   const nativeBalanceValue = nativeBalance?.value ?? 0n;
-  const wmntBalanceValue = wmntBalance?.value ?? 0n;
+  const wmntBalanceValue =
+    typeof wmntBalanceRaw === "bigint" ? wmntBalanceRaw : 0n;
   const shareBalanceValue = typeof shareBalance === "bigint" ? shareBalance : 0n;
   const maxWithdrawValue =
     typeof previewAssetsFromShares === "bigint" ? previewAssetsFromShares : 0n;
@@ -240,9 +243,11 @@ export default function YieldPanel({
     ? formatUnits(previewShares, shareDecimalsValue)
     : "0";
   const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
-  const formattedWmntBalance = walletReady
-    ? wmntBalance?.formatted ?? "—"
-    : "—";
+  const hasWmntBalance = typeof wmntBalanceRaw === "bigint";
+  const formattedWmntBalance =
+    walletReady && hasWmntBalance
+      ? formatUnits(wmntBalanceValue, wmntDecimalsValue)
+      : "—";
 
   const {
     data: vaultReceipt,
