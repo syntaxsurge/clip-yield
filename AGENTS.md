@@ -354,7 +354,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/campaign/[campaignId]` campaign receipt with terms hash, tx status, and invoice receipt details
 - `/activity` paginated on-chain activity feed with MantleScan links
 - `/leaderboard` boost and sponsorship rankings from confirmed on-chain activity
-- `/yield` KYC-gated WMNT vault interactions on Mantle Sepolia
+- `/yield` KYC-gated WMNT vault with real-time testnet yield streaming + on-chain sync
 - `/boost/[creatorId]` creator boost vault deposits with KYC gating
 - `/kyc` Persona-hosted KYC entrypoint for wallet verification
 - `/kyc/complete` KYC completion status + return to vault
@@ -384,7 +384,8 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Mantle Sepolia wallet stack using Privy embedded wallets + wagmi + viem (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`)
 - Admin routes are gated by an allowlist in `NEXT_PUBLIC_ADMIN_WALLET_ADDRESSES` and enforced via `src/app/admin/layout.tsx`
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
-- RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldInvoiceReceipts, ClipYieldBoostPass) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
+- RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldInvoiceReceipts, ClipYieldBoostPass, SimulatedYieldStreamer) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
+- SimulatedYieldStreamer streams testnet WMNT into the yield vault to surface real-time pending yield, synced on-chain via a drip transaction
 - SponsorHub mints invoice receipt NFTs and donates protocol fees to the yield vault, while net WMNT mints boost vault shares for creators
 - Persona hosted-flow KYC uses redirect + `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles

@@ -1,6 +1,13 @@
 "use client"
 
-import { AiOutlineHome, AiOutlineFolderOpen } from "react-icons/ai"
+import {
+  AiOutlineFolderOpen,
+  AiOutlineHistory,
+  AiOutlineHome,
+  AiOutlineLineChart,
+  AiOutlineTrophy,
+  AiOutlineUsergroupAdd,
+} from "react-icons/ai"
 import { RiGroupLine } from "react-icons/ri"
 import { MenuItemTypes } from "@/app/types"
 
@@ -10,6 +17,10 @@ export default function MenuItem({ iconString, colorString, sizeString }: MenuIt
         if (iconString == 'For You') return <AiOutlineHome size={sizeString} color={colorString} />
         if (iconString == 'Following') return <RiGroupLine size={sizeString} color={colorString} />
         if (iconString == 'Projects') return <AiOutlineFolderOpen size={sizeString} color={colorString} />
+        if (iconString == 'Yield vault') return <AiOutlineLineChart size={sizeString} color={colorString} />
+        if (iconString == 'Creators') return <AiOutlineUsergroupAdd size={sizeString} color={colorString} />
+        if (iconString == 'Activity') return <AiOutlineHistory size={sizeString} color={colorString} />
+        if (iconString == 'Leaderboard') return <AiOutlineTrophy size={sizeString} color={colorString} />
     }
 
     return (

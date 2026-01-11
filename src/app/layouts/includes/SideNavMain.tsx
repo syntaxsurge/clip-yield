@@ -22,6 +22,13 @@ export default function SideNavMain() {
     const currentPath = pathname ?? ""
     const resolvedPath = hasMounted ? currentPath : ""
     const isProjectsRoute = resolvedPath.startsWith("/projects")
+    const isYieldRoute = resolvedPath === "/yield"
+    const isCreatorsRoute =
+        resolvedPath.startsWith("/creators") ||
+        resolvedPath.startsWith("/profile") ||
+        resolvedPath.startsWith("/boost")
+    const isActivityRoute = resolvedPath.startsWith("/activity")
+    const isLeaderboardRoute = resolvedPath.startsWith("/leaderboard")
     const defaultColor = "hsl(var(--foreground))"
     const activeColor = "var(--brand-accent-text)"
 
@@ -82,6 +89,40 @@ export default function SideNavMain() {
                         <MenuItem
                             iconString="Projects"
                             colorString={isProjectsRoute ? activeColor : defaultColor}
+                            sizeString="25"
+                        />
+                    </Link>
+
+                    <div className="border-b lg:ml-2 mt-2 dark:border-white/10" />
+                    <h3 className="lg:block hidden text-xs font-semibold text-gray-600 dark:text-white/60 pt-4 pb-2 px-2">
+                        RealFi
+                    </h3>
+
+                    <Link href="/yield">
+                        <MenuItem
+                            iconString="Yield vault"
+                            colorString={isYieldRoute ? activeColor : defaultColor}
+                            sizeString="25"
+                        />
+                    </Link>
+                    <Link href="/creators">
+                        <MenuItem
+                            iconString="Creators"
+                            colorString={isCreatorsRoute ? activeColor : defaultColor}
+                            sizeString="25"
+                        />
+                    </Link>
+                    <Link href="/activity">
+                        <MenuItem
+                            iconString="Activity"
+                            colorString={isActivityRoute ? activeColor : defaultColor}
+                            sizeString="25"
+                        />
+                    </Link>
+                    <Link href="/leaderboard">
+                        <MenuItem
+                            iconString="Leaderboard"
+                            colorString={isLeaderboardRoute ? activeColor : defaultColor}
                             sizeString="25"
                         />
                     </Link>

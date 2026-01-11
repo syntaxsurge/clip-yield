@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import FlowLegend from "@/components/data-display/FlowLegend";
 import { formatShortHash } from "@/lib/utils";
 import SponsorPanel from "@/features/sponsor/components/SponsorPanel";
 import { isSponsorCampaignActive } from "@/features/sponsor/utils";
@@ -97,10 +98,12 @@ export default function SponsorPage({ params }: SponsorPageProps) {
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Sponsor this clip</h1>
             <p className="text-sm text-muted-foreground">
-              Sponsor with WMNT to mint an invoice receipt and route protocol fees into
+              Sponsor with WMNT to mint an invoice receipt NFT and route protocol fees into
               the yield vault.
             </p>
           </div>
+
+          <FlowLegend active="sponsor" />
 
           {status === "error" && (
             <Alert variant="destructive">

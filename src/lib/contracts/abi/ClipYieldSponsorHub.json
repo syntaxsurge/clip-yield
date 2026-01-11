@@ -1,118 +1,265 @@
 [
   {
-    "type": "constructor",
     "inputs": [
-      { "name": "wmnt_", "type": "address" },
-      { "name": "kyc_", "type": "address" },
-      { "name": "yieldVault_", "type": "address" },
-      { "name": "receipts_", "type": "address" },
-      { "name": "protocolFeeBps_", "type": "uint16" }
+      {
+        "internalType": "address",
+        "name": "wmnt_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "kyc_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "yieldVault_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "receipts_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint16",
+        "name": "protocolFeeBps_",
+        "type": "uint16"
+      }
     ],
-    "stateMutability": "nonpayable"
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
-    "type": "error",
+    "inputs": [],
     "name": "InvalidAddress",
-    "inputs": []
+    "type": "error"
   },
   {
-    "type": "error",
+    "inputs": [],
     "name": "InvalidAmount",
-    "inputs": []
+    "type": "error"
   },
   {
-    "type": "error",
+    "inputs": [],
     "name": "InvalidFeeBps",
-    "inputs": []
+    "type": "error"
   },
   {
-    "type": "error",
+    "inputs": [],
     "name": "InvalidPostHash",
-    "inputs": []
+    "type": "error"
   },
   {
-    "type": "error",
+    "inputs": [],
     "name": "InvalidTermsHash",
-    "inputs": []
+    "type": "error"
   },
   {
-    "type": "error",
-    "name": "NotVerified",
-    "inputs": [{ "name": "wallet", "type": "address" }]
-  },
-  {
-    "type": "error",
-    "name": "WrongAsset",
     "inputs": [
-      { "name": "vault", "type": "address" },
-      { "name": "expected", "type": "address" },
-      { "name": "actual", "type": "address" }
-    ]
+      {
+        "internalType": "address",
+        "name": "wallet",
+        "type": "address"
+      }
+    ],
+    "name": "NotVerified",
+    "type": "error"
   },
   {
-    "type": "event",
-    "name": "ClipSponsored",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "expected",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "actual",
+        "type": "address"
+      }
+    ],
+    "name": "WrongAsset",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
-      { "name": "campaignId", "type": "bytes32", "indexed": true },
-      { "name": "receiptTokenId", "type": "uint256", "indexed": true },
-      { "name": "sponsor", "type": "address", "indexed": true },
-      { "name": "creator", "type": "address", "indexed": false },
-      { "name": "boostVault", "type": "address", "indexed": false },
-      { "name": "amount", "type": "uint256", "indexed": false },
-      { "name": "protocolFee", "type": "uint256", "indexed": false },
-      { "name": "termsHash", "type": "bytes32", "indexed": false }
-    ]
-  },
-  {
-    "type": "function",
-    "name": "kyc",
-    "stateMutability": "view",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "address" }]
-  },
-  {
-    "type": "function",
-    "name": "protocolFeeBps",
-    "stateMutability": "view",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "uint16" }]
-  },
-  {
-    "type": "function",
-    "name": "receipts",
-    "stateMutability": "view",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "address" }]
-  },
-  {
-    "type": "function",
-    "name": "sponsorClip",
-    "stateMutability": "nonpayable",
-    "inputs": [
-      { "name": "creator", "type": "address" },
-      { "name": "boostVault", "type": "address" },
-      { "name": "postIdHash", "type": "bytes32" },
-      { "name": "termsHash", "type": "bytes32" },
-      { "name": "amount", "type": "uint256" }
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "campaignId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "receiptTokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sponsor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "boostVault",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "protocolFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "termsHash",
+        "type": "bytes32"
+      }
     ],
+    "name": "ClipSponsored",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "kyc",
     "outputs": [
-      { "name": "campaignId", "type": "bytes32" },
-      { "name": "receiptTokenId", "type": "uint256" }
-    ]
+      {
+        "internalType": "contract IKycRegistry",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "type": "function",
+    "inputs": [],
+    "name": "protocolFeeBps",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "receipts",
+    "outputs": [
+      {
+        "internalType": "contract IInvoiceReceipts",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "boostVault",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "postIdHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "termsHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "sponsorClip",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "campaignId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "receiptTokenId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "wmnt",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
-    "inputs": [],
-    "outputs": [{ "name": "", "type": "address" }]
+    "type": "function"
   },
   {
-    "type": "function",
-    "name": "yieldVault",
-    "stateMutability": "view",
     "inputs": [],
-    "outputs": [{ "name": "", "type": "address" }]
+    "name": "yieldVault",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]

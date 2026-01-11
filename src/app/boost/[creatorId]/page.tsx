@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import FlowLegend from "@/components/data-display/FlowLegend";
 import { formatShortHash } from "@/lib/utils";
 import YieldPanel from "@/features/yield/components/YieldPanel";
 
@@ -74,10 +75,12 @@ export default function BoostPage({ params }: BoostPageProps) {
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Boost {creatorLabel}</h1>
             <p className="text-sm text-muted-foreground">
-              Deposit WMNT into this creator&apos;s boost vault to back their work.
-              Your shares stay withdrawable and unlock boost perks.
+              Creator-directed vault. Your WMNT stays withdrawable while boosts
+              unlock perks and contribute to creator funding.
             </p>
           </div>
+
+          <FlowLegend active="boost" />
 
           {status === "error" && (
             <Alert variant="destructive">
@@ -150,6 +153,11 @@ export default function BoostPage({ params }: BoostPageProps) {
                       {formatShortHash(vaultRecord.vault)}
                     </span>
                   </div>
+                  <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground">
+                    Boost vaults are creator-specific ERC-4626 pools. Your WMNT stays
+                    withdrawable, while sponsorship inflows and strategy returns can lift
+                    share value over time.
+                  </div>
                 </CardContent>
               </Card>
 
@@ -157,6 +165,7 @@ export default function BoostPage({ params }: BoostPageProps) {
                 vaultAddress={vaultRecord.vault as `0x${string}`}
                 title={`Boost ${creatorLabel}`}
                 description="KYC-gated vault for creator boosts on Mantle Sepolia."
+                yieldSourceCopy="Boost vaults accrue yield when sponsorship revenue or strategy returns are routed in; sponsorship net deposits mint creator shares without diluting boosters."
                 returnTo={`/boost/${creatorId}`}
                 receiptKind="boostDeposit"
                 receiptCreatorId={creatorId}

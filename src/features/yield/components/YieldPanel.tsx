@@ -49,6 +49,7 @@ type YieldPanelProps = {
   receiptCreatorId?: string;
   receiptTitle?: string;
   receiptDescription?: string;
+  yieldSourceCopy?: string;
   recordDeposit?: boolean;
   onDeposit?: (payload: {
     txHash: string;
@@ -67,6 +68,7 @@ export default function YieldPanel({
   receiptCreatorId,
   receiptTitle,
   receiptDescription,
+  yieldSourceCopy,
   recordDeposit = true,
   onDeposit,
 }: YieldPanelProps) {
@@ -301,6 +303,9 @@ export default function YieldPanel({
   const formattedShareBalance = walletReady
     ? formatUnits(shareBalanceValue, shareDecimalsValue)
     : "—";
+  const formattedVaultClaim = walletReady
+    ? formatUnits(maxWithdrawValue, wmntDecimalsValue)
+    : "—";
   const formattedPreviewShares = previewShares
     ? formatUnits(previewShares, shareDecimalsValue)
     : "0";
@@ -312,6 +317,9 @@ export default function YieldPanel({
       : isWmntBalanceError
         ? "Unavailable"
         : formatUnits(wmntBalanceValue, wmntDecimalsValue);
+  const yieldSourceLabel =
+    yieldSourceCopy ??
+    "Sponsorship invoice fees are donated into the vault, increasing share value.";
 
   const {
     data: vaultReceipt,
@@ -634,6 +642,10 @@ export default function YieldPanel({
                 {formattedShareBalance} {vaultSymbol || "cySHARE"}
               </span>
             </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Vault claim (WMNT)</span>
+              <span>{formattedVaultClaim}</span>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -674,7 +686,7 @@ export default function YieldPanel({
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
               <p className="font-semibold">Yield source</p>
               <p className="text-xs text-muted-foreground">
-                Sponsorship invoice fees are donated into the vault, increasing share value.
+                {yieldSourceLabel}
               </p>
             </div>
           </div>

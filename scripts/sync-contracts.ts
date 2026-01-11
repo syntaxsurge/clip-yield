@@ -131,6 +131,7 @@ async function main() {
   const sponsorHubKey = findDeploymentKey(deployed, "#ClipYieldSponsorHub");
   const invoiceKey = findDeploymentKey(deployed, "#ClipYieldInvoiceReceipts");
   const boostPassKey = findDeploymentKey(deployed, "#ClipYieldBoostPass");
+  const yieldStreamerKey = findDeploymentKey(deployed, "#SimulatedYieldStreamer");
 
   const kycRegistry = deployed[kycKey];
   const clipYieldVault = deployed[vaultKey];
@@ -138,6 +139,7 @@ async function main() {
   const sponsorHub = sponsorHubKey ? deployed[sponsorHubKey] : null;
   const invoiceReceipts = invoiceKey ? deployed[invoiceKey] : null;
   const boostPass = boostPassKey ? deployed[boostPassKey] : null;
+  const yieldStreamer = yieldStreamerKey ? deployed[yieldStreamerKey] : null;
 
   await writeAbi(kycKey, "KycRegistry");
   await writeAbi(vaultKey, "ClipYieldVault");
@@ -152,6 +154,9 @@ async function main() {
   }
   if (boostPassKey) {
     await writeAbi(boostPassKey, "ClipYieldBoostPass");
+  }
+  if (yieldStreamerKey) {
+    await writeAbi(yieldStreamerKey, "SimulatedYieldStreamer");
   }
 
   const boostVaultArtifact = path.join(
@@ -200,6 +205,13 @@ async function main() {
       boostPass,
     );
     updatedEnv = upsertEnvValue(updatedEnv, "BOOST_PASS_ADDRESS", boostPass);
+  }
+  if (yieldStreamer) {
+    updatedEnv = upsertEnvValue(
+      updatedEnv,
+      "NEXT_PUBLIC_YIELD_STREAMER_ADDRESS",
+      yieldStreamer,
+    );
   }
   await fs.writeFile(envTarget.path, updatedEnv, "utf8");
 

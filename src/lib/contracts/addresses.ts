@@ -28,4 +28,8 @@ export const mantleSepoliaContracts = {
     process.env.NEXT_PUBLIC_BOOST_PASS_ADDRESS,
     "NEXT_PUBLIC_BOOST_PASS_ADDRESS",
   ),
+  yieldStreamer: requirePublicAddress(
+    process.env.NEXT_PUBLIC_YIELD_STREAMER_ADDRESS,
+    "NEXT_PUBLIC_YIELD_STREAMER_ADDRESS",
+  ),
 } as const;

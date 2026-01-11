@@ -93,18 +93,18 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Instead of webhook dependency, we sync on demand from /kyc/complete. The UI shows the inquiry details, then we press Sync and the wallet flips to Verified. This is a demo-friendly, locally testable workflow that still writes verification into the on-chain registry. Next we’ll open the yield vault and show custody and balances.”
 
-## 8. Yield Vault (Custody + Compliant Yield Distribution)
+## 8. Yield Vault (Custody + Real-Time Yield)
 - **URL:** /yield
-- **Shot:** Yield vault overview panels (TVL, shares), wallet status card, and action center (wrap/approve/deposit).
+- **Shot:** Yield vault overview panels (TVL, shares), wallet status card, and the Yield Engine panel showing streaming yield + sync.
 - **Steps:**
   1. **Current page:** `/kyc/complete` — confirm “Verified” is visible.
-  2. **Navigate:** **Current page:** `/kyc/complete` — click “Explore” → click “Yield vault” → lands on `/yield` — confirm “ClipYield Vault” heading is visible.
+  2. **Navigate:** **Current page:** `/kyc/complete` — click “Explore” → click “Yield vault” → lands on `/yield` — confirm “Yield vault” heading is visible.
   3. **Action:** **Current page:** `/yield` — confirm “KYC” shows “Verified” — confirm the verified badge is visible in the wallet status panel.
-  4. **Action:** **Current page:** `/yield` — click “Wrap MNT to WMNT” — confirm a wallet signing prompt appears.
-  5. **Action:** **Current page:** `/yield` — approve the transaction — confirm a “Transaction submitted” toast appears with a MantleScan link.
-  6. **Verify on-screen:** **Current page:** `/yield` — confirm “WMNT available” updates to a non-zero number (or “WMNT balance” updates) after confirmation.
+  4. **Action:** **Current page:** `/yield` — confirm the “Yield engine” panel shows “Streaming now (est.)”.
+  5. **Action:** **Current page:** `/yield` — click “Wrap MNT to WMNT” — confirm a wallet signing prompt appears → approve the transaction.
+  6. **Verify on-screen:** **Current page:** `/yield` — click “Sync yield on-chain” — confirm a MantleScan tx link appears and the pending yield resets or share price updates.
 - **Voiceover:**
-  > “This is the custody layer: a KYC-gated ERC‑4626 vault holding WMNT on Mantle Sepolia. We wrap MNT into WMNT, sign once, and the UI confirms on-chain submission with MantleScan proof. This vault is where compliant yield distribution happens—next we’ll boost a creator and then sponsor a clip to mint an invoice receipt.”
+  > “This is the custody layer: a KYC-gated ERC‑4626 vault holding WMNT on Mantle Sepolia. The Yield Engine shows real-time streaming yield on testnet, and we can sync it on-chain to lift share value. In production, this simulator is replaced by audited yield strategies and protocol-fee donations. Next we’ll boost a creator and then sponsor a clip to mint an invoice receipt.”
 
 ## 9. Creator Directory (Discovery for Cash-Flow Assets)
 - **URL:** /creators

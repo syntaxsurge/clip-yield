@@ -34,18 +34,26 @@ export default function TopNav() {
         () => {
             const sections = [
                 {
-                    title: "Get started",
+                    title: "RealFi actions",
                     links: [
-                        { label: "Start onboarding", href: "/start" },
-                        { label: "KYC verification", href: "/kyc" },
                         { label: "Yield vault", href: "/yield" },
+                        { label: "Creators (boost)", href: "/creators" },
+                        { label: "Activity feed", href: "/activity" },
+                        { label: "Leaderboard", href: "/leaderboard" },
                     ],
                 },
                 {
-                    title: "Insights",
+                    title: "Onboarding",
                     links: [
-                        { label: "Activity feed", href: "/activity" },
-                        { label: "Leaderboard", href: "/leaderboard" },
+                        { label: "Start onboarding", href: "/start" },
+                        { label: "KYC verification", href: "/kyc" },
+                    ],
+                },
+                {
+                    title: "Creator tools",
+                    links: [
+                        { label: "Projects", href: "/projects" },
+                        { label: "Upload", href: "/upload" },
                     ],
                 },
                 {
