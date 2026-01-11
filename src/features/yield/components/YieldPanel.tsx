@@ -78,7 +78,8 @@ export default function YieldPanel({
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
 
-  const [amount, setAmount] = useState("0.05");
+  const [wrapAmount, setWrapAmount] = useState("0.05");
+  const [vaultAmount, setVaultAmount] = useState("0.05");
   const [pendingAction, setPendingAction] = useState<ActionId | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [lastTx, setLastTx] = useState<{ action: ActionId; hash: string } | null>(null);
@@ -169,22 +170,32 @@ export default function YieldPanel({
     query: { enabled: Boolean(user) && isOnMantle },
   });
 
-  const parsedAmount = useMemo(() => {
+  const parsedWrapAmount = useMemo(() => {
     const decimals = typeof wmntDecimals === "number" ? wmntDecimals : 18;
-    if (!amount) return 0n;
+    if (!wrapAmount) return 0n;
     try {
-      return parseUnits(amount, decimals);
+      return parseUnits(wrapAmount, decimals);
     } catch {
       return 0n;
     }
-  }, [amount, wmntDecimals]);
+  }, [wrapAmount, wmntDecimals]);
+
+  const parsedVaultAmount = useMemo(() => {
+    const decimals = typeof wmntDecimals === "number" ? wmntDecimals : 18;
+    if (!vaultAmount) return 0n;
+    try {
+      return parseUnits(vaultAmount, decimals);
+    } catch {
+      return 0n;
+    }
+  }, [vaultAmount, wmntDecimals]);
 
   const { data: previewShares, refetch: refetchPreviewShares } = useReadContract({
     address: vault,
     abi: vaultAbi,
     functionName: "convertToShares",
-    args: parsedAmount > 0n ? [parsedAmount] : undefined,
-    query: { enabled: parsedAmount > 0n && isOnMantle },
+    args: parsedVaultAmount > 0n ? [parsedVaultAmount] : undefined,
+    query: { enabled: parsedVaultAmount > 0n && isOnMantle },
   });
 
   const {
@@ -229,20 +240,39 @@ export default function YieldPanel({
   const maxWithdrawValue =
     typeof previewAssetsFromShares === "bigint" ? previewAssetsFromShares : 0n;
 
-  const canTransact = isConnected && isOnMantle && parsedAmount > 0n;
-  const needsApproval = allowanceValue < parsedAmount;
-  const hasMntForWrap = nativeBalanceValue >= parsedAmount;
-  const hasWmntForActions = wmntBalanceValue >= parsedAmount;
-  const canWrap = canTransact && hasMntForWrap;
-  const canApprove = canTransact && hasWmntForActions && needsApproval;
+  const canWrap =
+    isConnected &&
+    isOnMantle &&
+    parsedWrapAmount > 0n &&
+    nativeBalanceValue >= parsedWrapAmount;
+  const canUnwrap =
+    isConnected &&
+    isOnMantle &&
+    parsedWrapAmount > 0n &&
+    wmntBalanceValue >= parsedWrapAmount;
+  const needsApproval =
+    parsedVaultAmount > 0n && allowanceValue < parsedVaultAmount;
+  const hasWmntForVault = wmntBalanceValue >= parsedVaultAmount;
+  const canApprove =
+    isConnected &&
+    isOnMantle &&
+    parsedVaultAmount > 0n &&
+    hasWmntForVault &&
+    needsApproval;
   const canDeposit =
-    canTransact && isVerified && hasWmntForActions && !needsApproval;
+    isConnected &&
+    isOnMantle &&
+    parsedVaultAmount > 0n &&
+    isVerified &&
+    hasWmntForVault &&
+    !needsApproval;
   const canWithdraw =
-    canTransact &&
+    isConnected &&
+    isOnMantle &&
+    parsedVaultAmount > 0n &&
     isVerified &&
     shareBalanceValue > 0n &&
-    maxWithdrawValue >= parsedAmount;
-  const canUnwrap = canTransact && hasWmntForActions;
+    maxWithdrawValue >= parsedVaultAmount;
 
   const walletReady = isConnected && isOnMantle;
   const formattedTotalAssets = totalAssets
@@ -322,7 +352,7 @@ export default function YieldPanel({
       refetchKycStatus(),
       refetchVaultReceipt(),
     ];
-    if (parsedAmount > 0n) {
+    if (parsedVaultAmount > 0n) {
       tasks.push(refetchPreviewShares());
     }
     if (shareBalanceValue > 0n) {
@@ -331,7 +361,7 @@ export default function YieldPanel({
     await Promise.allSettled(tasks);
     setIsRefreshing(false);
   }, [
-    parsedAmount,
+    parsedVaultAmount,
     refetchAllowance,
     refetchKycStatus,
     refetchNativeBalance,
@@ -414,7 +444,7 @@ export default function YieldPanel({
       address: vault,
       abi: vaultAbi,
       functionName: "deposit",
-      args: [parsedAmount, user as Address],
+      args: [parsedVaultAmount, user as Address],
     });
 
     if (!txHash) return;
@@ -428,7 +458,7 @@ export default function YieldPanel({
           kind: receiptKind,
           wallet: user,
           creatorId: receiptCreatorId,
-          assetsWei: parsedAmount.toString(),
+          assetsWei: parsedVaultAmount.toString(),
           txHash,
           chainId: mantleSepoliaContracts.chainId,
         });
@@ -445,7 +475,7 @@ export default function YieldPanel({
     if (onDeposit) {
       await onDeposit({
         txHash,
-        assetsWei: parsedAmount.toString(),
+        assetsWei: parsedVaultAmount.toString(),
         wallet: user,
         vault,
       });
@@ -656,45 +686,43 @@ export default function YieldPanel({
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium" htmlFor="amount">
-                  Amount used across actions (WMNT)
+                <label className="text-sm font-medium" htmlFor="wrap-amount">
+                  Wrap / unwrap amount (MNT)
                 </label>
                 <p className="text-xs text-muted-foreground">
-                  This amount powers wrap, unwrap, approve, deposit, and withdraw.
+                  Used for wrapping native MNT into WMNT or unwrapping back.
                 </p>
               </div>
               <Input
-                id="amount"
+                id="wrap-amount"
                 inputMode="decimal"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
+                value={wrapAmount}
+                onChange={(event) => setWrapAmount(event.target.value)}
+                placeholder="0.05"
+                className="mt-3"
+              />
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+              <div className="space-y-1">
+                <label className="text-sm font-medium" htmlFor="vault-amount">
+                  Vault amount (WMNT)
+                </label>
+                <p className="text-xs text-muted-foreground">
+                  Used for approval, deposit, and withdraw actions.
+                </p>
+              </div>
+              <Input
+                id="vault-amount"
+                inputMode="decimal"
+                value={vaultAmount}
+                onChange={(event) => setVaultAmount(event.target.value)}
                 placeholder="0.05"
                 className="mt-3"
               />
               <div className="mt-2 text-xs text-muted-foreground">
                 Estimated shares: {formattedPreviewShares} {vaultSymbol || "cySHARE"}
               </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">KYC status</span>
-                <span>{walletReady ? (isVerified ? "Verified" : "Not verified") : "—"}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">WMNT available</span>
-                <span>{formattedWmntBalance}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Approval</span>
-                <span>{walletReady ? (needsApproval ? "Required" : "Ready") : "—"}</span>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Approve the vault when you increase the amount you want to deposit.
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Use refresh after a transaction to sync balances and approvals.
-              </p>
             </div>
           </div>
 
@@ -714,7 +742,7 @@ export default function YieldPanel({
                       address: wmnt,
                       abi: wmntAbi,
                       functionName: "deposit",
-                      value: parsedAmount,
+                      value: parsedWrapAmount,
                     })
                   }
                   disabled={!canWrap || pendingAction === "wrap"}
@@ -728,7 +756,7 @@ export default function YieldPanel({
                       address: wmnt,
                       abi: wmntAbi,
                       functionName: "withdraw",
-                      args: [parsedAmount],
+                      args: [parsedWrapAmount],
                     })
                   }
                   disabled={!canUnwrap || pendingAction === "unwrap"}
@@ -753,7 +781,7 @@ export default function YieldPanel({
                       address: wmnt,
                       abi: wmntAbi,
                       functionName: "approve",
-                      args: [vault, parsedAmount],
+                      args: [vault, parsedVaultAmount],
                     })
                   }
                   disabled={!canApprove || pendingAction === "approve"}
@@ -773,7 +801,7 @@ export default function YieldPanel({
                       address: vault,
                       abi: vaultAbi,
                       functionName: "withdraw",
-                      args: [parsedAmount, user as Address, user as Address],
+                      args: [parsedVaultAmount, user as Address, user as Address],
                     })
                   }
                   disabled={!canWithdraw || pendingAction === "withdraw"}

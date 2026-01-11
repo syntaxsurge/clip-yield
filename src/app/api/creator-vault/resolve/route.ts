@@ -42,6 +42,26 @@ function resolveRegistryAddress() {
   return getAddress(value);
 }
 
+function resolveBoostFactoryAddress() {
+  const value =
+    getServerEnv("BOOST_FACTORY_ADDRESS") ??
+    getServerEnv("NEXT_PUBLIC_BOOST_FACTORY_ADDRESS");
+  if (!value || !isAddress(value)) {
+    return undefined;
+  }
+  return getAddress(value);
+}
+
+function resolveSponsorHubAddress() {
+  const value =
+    getServerEnv("SPONSOR_HUB_ADDRESS") ??
+    getServerEnv("NEXT_PUBLIC_SPONSOR_HUB_ADDRESS");
+  if (!value || !isAddress(value)) {
+    return undefined;
+  }
+  return getAddress(value);
+}
+
 export async function POST(req: Request) {
   const payload = await req.json().catch(() => null);
   const parsed = BodySchema.safeParse(payload);
@@ -136,7 +156,15 @@ export async function POST(req: Request) {
   try {
     const provisioned = await convexHttpClient.action(
       anyApi.creatorVaults.provisionCreatorVault,
-      { creatorWallet: walletAddress },
+      {
+        creatorWallet: walletAddress,
+        factoryAddress: resolveBoostFactoryAddress(),
+        sponsorHubAddress: resolveSponsorHubAddress(),
+        managerPrivateKey:
+          process.env.NODE_ENV === "development"
+            ? getServerEnv("KYC_MANAGER_PRIVATE_KEY")
+            : undefined,
+      },
     );
 
     return NextResponse.json({

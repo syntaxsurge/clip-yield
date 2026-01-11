@@ -58,9 +58,11 @@ const boostVaultRoleAbi = [
   },
 ] as const;
 
-function resolveSponsorHubAddress() {
+function resolveSponsorHubAddress(override?: string) {
   const sponsorHub =
-    getEnv("SPONSOR_HUB_ADDRESS") ?? getEnv("NEXT_PUBLIC_SPONSOR_HUB_ADDRESS");
+    override ??
+    getEnv("SPONSOR_HUB_ADDRESS") ??
+    getEnv("NEXT_PUBLIC_SPONSOR_HUB_ADDRESS");
 
   if (!sponsorHub || !isAddress(sponsorHub)) {
     throw new Error("Missing or invalid sponsor hub address.");
@@ -73,12 +75,14 @@ async function ensureSponsorHubRole({
   publicClient,
   walletClient,
   vault,
+  sponsorHub,
 }: {
   publicClient: ReturnType<typeof createMantleClients>["publicClient"];
   walletClient: ReturnType<typeof createMantleClients>["walletClient"];
   vault: `0x${string}`;
+  sponsorHub: `0x${string}`;
 }) {
-  const sponsorHub = resolveSponsorHubAddress();
+  const sponsorHubAddress = resolveSponsorHubAddress(sponsorHub);
 
   const yieldDonorRole = (await publicClient.readContract({
     address: vault,
@@ -90,7 +94,7 @@ async function ensureSponsorHubRole({
     address: vault,
     abi: boostVaultRoleAbi,
     functionName: "hasRole",
-    args: [yieldDonorRole, sponsorHub],
+    args: [yieldDonorRole, sponsorHubAddress],
   })) as boolean;
 
   if (alreadyGranted) return;
@@ -99,7 +103,7 @@ async function ensureSponsorHubRole({
     address: vault,
     abi: boostVaultRoleAbi,
     functionName: "grantRole",
-    args: [yieldDonorRole, sponsorHub],
+    args: [yieldDonorRole, sponsorHubAddress],
   });
 
   await publicClient.waitForTransactionReceipt({ hash: txHash });
@@ -194,7 +198,12 @@ export const upsertVaultFromServer = mutation({
 });
 
 export const provisionCreatorVault = action({
-  args: { creatorWallet: v.string() },
+  args: {
+    creatorWallet: v.string(),
+    factoryAddress: v.optional(v.string()),
+    sponsorHubAddress: v.optional(v.string()),
+    managerPrivateKey: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     if (!isAddress(args.creatorWallet)) {
       throw new Error("Invalid creator wallet address.");
@@ -211,19 +220,25 @@ export const provisionCreatorVault = action({
       return { vault: existing.vault, txHash: existing.txHash ?? null };
     }
 
-    const factoryAddress =
+    const factoryFromEnv =
       getEnv("BOOST_FACTORY_ADDRESS") ??
       getEnv("NEXT_PUBLIC_BOOST_FACTORY_ADDRESS");
+    const factoryAddress = args.factoryAddress && isAddress(args.factoryAddress)
+      ? getAddress(args.factoryAddress)
+      : factoryFromEnv && isAddress(factoryFromEnv)
+        ? getAddress(factoryFromEnv)
+        : null;
 
-    if (!factoryAddress || !isAddress(factoryAddress)) {
+    if (!factoryAddress) {
       throw new Error("Missing or invalid boost factory address.");
     }
 
-    const privateKey = requireEnv("KYC_MANAGER_PRIVATE_KEY");
+    const privateKey = args.managerPrivateKey ?? requireEnv("KYC_MANAGER_PRIVATE_KEY");
     const { publicClient, walletClient } = createMantleClients(privateKey);
+    const sponsorHubAddress = resolveSponsorHubAddress(args.sponsorHubAddress);
 
     const onchainVault = (await publicClient.readContract({
-      address: getAddress(factoryAddress),
+      address: factoryAddress,
       abi: factoryAbi,
       functionName: "vaultOf",
       args: [creatorWallet],
@@ -234,6 +249,7 @@ export const provisionCreatorVault = action({
         publicClient,
         walletClient,
         vault: onchainVault,
+        sponsorHub: sponsorHubAddress,
       });
       await ctx.runMutation(anyApi.creatorVaults.insertVaultInternal, {
         wallet: creatorWallet,
@@ -243,7 +259,7 @@ export const provisionCreatorVault = action({
     }
 
     const txHash = await walletClient.writeContract({
-      address: getAddress(factoryAddress),
+      address: factoryAddress,
       abi: factoryAbi,
       functionName: "createVault",
       args: [creatorWallet],
@@ -252,7 +268,7 @@ export const provisionCreatorVault = action({
     await publicClient.waitForTransactionReceipt({ hash: txHash });
 
     const vault = (await publicClient.readContract({
-      address: getAddress(factoryAddress),
+      address: factoryAddress,
       abi: factoryAbi,
       functionName: "vaultOf",
       args: [creatorWallet],
@@ -266,6 +282,7 @@ export const provisionCreatorVault = action({
       publicClient,
       walletClient,
       vault,
+      sponsorHub: sponsorHubAddress,
     });
 
     await ctx.runMutation(anyApi.creatorVaults.insertVaultInternal, {
