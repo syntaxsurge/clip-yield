@@ -147,7 +147,7 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
             <div
                 id={`PostMainLikes-${post?.id}`}
                 className={cn(
-                    "flex flex-col items-center justify-end gap-4",
+                    "flex flex-col items-center justify-end gap-4 text-gray-800 dark:text-white",
                     className,
                 )}
             >
@@ -182,7 +182,7 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
                     <button 
                         disabled={hasClickedLike}
                         onClick={() => likeOrUnlike()} 
-                        className="flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white shadow-lg transition hover:bg-black/70"
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 shadow-lg transition hover:bg-gray-300 dark:bg-black/50 dark:text-white dark:hover:bg-black/70"
                         aria-label="Like"
                     >
                         {!hasClickedLike ? (
@@ -191,7 +191,7 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
                             <BiLoaderCircle className="animate-spin" size="24"/>
                         )}
                     </button>
-                    <span className="text-[11px] font-semibold text-white/80">
+                    <span className="text-[11px] font-semibold text-gray-700 dark:text-white/80">
                         {likes?.length}
                     </span>
                 </div>
@@ -201,10 +201,10 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
                     className="flex flex-col items-center gap-1 text-center"
                     aria-label="View comments"
                 >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white shadow-lg transition hover:bg-black/70">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 shadow-lg transition hover:bg-gray-300 dark:bg-black/50 dark:text-white dark:hover:bg-black/70">
                         <FaCommentDots size="22"/>
                     </div>
-                    <span className="text-[11px] font-semibold text-white/80">
+                    <span className="text-[11px] font-semibold text-gray-700 dark:text-white/80">
                         {comments?.length}
                     </span>
                 </Link>
@@ -214,10 +214,10 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
                     className="flex flex-col items-center gap-1 text-center"
                     aria-label="Boost creator"
                 >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white shadow-lg transition hover:bg-black/70">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 shadow-lg transition hover:bg-gray-300 dark:bg-black/50 dark:text-white dark:hover:bg-black/70">
                         <FaBolt size="22"/>
                     </div>
-                    <span className="text-[11px] font-semibold text-white/80">
+                    <span className="text-[11px] font-semibold text-gray-700 dark:text-white/80">
                         Boost
                     </span>
                 </Link>
@@ -227,10 +227,10 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
                     className="flex flex-col items-center gap-1 text-center"
                     aria-label="Sponsor clip"
                 >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white shadow-lg transition hover:bg-black/70">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gray-200 text-gray-700 shadow-lg transition hover:bg-gray-300 dark:bg-black/50 dark:text-white dark:hover:bg-black/70">
                         <FaBullhorn size="21"/>
                     </div>
-                    <span className="text-[11px] font-semibold text-white/80">
+                    <span className="text-[11px] font-semibold text-gray-700 dark:text-white/80">
                         Sponsor
                     </span>
                 </Link>

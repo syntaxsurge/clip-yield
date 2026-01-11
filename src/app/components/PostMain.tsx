@@ -66,45 +66,40 @@ export default function PostMain({ post, onAutoAdvance }: PostMainProps) {
                 id={`PostMain-${post.id}`}
                 className="feed-item relative flex h-[calc(100vh-60px)] w-full items-center justify-center overflow-hidden border-b border-gray-200 dark:border-white/10"
             >
-                <div className="mx-auto flex w-full max-w-[920px] items-center justify-center py-6">
-                    <div className="relative w-full max-w-[420px]">
+                <div className="mx-auto flex w-full max-w-[980px] flex-col items-center justify-center gap-6 py-6 lg:flex-row lg:items-end">
+                    <div className="relative w-full max-w-[520px]">
                         <ClipVideoPlayer
                             src={useCreateBucketUrl(post?.video_url, "")}
                             observeVisibility
                             loop={!isAutoScrollEnabled}
                             onEnded={handleAutoAdvance}
                             showLogo={false}
-                            className="aspect-[9/16] h-[70vh] max-h-[740px] w-full"
+                            meta={{
+                                title: (
+                                    <Link href={profileUrl} className="text-white/95 hover:underline">
+                                        {usernameLabel}
+                                    </Link>
+                                ),
+                                description: caption,
+                                badge: isSponsored ? (
+                                    <Link
+                                        href={`/sponsor/${post.id}`}
+                                        className="rounded-full border border-white/60 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/80"
+                                    >
+                                        Sponsored
+                                    </Link>
+                                ) : null,
+                            }}
+                            className="h-[70vh] max-h-[740px] w-full"
                         />
-
-                        <div className="pointer-events-none absolute inset-0">
-                            <div className="pointer-events-auto absolute bottom-6 right-16 max-w-[65%] text-right text-white drop-shadow">
-                                <div className="flex items-center justify-end gap-2 text-sm font-semibold">
-                                    <Link href={profileUrl}>{usernameLabel}</Link>
-                                    {isSponsored ? (
-                                        <Link
-                                            href={`/sponsor/${post.id}`}
-                                            className="rounded-full border border-white/60 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/80"
-                                        >
-                                            Sponsored
-                                        </Link>
-                                    ) : null}
-                                </div>
-                                {caption ? (
-                                    <p className="mt-1 line-clamp-2 text-xs text-white/85">
-                                        {caption}
-                                    </p>
-                                ) : null}
-                            </div>
-
-                            <PostMainLikes
-                                post={post}
-                                avatarUrl={avatarUrl}
-                                profileUrl={profileUrl}
-                                className="pointer-events-auto absolute bottom-8 right-3"
-                            />
-                        </div>
                     </div>
+
+                    <PostMainLikes
+                        post={post}
+                        avatarUrl={avatarUrl}
+                        profileUrl={profileUrl}
+                        className="pb-6"
+                    />
                 </div>
             </div>
         </>

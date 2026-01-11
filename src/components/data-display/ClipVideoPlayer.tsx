@@ -8,13 +8,19 @@ import {
   useState,
   type ChangeEvent,
   type KeyboardEvent,
-  type MouseEvent,
   type PointerEvent,
+  type ReactNode,
 } from "react";
-import { FiMaximize, FiVolume, FiVolume1, FiVolume2, FiVolumeX } from "react-icons/fi";
+import { FiVolume, FiVolume1, FiVolume2, FiVolumeX } from "react-icons/fi";
 import { useGeneralStore } from "@/app/stores/general";
 import { cn } from "@/lib/utils";
 import { VideoStatusOverlay } from "./VideoStatusOverlay";
+
+type ClipVideoMeta = {
+  title: ReactNode;
+  description?: ReactNode;
+  badge?: ReactNode;
+};
 
 type ClipVideoPlayerProps = {
   src: string;
@@ -25,6 +31,8 @@ type ClipVideoPlayerProps = {
   observeVisibility?: boolean;
   showLogo?: boolean;
   logoClassName?: string;
+  meta?: ClipVideoMeta;
+  showMeta?: boolean;
   onEnded?: () => void;
 };
 
@@ -39,6 +47,8 @@ export function ClipVideoPlayer({
   observeVisibility = false,
   showLogo = true,
   logoClassName,
+  meta,
+  showMeta = true,
   onEnded,
 }: ClipVideoPlayerProps) {
   const { feedVolume, setFeedVolume } = useGeneralStore();
@@ -163,19 +173,6 @@ export function ClipVideoPlayer({
     event.stopPropagation();
   };
 
-  const handleFullscreen = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    const element = containerRef.current;
-    if (!element) return;
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-      return;
-    }
-    if (element.requestFullscreen) {
-      void element.requestFullscreen();
-    }
-  };
-
   const showPausedOverlay = hasPlayed && isPaused;
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
@@ -207,7 +204,7 @@ export function ClipVideoPlayer({
           loop={loop}
           playsInline
           autoPlay={autoPlay}
-          className={cn("h-full w-full object-cover", videoClassName)}
+          className={cn("h-full w-full object-contain", videoClassName)}
           src={src}
           onPlay={() => {
             setHasPlayed(true);
@@ -230,7 +227,26 @@ export function ClipVideoPlayer({
 
         <VideoStatusOverlay isBuffering={isBuffering} isPaused={showPausedOverlay} />
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        {meta && showMeta ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">
+            <div
+              className="pointer-events-auto bg-gradient-to-t from-black/85 via-black/45 to-transparent px-4 pb-6 pt-10 text-white"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="max-w-[72%] space-y-1 text-left drop-shadow">
+                <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                  {meta.title}
+                  {meta.badge}
+                </div>
+                {meta.description ? (
+                  <p className="line-clamp-2 text-xs text-white/85">
+                    {meta.description}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div
           className="absolute left-3 top-3 z-20 flex items-center gap-2"
@@ -268,15 +284,6 @@ export function ClipVideoPlayer({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleFullscreen}
-          aria-label="Toggle fullscreen"
-          className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white transition hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-        >
-          <FiMaximize size={18} />
-        </button>
-
         {showLogo ? (
           <img
             className={cn("absolute right-2 bottom-10 w-[84px]", logoClassName)}
@@ -287,23 +294,25 @@ export function ClipVideoPlayer({
       </div>
 
       <div className="absolute inset-x-0 bottom-0 z-20 translate-y-full px-3">
-        <input
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={0.1}
-          value={currentTime}
-          onChange={handleSeekChange}
-          onPointerDown={handleSeekStart}
-          onPointerUp={handleSeekEnd}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-          aria-label="Playback position"
-          className="clip-slider h-1 w-full cursor-pointer rounded-full"
-          style={{
-            background: `linear-gradient(to right, #ffffff ${progress}%, rgba(255,255,255,0.2) ${progress}%)`,
-          }}
-        />
+        <div className="rounded-full bg-black/60 px-3 py-2 shadow-lg backdrop-blur">
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            step={0.1}
+            value={currentTime}
+            onChange={handleSeekChange}
+            onPointerDown={handleSeekStart}
+            onPointerUp={handleSeekEnd}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+            aria-label="Playback position"
+            className="clip-slider h-1 w-full cursor-pointer rounded-full"
+            style={{
+              background: `linear-gradient(to right, var(--clip-slider-fill) ${progress}%, var(--clip-slider-track) ${progress}%)`,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

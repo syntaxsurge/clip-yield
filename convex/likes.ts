@@ -2,11 +2,13 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const byPost = query({
-  args: { postId: v.id("posts") },
+  args: { postId: v.string() },
   handler: async (ctx, args) => {
+    const postId = ctx.db.normalizeId("posts", args.postId);
+    if (!postId) return [];
     const likes = await ctx.db
       .query("likes")
-      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .withIndex("by_post", (q) => q.eq("postId", postId))
       .collect();
 
     return likes.map((like) => ({

@@ -90,7 +90,7 @@ export async function POST(req: Request) {
         await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
           walletAddress,
           verified: true,
-          txHash: verification?.txHash ?? null,
+          txHash: verification?.txHash ?? undefined,
           secret: syncSecret,
         });
         isVerified = true;

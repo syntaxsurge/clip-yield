@@ -113,6 +113,9 @@
     --ring: 38 97% 49%;
 
     --radius: 1rem;
+
+    --clip-slider-fill: rgba(15, 23, 42, 0.9);
+    --clip-slider-track: rgba(15, 23, 42, 0.25);
   }
 
   .dark {
@@ -153,6 +156,9 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 48 97% 55.5%;
+
+    --clip-slider-fill: rgba(255, 255, 255, 0.9);
+    --clip-slider-track: rgba(255, 255, 255, 0.35);
   }
 
   .feed-scroll {
