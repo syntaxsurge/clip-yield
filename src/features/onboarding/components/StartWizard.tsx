@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { formatShortHash } from "@/lib/utils";
 import { explorerAddressUrl, explorerTxUrl, mantleConfig } from "@/lib/web3/mantleConfig";
-import { wmntWrapAbi } from "@/lib/web3/wmnt";
+import { wmntAbi } from "@/lib/web3/wmnt";
 
 const DEFAULT_WRAP_AMOUNT = "0.1";
 
@@ -111,7 +111,7 @@ export default function StartWizard() {
     try {
       const hash = await writeContractAsync({
         address: mantleConfig.wmntAddress,
-        abi: wmntWrapAbi,
+        abi: wmntAbi,
         functionName: "deposit",
         value: parsedWrapAmount,
       });

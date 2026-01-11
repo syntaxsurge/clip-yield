@@ -5,11 +5,12 @@ import {
   useAccount,
   useBalance,
   useChainId,
+  usePublicClient,
   useReadContract,
   useSwitchChain,
   useWriteContract,
 } from "wagmi";
-import { Address, erc20Abi, formatUnits, getAddress, parseUnits } from "viem";
+import { Address, formatUnits, getAddress, parseUnits } from "viem";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -31,8 +32,8 @@ import { formatShortHash } from "@/lib/utils";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import vaultAbi from "@/lib/contracts/abi/ClipYieldVault.json";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
-import { wmntWrapAbi } from "@/lib/web3/wmnt";
-import { explorerTxUrl } from "@/lib/web3/mantleConfig";
+import { wmntAbi } from "@/lib/web3/wmnt";
+import { explorerAddressUrl, explorerTxUrl } from "@/lib/web3/mantleConfig";
 import Link from "next/link";
 
 type ActionId = "wrap" | "approve" | "deposit" | "withdraw" | "unwrap";
@@ -71,6 +72,7 @@ export default function YieldPanel({
   const { ready, authenticated, login } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
+  const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
 
@@ -80,6 +82,7 @@ export default function YieldPanel({
   const [lastTx, setLastTx] = useState<{ action: ActionId; hash: string } | null>(null);
   const [lastDepositTxHash, setLastDepositTxHash] = useState<string | null>(null);
   const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [wrapTargetMismatch, setWrapTargetMismatch] = useState<string | null>(null);
 
   const user = address as Address | undefined;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
@@ -127,7 +130,7 @@ export default function YieldPanel({
 
   const { data: wmntDecimals } = useReadContract({
     address: wmnt,
-    abi: erc20Abi,
+    abi: wmntAbi,
     functionName: "decimals",
     query: { enabled: isOnMantle },
   });
@@ -156,7 +159,7 @@ export default function YieldPanel({
 
   const { data: allowance } = useReadContract({
     address: wmnt,
-    abi: erc20Abi,
+    abi: wmntAbi,
     functionName: "allowance",
     args: user ? [user, vault] : undefined,
     query: { enabled: Boolean(user) && isOnMantle },
@@ -194,9 +197,13 @@ export default function YieldPanel({
     query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
   });
 
-  const { data: wmntBalanceRaw } = useReadContract({
+  const {
+    data: wmntBalanceRaw,
+    isLoading: isWmntBalanceLoading,
+    isError: isWmntBalanceError,
+  } = useReadContract({
     address: wmnt,
-    abi: erc20Abi,
+    abi: wmntAbi,
     functionName: "balanceOf",
     args: user ? [user] : undefined,
     chainId: mantleSepoliaContracts.chainId,
@@ -244,10 +251,13 @@ export default function YieldPanel({
     : "0";
   const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
   const hasWmntBalance = typeof wmntBalanceRaw === "bigint";
-  const formattedWmntBalance =
-    walletReady && hasWmntBalance
-      ? formatUnits(wmntBalanceValue, wmntDecimalsValue)
-      : "—";
+  const formattedWmntBalance = !walletReady
+    ? "—"
+    : isWmntBalanceLoading
+      ? "Loading..."
+      : isWmntBalanceError
+        ? "Unavailable"
+        : formatUnits(wmntBalanceValue, wmntDecimalsValue);
 
   const {
     data: vaultReceipt,
@@ -297,6 +307,38 @@ export default function YieldPanel({
       setPendingAction(null);
     }
   };
+
+  useEffect(() => {
+    let isActive = true;
+
+    if (!publicClient || !lastTx || lastTx.action !== "wrap") {
+      setWrapTargetMismatch(null);
+      return;
+    }
+
+    (async () => {
+      try {
+        const tx = await publicClient.getTransaction({
+          hash: lastTx.hash as `0x${string}`,
+        });
+        if (!isActive) return;
+        const toAddress = tx.to;
+        if (toAddress && toAddress.toLowerCase() !== wmnt.toLowerCase()) {
+          setWrapTargetMismatch(toAddress);
+        } else {
+          setWrapTargetMismatch(null);
+        }
+      } catch {
+        if (isActive) {
+          setWrapTargetMismatch(null);
+        }
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [lastTx, publicClient, wmnt]);
 
   const handleSwitchChain = async () => {
     if (!switchChainAsync) return;
@@ -445,6 +487,17 @@ export default function YieldPanel({
               <span>{formattedWmntBalance}</span>
             </div>
             <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">WMNT contract</span>
+              <Link
+                className="font-mono text-xs underline underline-offset-2"
+                href={explorerAddressUrl(wmnt)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {formatShortHash(wmnt)}
+              </Link>
+            </div>
+            <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Vault shares (cySHARE)</span>
               <span>
                 {formattedShareBalance} {vaultSymbol || "cySHARE"}
@@ -555,7 +608,7 @@ export default function YieldPanel({
                   onClick={() =>
                     runTx("wrap", {
                       address: wmnt,
-                      abi: wmntWrapAbi,
+                      abi: wmntAbi,
                       functionName: "deposit",
                       value: parsedAmount,
                     })
@@ -569,7 +622,7 @@ export default function YieldPanel({
                   onClick={() =>
                     runTx("unwrap", {
                       address: wmnt,
-                      abi: wmntWrapAbi,
+                      abi: wmntAbi,
                       functionName: "withdraw",
                       args: [parsedAmount],
                     })
@@ -594,7 +647,7 @@ export default function YieldPanel({
                   onClick={() =>
                     runTx("approve", {
                       address: wmnt,
-                      abi: erc20Abi,
+                      abi: wmntAbi,
                       functionName: "approve",
                       args: [vault, parsedAmount],
                     })
@@ -649,6 +702,38 @@ export default function YieldPanel({
                 >
                   View on MantleScan
                 </a>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {wrapTargetMismatch && (
+            <Alert variant="warning">
+              <AlertTitle>Wrap sent to the wrong address</AlertTitle>
+              <AlertDescription className="space-y-1">
+                <p>
+                  The last wrap transaction targeted{" "}
+                  <a
+                    className="underline underline-offset-2"
+                    href={explorerAddressUrl(wrapTargetMismatch)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {formatShortHash(wrapTargetMismatch)}
+                  </a>
+                  , which does not mint WMNT.
+                </p>
+                <p>
+                  Wrap MNT using the official WMNT contract{" "}
+                  <a
+                    className="underline underline-offset-2"
+                    href={explorerAddressUrl(wmnt)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {formatShortHash(wmnt)}
+                  </a>
+                  .
+                </p>
               </AlertDescription>
             </Alert>
           )}

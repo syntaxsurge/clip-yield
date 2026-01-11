@@ -39,7 +39,7 @@ import { formatShortHash } from "@/lib/utils";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import sponsorHubAbi from "@/lib/contracts/abi/ClipYieldSponsorHub.json";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
-import { wmntWrapAbi } from "@/lib/web3/wmnt";
+import { wmntAbi } from "@/lib/web3/wmnt";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
 import useCreateSponsorCampaign from "@/app/hooks/useCreateSponsorCampaign";
 import useCreateCampaignReceipt from "@/app/hooks/useCreateCampaignReceipt";
@@ -165,14 +165,14 @@ export default function SponsorPanel({
 
   const { data: wmntDecimals } = useReadContract({
     address: wmnt,
-    abi: erc20Abi,
+    abi: wmntAbi,
     functionName: "decimals",
     query: { enabled: isOnMantle },
   });
 
   const { data: allowance } = useReadContract({
     address: wmnt,
-    abi: erc20Abi,
+    abi: wmntAbi,
     functionName: "allowance",
     args: user ? [user, sponsorHub] : undefined,
     query: { enabled: Boolean(user) && isOnMantle },
@@ -722,7 +722,7 @@ export default function SponsorPanel({
               onClick={() =>
                 runTx("wrap", {
                   address: wmnt,
-                  abi: wmntWrapAbi,
+                  abi: wmntAbi,
                   functionName: "deposit",
                   value: parsedAmount,
                 })
@@ -737,7 +737,7 @@ export default function SponsorPanel({
               onClick={() =>
                 runTx("approve", {
                   address: wmnt,
-                  abi: erc20Abi,
+                  abi: wmntAbi,
                   functionName: "approve",
                   args: [sponsorHub, parsedAmount],
                 })
