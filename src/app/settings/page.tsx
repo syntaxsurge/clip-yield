@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
@@ -56,106 +57,118 @@ export default function SettingsPage() {
             </p>
           </header>
 
-          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader className="space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <CardTitle className="text-base">Wallet & verification</CardTitle>
-                    <Badge variant={isConnected ? "success" : "warning"}>
-                      {isConnected ? "Connected" : "Not connected"}
-                    </Badge>
-                  </div>
-                  <CardDescription>
-                    Your wallet powers KYC, yield vaults, and sponsorship signatures.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Wallet</span>
-                    <span className="font-mono text-xs">{walletLabel}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Network</span>
-                    <span>{networkLabel}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">KYC status</span>
-                    <span>{kycLabel}</span>
-                  </div>
-                  {!isConnected ? (
-                    <Button onClick={() => void login()} disabled={!ready}>
-                      {ready ? "Connect wallet" : "Checking..."}
-                    </Button>
-                  ) : !isVerified ? (
-                    <Button asChild variant="outline">
-                      <Link href="/kyc?returnTo=/settings">Start KYC</Link>
-                    </Button>
-                  ) : (
-                    <Button asChild variant="outline">
-                      <Link href="/yield">Open yield vault</Link>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+          <Tabs defaultValue="general" className="space-y-6">
+            <TabsList
+              aria-label="Settings sections"
+              className="w-full justify-start gap-2 overflow-x-auto"
+            >
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="ai">AI Studio</TabsTrigger>
+            </TabsList>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Preferences</CardTitle>
-                  <CardDescription>
-                    Personalize playback and appearance across the app.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 text-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="font-medium">Mute clips by default</div>
-                      <p className="text-xs text-muted-foreground">
-                        Start For You and Following feeds muted.
-                      </p>
+            <TabsContent value="general">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <Card>
+                  <CardHeader className="space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <CardTitle className="text-base">Wallet & verification</CardTitle>
+                      <Badge variant={isConnected ? "success" : "warning"}>
+                        {isConnected ? "Connected" : "Not connected"}
+                      </Badge>
                     </div>
-                    <Checkbox
-                      checked={isFeedMuted}
-                      onCheckedChange={(checked) => setIsFeedMuted(Boolean(checked))}
-                      aria-label="Mute clips by default"
-                    />
-                  </div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="font-medium">Theme</div>
-                      <p className="text-xs text-muted-foreground">
-                        Toggle between light and dark mode.
-                      </p>
+                    <CardDescription>
+                      Your wallet powers KYC, yield vaults, and sponsorship signatures.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Wallet</span>
+                      <span className="font-mono text-xs">{walletLabel}</span>
                     </div>
-                    <ThemeToggle className="h-9 w-9" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Network</span>
+                      <span>{networkLabel}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">KYC status</span>
+                      <span>{kycLabel}</span>
+                    </div>
+                    {!isConnected ? (
+                      <Button onClick={() => void login()} disabled={!ready}>
+                        {ready ? "Connect wallet" : "Checking..."}
+                      </Button>
+                    ) : !isVerified ? (
+                      <Button asChild variant="outline">
+                        <Link href="/kyc?returnTo=/settings">Start KYC</Link>
+                      </Button>
+                    ) : (
+                      <Button asChild variant="outline">
+                        <Link href="/yield">Open yield vault</Link>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
 
-            <div className="space-y-6">
-              <OpenAIKeyCard />
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">AI workflow tips</CardTitle>
-                  <CardDescription>
-                    Keep your Sora generations organized and ready for remixing.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm text-muted-foreground">
-                  <p>
-                    Generate clips from the editor's AI Studio, then drag them from
-                    History into your timeline. Generations stay synced to the current
-                    project in local storage.
-                  </p>
-                  <p>
-                    Use short prompts for rapid iteration, then increase duration and
-                    size once you land on a final look.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Preferences</CardTitle>
+                    <CardDescription>
+                      Personalize playback and appearance across the app.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="font-medium">Mute clips by default</div>
+                        <p className="text-xs text-muted-foreground">
+                          Start For You and Following feeds muted.
+                        </p>
+                      </div>
+                      <Checkbox
+                        checked={isFeedMuted}
+                        onCheckedChange={(checked) => setIsFeedMuted(Boolean(checked))}
+                        aria-label="Mute clips by default"
+                      />
+                    </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="font-medium">Theme</div>
+                        <p className="text-xs text-muted-foreground">
+                          Toggle between light and dark mode.
+                        </p>
+                      </div>
+                      <ThemeToggle className="h-9 w-9" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ai">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <OpenAIKeyCard />
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">AI workflow tips</CardTitle>
+                    <CardDescription>
+                      Keep your Sora generations organized and ready for remixing.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm text-muted-foreground">
+                    <p>
+                      Generate clips from the editor&apos;s AI Studio, then drag them from
+                      History into your timeline. Generations stay synced to the current
+                      project in local storage.
+                    </p>
+                    <p>
+                      Use short prompts for rapid iteration, then increase duration and
+                      size once you land on a final look.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </MainLayout>

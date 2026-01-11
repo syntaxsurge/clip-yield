@@ -241,7 +241,7 @@ export default function TopNav() {
                                                 </button>
                                                 <button
                                                     onClick={() => {
-                                                        router.push(\"/settings\")
+                                                        router.push("/settings")
                                                         setShowMenu(false)
                                                     }}
                                                     className="flex items-center w-full justify-start py-3 px-2 text-gray-800 hover:bg-gray-100 cursor-pointer dark:text-white dark:hover:bg-white/10"
