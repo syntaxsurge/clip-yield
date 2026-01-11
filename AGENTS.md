@@ -345,6 +345,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 ## Pages
 - `/` short-form feed backed by Convex posts
 - `/following` feed of clips from followed creators
+- `/creators` creator directory with suggested + following lists
 - `/start` Mantle Sepolia onboarding wizard (wallet connect, faucet/bridge, WMNT wrap, entry to vault flows)
 - `/upload` upload a new video post
 - `/profile/[id]` creator profile with posts
@@ -357,6 +358,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/boost/[creatorId]` creator boost vault deposits with KYC gating
 - `/kyc` Persona-hosted KYC entrypoint for wallet verification
 - `/kyc/complete` KYC completion status + return to vault
+- `/settings` global settings for wallet status, playback preferences, and AI BYOK keys
 - `/admin/kyc` on-chain KYC manager console for Mantle Sepolia
 - `/admin/boost-pass` publish on-chain Boost Pass epochs from leaderboard snapshots
 - `/perks/boost-pass` Boost Pass remix pack downloads + project import
@@ -367,7 +369,9 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/api/kyc/start` creates a Persona inquiry and returns the hosted flow URL
 - `/api/kyc/sync` fetches Persona inquiry status and triggers on-chain KYC updates
 - `/api/creator-vault/resolve` verifies creator KYC and provisions or returns the creator boost vault
-- `/api/mantle/rollup-info` returns `{ ok, info }` rollup status via `rollup_getInfo` for finality UX
+- `/api/settings/openai-key` manages encrypted BYOK OpenAI keys stored in HTTP-only cookies
+- `/api/sora` creates Sora jobs and polls job status using the stored BYOK key
+- `/api/sora/content` proxies generated Sora video content for editor ingestion
 - `/api/boost-pass/remix-pack` verifies Boost Pass ownership and returns the remix pack JSON
 - `/api/sponsor/remix-pack` verifies sponsor perks eligibility and returns the sponsor remix pack JSON
 
@@ -376,10 +380,10 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Convex backend in `convex/` with `profiles`, `posts` (Convex file storage), `comments`, `likes`, `follows`, `projects`, creator vaults (`creatorVaults`), sponsor campaigns (`sponsorCampaigns`), campaign receipts (`campaignReceipts` with L2 inclusion metadata), vault tx logs (`vaultTx` with L2 inclusion metadata), activity events (`activityEvents`), leaderboard snapshots (`leaderboardSnapshots`), boost pass epochs/claims (`boostPassEpochs`, `boostPassClaims`), KYC tables (`kycInquiries`, `walletVerifications`), plus `admin.truncateAll` for `convex:reset`
 - Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with a cron recompute of leaderboards
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence (`src/app/store`)
+- AI generation uses Sora BYOK keys stored via encrypted cookies (`OPENAI_BYOK_COOKIE_SECRET`) and `/api/sora` routes, surfaced in the editor library AI Studio
 - Mantle Sepolia wallet stack using Privy embedded wallets + wagmi + viem (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`)
 - Admin routes are gated by an allowlist in `NEXT_PUBLIC_ADMIN_WALLET_ADDRESSES` and enforced via `src/app/admin/layout.tsx`
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
-- Mantle rollup status is fetched server-side and surfaced in the campaign receipt finality panel
 - RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldBoostPass) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
 - Persona hosted-flow KYC uses redirect + `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles

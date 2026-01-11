@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useAppDispatch } from "@/app/store";
 import { addSoraJob } from "@/app/store/slices/projectSlice";
 import toast from "react-hot-toast";

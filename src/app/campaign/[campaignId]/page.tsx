@@ -4,7 +4,6 @@ import { use, useEffect, useMemo, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
 import useGetCampaignReceiptById from "@/app/hooks/useGetCampaignReceiptById";
 import type { CampaignReceipt } from "@/app/types";
-import { MantleFinalityPanel } from "@/components/data-display/MantleFinalityPanel";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Card,
@@ -203,20 +202,6 @@ export default function CampaignReceiptPage({ params }: CampaignPageProps) {
                 </Card>
               </div>
 
-              <Alert variant="info">
-                <AlertTitle>Batch context</AlertTitle>
-                <AlertDescription>
-                  Mantle batches L2 transactions before submitting them to L1. In
-                  the explorer, the L1 State Data section includes the Batch Index
-                  and the L1 submission hash that links this batch to Ethereum.
-                </AlertDescription>
-              </Alert>
-
-              <MantleFinalityPanel
-                txHash={receipt.txHash as `0x${string}`}
-                l2BlockNumber={receipt.l2BlockNumber ?? null}
-                l2TimestampIso={receipt.l2TimestampIso ?? null}
-              />
             </div>
           )}
         </div>

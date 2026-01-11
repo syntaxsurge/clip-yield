@@ -14,7 +14,7 @@ const alertVariants = cva(
         warning:
           "border-[color:var(--brand-accent)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-accent-text)] dark:text-[color:var(--brand-accent-strong)]",
         destructive:
-          "border-destructive/40 bg-destructive/10 text-destructive dark:border-destructive/30",
+          "border-[color:var(--brand-accent-strong)] bg-[color:var(--brand-accent-soft)] text-[color:var(--brand-ink)] dark:text-[color:var(--brand-accent-strong)]",
       },
     },
     defaultVariants: {
@@ -57,7 +57,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm leading-relaxed text-current break-words", className)}
     {...props}
   />
 ));

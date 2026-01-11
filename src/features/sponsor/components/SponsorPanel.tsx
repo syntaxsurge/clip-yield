@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import {
   useAccount,
   useBalance,
@@ -106,9 +106,10 @@ export default function SponsorPanel({
   const user = address as Address | undefined;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
 
-  const wmnt = mantleSepoliaContracts.wmnt as Address;
-  const sponsorHub = mantleSepoliaContracts.sponsorHub as Address;
-  const kycRegistry = mantleSepoliaContracts.kycRegistry as Address;
+  const wmnt = getAddress(mantleSepoliaContracts.wmnt as Address);
+  const sponsorHub = getAddress(mantleSepoliaContracts.sponsorHub as Address);
+  const kycRegistry = getAddress(mantleSepoliaContracts.kycRegistry as Address);
+  const vault = useMemo(() => getAddress(vaultAddress), [vaultAddress]);
 
   const clipHash = useMemo(() => {
     return keccak256(toHex(`post:${postId}`));
@@ -178,21 +179,21 @@ export default function SponsorPanel({
   });
 
   const { data: vaultSymbol } = useReadContract({
-    address: vaultAddress,
+    address: vault,
     abi: erc20Abi,
     functionName: "symbol",
     query: { enabled: isOnMantle },
   });
 
   const { data: vaultDecimals } = useReadContract({
-    address: vaultAddress,
+    address: vault,
     abi: erc20Abi,
     functionName: "decimals",
     query: { enabled: isOnMantle },
   });
 
   const { data: shareBalance } = useReadContract({
-    address: vaultAddress,
+    address: vault,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: user ? [user] : undefined,
@@ -259,7 +260,7 @@ export default function SponsorPanel({
           args: [
             clipHash,
             getAddress(creatorId),
-            vaultAddress,
+            vault,
             parsedAmount,
             previewTermsHash,
           ],
@@ -291,7 +292,7 @@ export default function SponsorPanel({
     sponsorHub,
     termsReady,
     user,
-    vaultAddress,
+    vault,
   ]);
 
   const formattedShares = shareBalanceValue
@@ -392,7 +393,7 @@ export default function SponsorPanel({
       address: sponsorHub,
       abi: sponsorHubAbi,
       functionName: "sponsorWithTerms",
-      args: [clipHash, getAddress(creatorId), vaultAddress, parsedAmount, termsHash],
+      args: [clipHash, getAddress(creatorId), vault, parsedAmount, termsHash],
     });
 
     if (!txHash) return;
@@ -401,7 +402,7 @@ export default function SponsorPanel({
       postId,
       clipHash,
       creatorId,
-      vaultAddress,
+      vaultAddress: vault,
       sponsorAddress: user as string,
       assets: parsedAmount.toString(),
       txHash,
@@ -417,7 +418,7 @@ export default function SponsorPanel({
         clipHash,
         creatorId: getAddress(creatorId),
         sponsorAddress: user,
-        boostVault: vaultAddress,
+        boostVault: vault,
         assetsWei: parsedAmount.toString(),
         termsHash,
         txHash,
@@ -542,7 +543,9 @@ export default function SponsorPanel({
       {actionError && (
         <Alert variant="destructive">
           <AlertTitle>Action failed</AlertTitle>
-          <AlertDescription>{actionError}</AlertDescription>
+          <AlertDescription className="break-all whitespace-pre-wrap">
+            {actionError}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -578,7 +581,7 @@ export default function SponsorPanel({
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Vault</span>
-            <span className="font-mono text-xs">{formatShortHash(vaultAddress)}</span>
+            <span className="font-mono text-xs">{formatShortHash(vault)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Sponsor hub</span>

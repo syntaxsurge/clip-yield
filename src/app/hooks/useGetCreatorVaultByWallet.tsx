@@ -1,6 +1,7 @@
 import { convexClient } from "@/lib/convex/client";
 import { getCreatorVaultByWallet } from "@/lib/convex/functions";
 import type { CreatorVaultRecord } from "@/app/types";
+import { getAddress, isAddress } from "viem";
 
 const useGetCreatorVaultByWallet = async (
   wallet: string,
@@ -20,35 +21,39 @@ const useGetCreatorVaultByWallet = async (
     };
   }
 
-  try {
-    const res = await fetch("/api/creator-vault/resolve", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ wallet }),
-    });
+  const res = await fetch("/api/creator-vault/resolve", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ wallet }),
+  });
 
-    if (!res.ok) return null;
+  const payload = (await res.json().catch(() => null)) as {
+    ok?: boolean;
+    walletAddress?: string;
+    vault?: string | null;
+    txHash?: string | null;
+    reason?: string;
+  } | null;
 
-    const payload = (await res.json()) as {
-      ok?: boolean;
-      walletAddress?: string;
-      vault?: string | null;
-      txHash?: string | null;
-    };
-
-    if (!payload?.ok || !payload.vault || !payload.walletAddress) {
-      return null;
-    }
-
-    return {
-      wallet: payload.walletAddress,
-      vault: payload.vault,
-      txHash: payload.txHash ?? null,
-      createdAt: Date.now(),
-    };
-  } catch {
-    return null;
+  if (!res.ok || !payload?.ok) {
+    if (payload?.reason === "kyc_required") return null;
+    throw new Error(payload?.reason ?? "Unable to resolve creator vault.");
   }
+
+  if (!payload.vault || !payload.walletAddress) {
+    throw new Error("Creator vault not provisioned yet.");
+  }
+
+  if (!isAddress(payload.vault) || !isAddress(payload.walletAddress)) {
+    throw new Error("Received an invalid vault address from the server.");
+  }
+
+  return {
+    wallet: getAddress(payload.walletAddress),
+    vault: getAddress(payload.vault),
+    txHash: payload.txHash ?? null,
+    createdAt: Date.now(),
+  };
 };
 
 export default useGetCreatorVaultByWallet;

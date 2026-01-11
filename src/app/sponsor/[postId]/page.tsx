@@ -154,7 +154,11 @@ export default function SponsorPage({ params }: SponsorPageProps) {
                       yield.
                     </AlertDescription>
                     <div className="mt-3 flex flex-wrap gap-3">
-                      <Button asChild variant="outline">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="border-[color:var(--brand-accent)] text-[color:var(--brand-accent-strong)] hover:bg-[color:var(--brand-accent-soft)]"
+                      >
                         <Link
                           href={`/kyc?returnTo=${encodeURIComponent(
                             `/sponsor/${postId}`,
@@ -163,7 +167,11 @@ export default function SponsorPage({ params }: SponsorPageProps) {
                           Start KYC
                         </Link>
                       </Button>
-                      <Button asChild variant="secondary">
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className="text-foreground"
+                      >
                         <Link href={`/profile/${post.profile.user_id}`}>
                           Back to profile
                         </Link>

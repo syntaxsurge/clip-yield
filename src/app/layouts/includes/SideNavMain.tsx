@@ -15,20 +15,21 @@ export default function SideNavMain() {
 
     let { setRandomUsers, randomUsers} = useGeneralStore()
     const [followingUsers, setFollowingUsers] = useState<RandomUsers[]>([])
+    const [hasMounted, setHasMounted] = useState(false)
 
     const contextUser = useUser()
     const pathname = usePathname()
-    const [hydrated, setHydrated] = useState(false)
-    const currentPath = hydrated ? pathname ?? "" : ""
-    const isProjectsRoute = currentPath.startsWith("/projects")
+    const currentPath = pathname ?? ""
+    const resolvedPath = hasMounted ? currentPath : ""
+    const isProjectsRoute = resolvedPath.startsWith("/projects")
     const defaultColor = "hsl(var(--foreground))"
     const activeColor = "var(--brand-accent-text)"
 
-    useEffect(() => { setRandomUsers() }, [setRandomUsers])
-
     useEffect(() => {
-        setHydrated(true)
+        setHasMounted(true)
     }, [])
+
+    useEffect(() => { setRandomUsers() }, [setRandomUsers])
 
     useEffect(() => {
         if (!contextUser?.user?.id) {
@@ -66,14 +67,14 @@ export default function SideNavMain() {
                     <Link href="/">
                         <MenuItem 
                             iconString="For You" 
-                            colorString={currentPath === '/' ? activeColor : defaultColor} 
+                            colorString={resolvedPath === '/' ? activeColor : defaultColor} 
                             sizeString="25"
                         />
                     </Link>
                     <Link href="/following">
                         <MenuItem
                             iconString="Following"
-                            colorString={currentPath === '/following' ? activeColor : defaultColor}
+                            colorString={resolvedPath === '/following' ? activeColor : defaultColor}
                             sizeString="25"
                         />
                     </Link>
@@ -99,7 +100,12 @@ export default function SideNavMain() {
                         </div>
                     </ClientOnly>
 
-                    <button className="lg:block hidden text-[color:var(--brand-accent-text)] pt-1.5 pl-2 text-[13px] font-semibold">See all</button>
+                    <Link
+                        href="/creators#suggested"
+                        className="lg:block hidden text-[color:var(--brand-accent-text)] pt-1.5 pl-2 text-[13px] font-semibold"
+                    >
+                        See all
+                    </Link>
 
                     {contextUser?.user?.id ? (
                         <div >
@@ -123,7 +129,12 @@ export default function SideNavMain() {
                                 </div>
                             </ClientOnly>
 
-                            <button className="lg:block hidden text-[color:var(--brand-accent-text)] pt-1.5 pl-2 text-[13px] font-semibold">See more</button>
+                            <Link
+                                href="/creators#following"
+                                className="lg:block hidden text-[color:var(--brand-accent-text)] pt-1.5 pl-2 text-[13px] font-semibold"
+                            >
+                                See more
+                            </Link>
                         </div>
                     ) : null}
                     <div className="lg:block hidden border-b lg:ml-2 mt-2 dark:border-white/10" />

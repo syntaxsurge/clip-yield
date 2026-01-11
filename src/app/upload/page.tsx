@@ -5,7 +5,7 @@ import UploadLayout from "../layouts/UploadLayout";
 import { BiLoaderCircle, BiSolidCloudUpload } from "react-icons/bi"
 import { AiOutlineCheckCircle } from "react-icons/ai";
 import { PiKnifeLight } from 'react-icons/pi'
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useUser } from "@/app/context/user"
 import { UploadError } from "../types";
 import useCreatePost from "../hooks/useCreatePost";

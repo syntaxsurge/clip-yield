@@ -103,7 +103,11 @@ export default function BoostPage({ params }: BoostPageProps) {
                 auto-provisioned immediately after verification.
               </AlertDescription>
               <div className="mt-3 flex flex-wrap gap-3">
-                <Button asChild variant="outline">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-[color:var(--brand-accent)] text-[color:var(--brand-accent-strong)] hover:bg-[color:var(--brand-accent-soft)]"
+                >
                   <Link
                     href={`/kyc?returnTo=${encodeURIComponent(
                       `/boost/${creatorId}`,
@@ -112,7 +116,11 @@ export default function BoostPage({ params }: BoostPageProps) {
                     Start KYC
                   </Link>
                 </Button>
-                <Button asChild variant="secondary">
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="text-foreground"
+                >
                   <Link href={`/profile/${creatorId}`}>Back to profile</Link>
                 </Button>
               </div>

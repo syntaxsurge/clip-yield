@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -39,14 +39,6 @@ type KycStatusResponse = {
   error?: string;
 };
 
-const FINAL_STATUSES = new Set([
-  "approved",
-  "completed",
-  "declined",
-  "rejected",
-  "failed",
-]);
-
 export default function KycCompletePage() {
   const searchParams = useSearchParams();
   const inquiryId = searchParams.get("inquiry-id");
@@ -60,26 +52,27 @@ export default function KycCompletePage() {
   const [walletAddress, setWalletAddress] = useState<string | null>(
     referenceId ?? null,
   );
+  const [isVerified, setIsVerified] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
+  const [autoSyncAttempted, setAutoSyncAttempted] = useState(false);
+  const [hasLoadedStatus, setHasLoadedStatus] = useState(false);
+  const [autoSyncDisabled, setAutoSyncDisabled] = useState(false);
 
   const statusLabel = syncStatus ?? status ?? "processing";
-  const isFinalStatus = FINAL_STATUSES.has(statusLabel);
   const isDeclined =
     statusLabel === "declined" ||
     statusLabel === "rejected" ||
     statusLabel === "failed";
-  const isSettled = Boolean(txHash) || isDeclined;
-  const shouldPoll = useMemo(() => {
-    if (!inquiryId) return false;
-    if (txHash) return false;
-    return !isFinalStatus;
-  }, [inquiryId, isFinalStatus, txHash]);
+  const isSettled = Boolean(txHash) || isVerified || isDeclined;
+  const hasOnchainVerification = Boolean(txHash) || isVerified;
 
   const loadStatus = useCallback(async () => {
     if (!referenceId) return;
+    let verifiedFromStatus = false;
+    let txHashFromStatus: string | null = null;
     try {
       const res = await fetch(
         `/api/kyc/status?wallet=${encodeURIComponent(referenceId)}`,
@@ -91,17 +84,29 @@ export default function KycCompletePage() {
       }
       if (payload.inquiry?.status) setSyncStatus(payload.inquiry.status);
       if (payload.walletAddress) setWalletAddress(payload.walletAddress);
-      if (payload.verification?.txHash) setTxHash(payload.verification.txHash);
+      verifiedFromStatus = Boolean(payload.verification?.verified);
+      txHashFromStatus = payload.verification?.txHash ?? null;
+      if (verifiedFromStatus) {
+        setIsVerified(true);
+      }
+      if (txHashFromStatus) setTxHash(txHashFromStatus);
       if (payload.verification?.updatedAt) {
         setLastSyncedAt(payload.verification.updatedAt);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load KYC status.");
+    } finally {
+      if (verifiedFromStatus || txHashFromStatus) {
+        setAutoSyncDisabled(true);
+        setAutoSyncAttempted(true);
+        setIsSyncing(false);
+      }
+      setHasLoadedStatus(true);
     }
   }, [referenceId]);
 
   const runSync = useCallback(async () => {
-    if (!inquiryId || isSyncing || txHash) return;
+    if (!inquiryId || isSyncing || isSettled || autoSyncDisabled) return;
     setIsSyncing(true);
     setError(null);
 
@@ -123,24 +128,35 @@ export default function KycCompletePage() {
 
       if (payload.status) setSyncStatus(payload.status);
       if (payload.walletAddress) setWalletAddress(payload.walletAddress);
+      if (payload.verified || payload.alreadyVerified) {
+        setIsVerified(true);
+      }
       if (payload.txHash) setTxHash(payload.txHash);
       setLastSyncedAt(Date.now());
+      if (payload.verified || payload.alreadyVerified || payload.txHash) {
+        setAutoSyncDisabled(true);
+        setAutoSyncAttempted(true);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sync KYC status.");
     } finally {
       setIsSyncing(false);
     }
-  }, [inquiryId, isSyncing, referenceId, txHash]);
+  }, [autoSyncDisabled, inquiryId, isSettled, isSyncing, referenceId]);
 
   useEffect(() => {
-    if (!inquiryId) return;
-    if ((isFinalStatus || isSettled) && referenceId) {
+    if (referenceId) {
       void loadStatus();
-      setIsSyncing(false);
       return;
     }
-    void runSync();
-  }, [inquiryId, isFinalStatus, isSettled, loadStatus, referenceId, runSync]);
+    if (inquiryId && !referenceId) {
+      setError("Missing wallet reference for this inquiry.");
+    }
+  }, [inquiryId, loadStatus, referenceId]);
+
+  useEffect(() => {
+    setAutoSyncAttempted(false);
+  }, [inquiryId]);
 
   useEffect(() => {
     if (referenceId && !walletAddress) {
@@ -149,16 +165,38 @@ export default function KycCompletePage() {
   }, [referenceId, walletAddress]);
 
   useEffect(() => {
-    if (!inquiryId || !shouldPoll) return;
-    const interval = setInterval(() => {
-      void runSync();
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [inquiryId, shouldPoll, runSync]);
+    if (!inquiryId || isSettled || autoSyncAttempted || autoSyncDisabled) return;
+    if (!hasLoadedStatus) return;
+    setAutoSyncAttempted(true);
+    void runSync();
+  }, [
+    autoSyncAttempted,
+    autoSyncDisabled,
+    hasLoadedStatus,
+    inquiryId,
+    isSettled,
+    runSync,
+  ]);
+
+  useEffect(() => {
+    if ((isSettled || hasOnchainVerification) && isSyncing) {
+      setIsSyncing(false);
+    }
+  }, [hasOnchainVerification, isSettled, isSyncing]);
+
+  useEffect(() => {
+    if (!hasLoadedStatus) return;
+    if (hasOnchainVerification) {
+      setAutoSyncDisabled(true);
+      setAutoSyncAttempted(true);
+      if (isSyncing) setIsSyncing(false);
+    }
+  }, [hasLoadedStatus, hasOnchainVerification, isSyncing]);
 
   const formattedWallet = walletAddress ? formatShortHash(walletAddress) : "Unavailable";
   const syncedAtLabel = lastSyncedAt ? new Date(lastSyncedAt).toLocaleTimeString() : "Not synced";
-  const isApproved = statusLabel === "approved" || statusLabel === "completed";
+  const isApproved =
+    isVerified || statusLabel === "approved" || statusLabel === "completed";
 
   return (
     <MainLayout>

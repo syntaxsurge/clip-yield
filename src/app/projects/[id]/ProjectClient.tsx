@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import {
   getFile,
   getProject,
@@ -32,6 +32,7 @@ import ExportList from "@/app/components/editor/AssetsPanel/tools-section/Export
 import EditorTopBar from "@/app/components/editor/EditorTopBar";
 import { EditorPlayerProvider } from "@/app/components/editor/player/remotion/EditorPlayerContext";
 import ClientOnly from "@/app/components/ClientOnly";
+import { SoraJobManager } from "@/app/components/editor/AssetsPanel/tools-section/SoraJobManager";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -122,6 +123,7 @@ export default function ProjectClient({ projectId }: Props) {
 
   return (
     <EditorPlayerProvider>
+      <SoraJobManager />
       <div className="flex h-screen flex-col select-none bg-black">
         <EditorTopBar />
         {isLoading ? (

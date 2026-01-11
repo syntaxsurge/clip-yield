@@ -10,7 +10,7 @@ import {
   useSwitchChain,
   useWriteContract,
 } from "wagmi";
-import { Address, erc20Abi, formatUnits, parseUnits } from "viem";
+import { Address, erc20Abi, formatUnits, getAddress, parseUnits } from "viem";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -23,7 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MantleFinalityPanel } from "@/components/data-display/MantleFinalityPanel";
 import { VaultTxReceiptCard } from "@/components/data-display/VaultTxReceiptCard";
 import useCreateVaultTx from "@/app/hooks/useCreateVaultTx";
 import useGetLatestVaultTx from "@/app/hooks/useGetLatestVaultTx";
@@ -88,9 +87,11 @@ export default function YieldPanel({
   const user = address as Address | undefined;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
 
-  const wmnt = mantleSepoliaContracts.wmnt as Address;
-  const vault = (vaultAddress ?? mantleSepoliaContracts.clipYieldVault) as Address;
-  const kycRegistry = mantleSepoliaContracts.kycRegistry as Address;
+  const wmnt = getAddress(mantleSepoliaContracts.wmnt as Address);
+  const vault = getAddress(
+    (vaultAddress ?? mantleSepoliaContracts.clipYieldVault) as Address,
+  );
+  const kycRegistry = getAddress(mantleSepoliaContracts.kycRegistry as Address);
   const kycReturnTo = returnTo ?? "/yield";
 
   useEffect(() => {
@@ -192,13 +193,15 @@ export default function YieldPanel({
 
   const { data: nativeBalance } = useBalance({
     address: user,
-    query: { enabled: Boolean(user) && isOnMantle },
+    query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
   });
 
-  const { data: wmntBalance } = useBalance({
-    address: user,
-    token: wmnt,
-    query: { enabled: Boolean(user) && isOnMantle },
+  const { data: wmntBalance } = useReadContract({
+    address: wmnt,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: user ? [user] : undefined,
+    query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
   });
 
   const isVerified = Boolean(kycStatus);
@@ -206,7 +209,7 @@ export default function YieldPanel({
   const shareDecimalsValue = typeof vaultDecimals === "number" ? vaultDecimals : 18;
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
   const nativeBalanceValue = nativeBalance?.value ?? 0n;
-  const wmntBalanceValue = wmntBalance?.value ?? 0n;
+  const wmntBalanceValue = typeof wmntBalance === "bigint" ? wmntBalance : 0n;
   const shareBalanceValue = typeof shareBalance === "bigint" ? shareBalance : 0n;
   const maxWithdrawValue =
     typeof previewAssetsFromShares === "bigint" ? previewAssetsFromShares : 0n;
@@ -230,18 +233,23 @@ export default function YieldPanel({
     isVerified &&
     !needsApproval;
 
+  const walletReady = isConnected && isOnMantle;
   const formattedTotalAssets = totalAssets
     ? formatUnits(totalAssets, wmntDecimalsValue)
     : "0";
   const formattedTotalSupply = totalSupply
     ? formatUnits(totalSupply, shareDecimalsValue)
     : "0";
-  const formattedShareBalance = shareBalance
-    ? formatUnits(shareBalance, shareDecimalsValue)
-    : "0";
+  const formattedShareBalance = walletReady
+    ? formatUnits(shareBalanceValue, shareDecimalsValue)
+    : "—";
   const formattedPreviewShares = previewShares
     ? formatUnits(previewShares, shareDecimalsValue)
     : "0";
+  const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
+  const formattedWmntBalance = walletReady
+    ? formatUnits(wmntBalanceValue, wmntDecimalsValue)
+    : "—";
 
   const {
     data: vaultReceipt,
@@ -364,12 +372,12 @@ export default function YieldPanel({
       }
     }
 
-    if (onDeposit) {
-      await onDeposit({
-        txHash,
-        assetsWei: parsedAmount.toString(),
-        wallet: user,
-        vault,
+  if (onDeposit) {
+    await onDeposit({
+      txHash,
+      assetsWei: parsedAmount.toString(),
+      wallet: user,
+      vault,
       });
     }
   };
@@ -425,41 +433,6 @@ export default function YieldPanel({
         </Alert>
       )}
 
-      {actionError && (
-        <Alert variant="warning">
-          <AlertTitle>Transaction failed</AlertTitle>
-          <AlertDescription className="break-words whitespace-pre-wrap text-foreground">
-            {actionError}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {lastTx && (
-        <Alert variant="success">
-          <AlertTitle>Transaction submitted</AlertTitle>
-          <AlertDescription>
-            {lastTx.action.toUpperCase()} TX: {formatShortHash(lastTx.hash)}{" "}
-            <a
-              className="underline underline-offset-2"
-              href={explorerTxUrl(lastTx.hash)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              View on MantleScan
-            </a>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {receiptError && (
-        <Alert variant="warning">
-          <AlertTitle>Receipt logging failed</AlertTitle>
-          <AlertDescription className="break-words whitespace-pre-wrap">
-            {receiptError}
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -472,7 +445,7 @@ export default function YieldPanel({
               <span>{formattedTotalAssets}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Share supply</span>
+              <span className="text-muted-foreground">Share supply (cySHARE)</span>
               <span>
                 {formattedTotalSupply} {vaultSymbol || "cySHARE"}
               </span>
@@ -500,14 +473,14 @@ export default function YieldPanel({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">MNT balance</span>
-              <span>{nativeBalance?.formatted ?? "0"}</span>
+              <span>{formattedNativeBalance}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">WMNT balance</span>
-              <span>{wmntBalance?.formatted ?? "0"}</span>
+              <span>{formattedWmntBalance}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Vault shares</span>
+              <span className="text-muted-foreground">Vault shares (cySHARE)</span>
               <span>
                 {formattedShareBalance} {vaultSymbol || "cySHARE"}
               </span>
@@ -518,182 +491,264 @@ export default function YieldPanel({
 
       <Card>
         <CardHeader>
-          <CardTitle>Deposit or withdraw</CardTitle>
+          <CardTitle>How the vault works</CardTitle>
           <CardDescription>
-            Amounts are in WMNT. Wrap MNT first if needed.
+            A quick guide to the terms and mechanics on this page.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="amount">
-              Amount
-            </label>
-            <Input
-              id="amount"
-              inputMode="decimal"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              placeholder="0.05"
-            />
-            <div className="text-xs text-muted-foreground">
-              Estimated shares: {formattedPreviewShares} {vaultSymbol || "cySHARE"}
+        <CardContent className="space-y-4 text-sm">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-semibold">TVL (WMNT)</p>
+              <p className="text-xs text-muted-foreground">
+                Total WMNT locked in the vault. Deposits increase TVL and yield grows it over time.
+              </p>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Estimated network fee: {estimatedFee ? `${estimatedFee} MNT` : "—"}
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-semibold">cySHARE</p>
+              <p className="text-xs text-muted-foreground">
+                Vault share tokens minted to depositors. Your cySHARE balance tracks your claim on WMNT + yield.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-semibold">Share supply</p>
+              <p className="text-xs text-muted-foreground">
+                The total cySHARE outstanding across all depositors in the vault.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <p className="font-semibold">KYC registry</p>
+              <p className="text-xs text-muted-foreground">
+                On-chain registry that marks verified wallets allowed to deposit or withdraw.
+              </p>
             </div>
           </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <Button
-              variant="outline"
-              onClick={() =>
-                runTx("wrap", {
-                  address: wmnt,
-                  abi: wmntWrapAbi,
-                  functionName: "deposit",
-                  value: parsedAmount,
-                })
-              }
-              disabled={!canWrap || pendingAction === "wrap"}
-            >
-              {pendingAction === "wrap" ? "Wrapping..." : "Wrap MNT to WMNT"}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() =>
-                runTx("approve", {
-                  address: wmnt,
-                  abi: erc20Abi,
-                  functionName: "approve",
-                  args: [vault, parsedAmount],
-                })
-              }
-              disabled={!canApprove || pendingAction === "approve"}
-            >
-              {pendingAction === "approve" ? "Approving..." : "Approve vault"}
-            </Button>
-
-            <Button
-              onClick={handleDeposit}
-              disabled={!canDeposit || pendingAction === "deposit"}
-            >
-              {pendingAction === "deposit" ? "Depositing..." : "Deposit"}
-            </Button>
-
-            <Button
-              variant="secondary"
-              onClick={() =>
-                runTx("withdraw", {
-                  address: vault,
-                  abi: vaultAbi,
-                  functionName: "withdraw",
-                  args: [parsedAmount, user as Address, user as Address],
-                })
-              }
-              disabled={!canWithdraw || pendingAction === "withdraw"}
-            >
-              {pendingAction === "withdraw" ? "Withdrawing..." : "Withdraw WMNT"}
-            </Button>
-
-            <Button
-              variant="ghost"
-              onClick={() =>
-                runTx("unwrap", {
-                  address: wmnt,
-                  abi: wmntWrapAbi,
-                  functionName: "withdraw",
-                  args: [parsedAmount],
-                })
-              }
-              disabled={!canUnwrap || pendingAction === "unwrap"}
-            >
-              {pendingAction === "unwrap" ? "Unwrapping..." : "Unwrap WMNT"}
-            </Button>
-          </div>
-
-          <div className="rounded-xl border border-border/60 bg-muted/30 p-4 text-sm">
-            <p className="font-semibold">What these actions do</p>
-            <ul className="mt-2 space-y-1 text-muted-foreground">
-              <li>
-                <span className="font-medium text-foreground">Wrap MNT</span>{" "}
-                converts your MNT into WMNT so the vault can accept deposits.
-              </li>
-              <li>
-                <span className="font-medium text-foreground">Approve vault</span>{" "}
-                grants the vault permission to move your WMNT for deposits.
-              </li>
-              <li>
-                <span className="font-medium text-foreground">Deposit</span>{" "}
-                sends WMNT into the vault and mints vault shares.
-              </li>
-              <li>
-                <span className="font-medium text-foreground">Withdraw WMNT</span>{" "}
-                redeems WMNT back to your wallet from the vault.
-              </li>
-              <li>
-                <span className="font-medium text-foreground">Unwrap WMNT</span>{" "}
-                converts WMNT back into native MNT.
-              </li>
-            </ul>
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
+            <p className="font-semibold">Why wrap MNT to WMNT?</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Vaults accept ERC-20 tokens, so MNT must be wrapped into WMNT before deposits. You can unwrap WMNT back to native MNT anytime.
+            </p>
           </div>
         </CardContent>
       </Card>
 
-      {isConnected && isOnMantle && (
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold">Receipt & finality</h2>
-            <p className="text-sm text-muted-foreground">
-              Every vault transaction is recorded in Convex and confirmed on-chain.
-            </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>Action center</CardTitle>
+          <CardDescription>
+            Wrap MNT, approve WMNT, and move funds in or out of the vault.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="amount">
+                Amount (WMNT)
+              </label>
+              <Input
+                id="amount"
+                inputMode="decimal"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder="0.05"
+              />
+              <div className="text-xs text-muted-foreground">
+                Estimated shares: {formattedPreviewShares} {vaultSymbol || "cySHARE"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Estimated network fee: {estimatedFee ? `${estimatedFee} MNT` : "—"}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">KYC status</span>
+                <span>{walletReady ? (isVerified ? "Verified" : "Not verified") : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">WMNT available</span>
+                <span>{formattedWmntBalance}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Approval</span>
+                <span>{walletReady ? (needsApproval ? "Required" : "Ready") : "—"}</span>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Approve the vault when you increase the amount you want to deposit.
+              </p>
+            </div>
           </div>
 
-          {receiptLoadError && (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="space-y-3 rounded-xl border border-border/60 bg-muted/10 p-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold">Wrap & unwrap WMNT</h3>
+                <p className="text-xs text-muted-foreground">
+                  Convert between native MNT and WMNT for vault interactions.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    runTx("wrap", {
+                      address: wmnt,
+                      abi: wmntWrapAbi,
+                      functionName: "deposit",
+                      value: parsedAmount,
+                    })
+                  }
+                  disabled={!canWrap || pendingAction === "wrap"}
+                >
+                  {pendingAction === "wrap" ? "Wrapping..." : "Wrap MNT to WMNT"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    runTx("unwrap", {
+                      address: wmnt,
+                      abi: wmntWrapAbi,
+                      functionName: "withdraw",
+                      args: [parsedAmount],
+                    })
+                  }
+                  disabled={!canUnwrap || pendingAction === "unwrap"}
+                >
+                  {pendingAction === "unwrap" ? "Unwrapping..." : "Unwrap WMNT"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-border/60 bg-muted/10 p-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold">Approve + vault actions</h3>
+                <p className="text-xs text-muted-foreground">
+                  Approve WMNT once, then deposit into or withdraw from the vault.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    runTx("approve", {
+                      address: wmnt,
+                      abi: erc20Abi,
+                      functionName: "approve",
+                      args: [vault, parsedAmount],
+                    })
+                  }
+                  disabled={!canApprove || pendingAction === "approve"}
+                >
+                  {pendingAction === "approve" ? "Approving..." : "Approve vault"}
+                </Button>
+                <Button
+                  onClick={handleDeposit}
+                  disabled={!canDeposit || pendingAction === "deposit"}
+                >
+                  {pendingAction === "deposit" ? "Depositing..." : "Deposit"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    runTx("withdraw", {
+                      address: vault,
+                      abi: vaultAbi,
+                      functionName: "withdraw",
+                      args: [parsedAmount, user as Address, user as Address],
+                    })
+                  }
+                  disabled={!canWithdraw || pendingAction === "withdraw"}
+                >
+                  {pendingAction === "withdraw" ? "Withdrawing..." : "Withdraw WMNT"}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {actionError && (
             <Alert variant="warning">
-              <AlertTitle>Unable to load receipts</AlertTitle>
-              <AlertDescription>
-                {receiptLoadError instanceof Error
-                  ? receiptLoadError.message
-                  : "Failed to load vault receipts."}
+              <AlertTitle>Transaction failed</AlertTitle>
+              <AlertDescription className="break-all whitespace-pre-wrap">
+                {actionError}
               </AlertDescription>
             </Alert>
           )}
 
-          {!receiptLoadError && receiptLoading && (
-            <Alert variant="info">
-              <AlertTitle>Loading receipts</AlertTitle>
+          {lastTx && (
+            <Alert variant="success">
+              <AlertTitle>Transaction submitted</AlertTitle>
               <AlertDescription>
-                Checking the latest vault transaction status.
+                {lastTx.action.toUpperCase()} TX: {formatShortHash(lastTx.hash)}{" "}
+                <a
+                  className="underline underline-offset-2"
+                  href={explorerTxUrl(lastTx.hash)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View on MantleScan
+                </a>
               </AlertDescription>
             </Alert>
           )}
 
-          {!receiptLoadError && !receiptLoading && !vaultReceipt && (
-            <Alert variant="info">
-              <AlertTitle>No receipts yet</AlertTitle>
-              <AlertDescription>
-                Once you deposit, we&apos;ll surface the on-chain receipt here.
+          {receiptError && (
+            <Alert variant="warning">
+              <AlertTitle>Receipt logging failed</AlertTitle>
+              <AlertDescription className="break-words whitespace-pre-wrap">
+                {receiptError}
               </AlertDescription>
             </Alert>
           )}
 
-          {vaultReceipt && (
-            <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-              <VaultTxReceiptCard
-                receipt={vaultReceipt}
-                title={receiptTitle}
-                description={receiptDescription}
-              />
-              <MantleFinalityPanel
-                txHash={vaultReceipt.txHash as `0x${string}`}
-                l2BlockNumber={vaultReceipt.l2BlockNumber ?? null}
-                l2TimestampIso={vaultReceipt.l2TimestampIso ?? null}
-              />
+          {isConnected && isOnMantle && (
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold">Latest receipt</h3>
+                <p className="text-xs text-muted-foreground">
+                  Every vault transaction is recorded in Convex and confirmed on-chain.
+                </p>
+              </div>
+
+              {receiptLoadError && (
+                <Alert variant="warning">
+                  <AlertTitle>Unable to load receipts</AlertTitle>
+                  <AlertDescription>
+                    {receiptLoadError instanceof Error
+                      ? receiptLoadError.message
+                      : "Failed to load vault receipts."}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {!receiptLoadError && receiptLoading && (
+                <Alert variant="info">
+                  <AlertTitle>Loading receipts</AlertTitle>
+                  <AlertDescription>
+                    Checking the latest vault transaction status.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {!receiptLoadError && !receiptLoading && !vaultReceipt && (
+                <Alert variant="info">
+                  <AlertTitle>No receipts yet</AlertTitle>
+                  <AlertDescription>
+                    Once you deposit, we&apos;ll surface the on-chain receipt here.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {vaultReceipt && (
+                <VaultTxReceiptCard
+                  receipt={vaultReceipt}
+                  title={receiptTitle}
+                  description={receiptDescription}
+                />
+              )}
             </div>
           )}
-        </div>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

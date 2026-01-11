@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useAccount } from "wagmi";
 import { usePrivy } from "@privy-io/react-auth";
 import { Button } from "@/components/ui/button";

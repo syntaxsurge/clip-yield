@@ -14,6 +14,7 @@ import useToggleFollow from "@/app/hooks/useToggleFollow"
 import { formatShortHash } from "@/lib/utils"
 import { FiVolume2, FiVolumeX } from "react-icons/fi"
 import { useGeneralStore } from "@/app/stores/general"
+import { VideoStatusOverlay } from "@/components/data-display/VideoStatusOverlay"
 
 export default function PostMain({ post }: PostMainCompTypes) {
     const contextUser = useUser()
@@ -21,6 +22,9 @@ export default function PostMain({ post }: PostMainCompTypes) {
     const [isFollowing, setIsFollowing] = useState(false)
     const [isFollowLoading, setIsFollowLoading] = useState(false)
     const { isFeedMuted, setIsFeedMuted, toggleFeedMuted } = useGeneralStore()
+    const [isBuffering, setIsBuffering] = useState(true)
+    const [isPaused, setIsPaused] = useState(false)
+    const [hasPlayed, setHasPlayed] = useState(false)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -158,6 +162,8 @@ export default function PostMain({ post }: PostMainCompTypes) {
         }
     }
 
+    const showPausedOverlay = hasPlayed && isPaused
+
     return (
         <>
             <div
@@ -238,6 +244,22 @@ export default function PostMain({ post }: PostMainCompTypes) {
                                 playsInline
                                 className="h-full w-full object-cover"
                                 src={useCreateBucketUrl(post?.video_url, "")}
+                                onPlay={() => {
+                                    setHasPlayed(true)
+                                    setIsPaused(false)
+                                }}
+                                onPause={() => setIsPaused(true)}
+                                onWaiting={() => setIsBuffering(true)}
+                                onCanPlay={() => setIsBuffering(false)}
+                                onPlaying={() => {
+                                    setIsBuffering(false)
+                                    setIsPaused(false)
+                                    setHasPlayed(true)
+                                }}
+                            />
+                            <VideoStatusOverlay
+                                isBuffering={isBuffering}
+                                isPaused={showPausedOverlay}
                             />
                             <button
                                 type="button"

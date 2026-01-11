@@ -173,20 +173,19 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
   5. Click “Confirm Sponsorship” — wait for Privy signing and a “Campaign created” / “Transaction submitted” state.
   6. **Verify on-screen:** **Current page:** `/sponsor/[postId]` — confirm a success state is visible (toast/status/redirect prompt).
 - **Voiceover:**
-  > “Sponsorship is the creator revenue engine. I sponsor this clip with 2 WMNT and sign through Privy. The result is an on-chain action that’s easy for a consumer to do and easy for judges to verify. Next we’ll open the campaign receipt to see the terms hash, transaction status, and finality UX.”
+  > “Sponsorship is the creator revenue engine. I sponsor this clip with 2 WMNT and sign through Privy. The result is an on-chain action that’s easy for a consumer to do and easy for judges to verify. Next we’ll open the campaign receipt to see the terms hash and transaction status.”
 
-## 14. Campaign Receipt + Finality Panel (On‑Chain Proof)
+## 14. Campaign Receipt (On‑Chain Proof)
 - **URL:** /campaign/[campaignId]
-- **Shot:** Campaign receipt showing campaign ID, terms hash, tx status, MantleScan link, and a finality panel.
+- **Shot:** Campaign receipt showing campaign ID, terms hash, tx status, and a MantleScan link.
 - **Steps:**
   1. **Current page:** `/sponsor/[postId]` — confirm the sponsorship success state is visible.
   2. **Navigate:** Open URL directly: `/campaign/[campaignId]` → lands on `/campaign/[campaignId]` — confirm a “Campaign Receipt” heading and “Terms Hash” are visible.
   3. **Action:** **Current page:** `/campaign/[campaignId]` — click “View Transaction on MantleScan” — confirm a new tab opens to `https://sepolia.mantlescan.xyz/` on the transaction page.
   4. **Navigate:** **Current page:** MantleScan tab — close the tab and return to the receipt — confirm the receipt is still visible.
-  5. **Action:** **Current page:** `/campaign/[campaignId]` — scroll to the “Finality” panel — confirm you see finality/inclusion status text.
-  6. **Verify on-screen:** **Current page:** `/campaign/[campaignId]` — confirm the receipt shows terms hash + tx status + explorer proof.
+  5. **Verify on-screen:** **Current page:** `/campaign/[campaignId]` — confirm the receipt shows terms hash + tx status + explorer proof.
 - **Voiceover:**
-  > “This receipt is the judge-friendly proof: terms hash, transaction status, and a direct MantleScan link on Mantle Sepolia. We also surface a finality panel so users understand L2 inclusion and stability. Next we’ll open the Activity feed where every boost and sponsorship becomes a transparent event stream.”
+  > “This receipt is the judge-friendly proof: terms hash, transaction status, and a direct MantleScan link on Mantle Sepolia. Next we’ll open the Activity feed where every boost and sponsorship becomes a transparent event stream.”
 
 ## 15. On‑Chain Activity Feed (Transparent Ledger)
 - **URL:** /activity
@@ -251,23 +250,40 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
   5. **Navigate:** **Current page:** `/projects/[id]` — wait for editor UI to finish loading — confirm timeline clips are visible.
   6. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm the project opens successfully and the timeline is ready.
 - **Voiceover:**
-  > “This is the creator workspace. The Remix Pack isn’t just a collectible—it becomes a real editable project. We open it and the editor loads with assets ready to remix. Next we’ll export a finished MP4 and upload it back into the feed.”
+  > “This is the creator workspace. The Remix Pack isn’t just a collectible—it becomes a real editable project. We open it and the editor loads with assets ready to remix. Next we’ll use AI Studio and our BYOK Settings flow to generate a clip for the timeline.”
 
-## 20. Timeline Editor + Export (Remix Production)
+## 20. AI Studio + Settings (BYOK Sora)
+- **URL:** /projects/[id] → /settings
+- **Shot:** Editor library showing “AI Studio”, then Settings with an OpenAI key form.
+- **Steps:**
+  1. **Current page:** `/projects/[id]` — confirm the Library panel and “AI Studio” card are visible.
+  2. **Action:** **Current page:** `/projects/[id]` — click “AI Studio → Generate” — confirm you are redirected to `/settings?focus=openai` (or open the avatar menu → Settings).
+  3. **Action:** **Current page:** `/settings` — click into “OpenAI API key” and paste your key.
+     - OpenAI API key = `[OPENAI_KEY="sk-demo-key"]`
+  4. Click “Save key” — confirm a success toast and automatic return to `/projects/[id]`.
+  5. **Action:** **Current page:** `/projects/[id]` — open “AI Studio → Generate” again and enter a prompt.
+     - Prompt = `[SORA_PROMPT="A cinematic drone shot of a floating music festival at sunset"]`
+  6. Click “Generate clip” — confirm a “Sora job queued” toast, then open “History”.
+  7. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm the Sora job appears in History and the generated clip is available in the Library list.
+- **Voiceover:**
+  > “ClipYield’s editor ships with AI Studio. Because it’s BYOK, the first time I generate I’m redirected to Settings to add my OpenAI key. Once saved, I can prompt Sora, track the job in History, and pull the generated clip straight into the library.”
+
+## 21. Timeline Editor + Export (Remix Production)
 - **URL:** /projects/[id]
 - **Shot:** Full editor view with timeline, preview, and export controls with render progress.
 - **Steps:**
-  1. **Current page:** `/projects/[id]` — confirm the timeline editor is visible and an “Export” button exists.
-  2. **Action:** **Current page:** `/projects/[id]` — click “Preview” — confirm the preview plays and the playhead moves.
-  3. **Action:** **Current page:** `/projects/[id]` — click “Export” — confirm an export modal or progress indicator appears.
-  4. **(Only if needed) Enter values:**
+  1. **Current page:** `/projects/[id]` — confirm the AI-generated clip appears in the Library list.
+  2. **Action:** **Current page:** `/projects/[id]` — drag the generated clip onto the timeline — confirm a new clip block appears.
+  3. **Action:** **Current page:** `/projects/[id]` — click “Preview” — confirm the preview plays and the playhead moves.
+  4. **Action:** **Current page:** `/projects/[id]` — click “Export” — confirm an export modal or progress indicator appears.
+  5. **(Only if needed) Enter values:**
      - Export name = `[EXPORT_NAME="clipyield_remix"]`
-  5. Click “Start Export” — wait for progress to reach 100% and an “Export complete” state.
-  6. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm “Export complete” and a “Download MP4” button/link is visible.
+  6. Click “Start Export” — wait for progress to reach 100% and an “Export complete” state.
+  7. **Verify on-screen:** **Current page:** `/projects/[id]` — confirm “Export complete” and a “Download MP4” button/link is visible.
 - **Voiceover:**
-  > “Now we turn perks into actual content. We preview, export, and get a real downloadable MP4 with a clear render progress UI. This is what makes ClipYield a true creator product: on-chain incentives unlock tools, and tools produce content. Next we’ll upload this remix back into the feed.”
+  > “Now we turn perks and AI into real content. We drop the generated clip onto the timeline, preview, export, and get a downloadable MP4 with clear render progress. Next we’ll upload this remix back into the feed.”
 
-## 21. Upload Remix (Publish Back to Feed)
+## 22. Upload Remix (Publish Back to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker + caption input and a publish CTA; then a visible success state after publish.
 - **Steps:**
@@ -280,26 +296,13 @@ One-liner: A creator-first short‑video platform where fans sponsor clips using
   5. Click “Publish” — wait for an “Uploaded” toast/state and redirect.
   6. **Verify on-screen:** **Current page:** `/` — confirm the newly uploaded clip appears in the feed with the caption visible.
 - **Voiceover:**
-  > “This closes the loop. We upload the exported remix, publish it, and it’s live in the feed. This proves ClipYield isn’t just on-chain mechanics—it’s a full consumer creator pipeline. Finally, I’ll show the small API proof that powers the campaign finality UX we saw earlier.”
-
-## 22. Mantle Rollup Info API (Finality UX Proof Endpoint)
-- **URL:** /api/mantle/rollup-info
-- **Shot:** Raw JSON response showing `{ ok, info }` fields used by the finality panel.
-- **Steps:**
-  1. **Current page:** `/` — confirm your newly uploaded clip is visible.
-  2. **Navigate:** Open URL directly: `/api/mantle/rollup-info` → lands on `/api/mantle/rollup-info` — confirm a JSON response is visible.
-  3. **Action:** **Current page:** `/api/mantle/rollup-info` — highlight the `ok` field — confirm it indicates success (e.g., `true`).
-  4. **Action:** **Current page:** `/api/mantle/rollup-info` — scroll slightly — confirm `info` fields are visible.
-  5. **Action:** **Current page:** `/api/mantle/rollup-info` — copy the URL in the address bar — confirm it’s exactly `/api/mantle/rollup-info`.
-  6. **Verify on-screen:** **Current page:** `/api/mantle/rollup-info` — confirm the API returns a valid JSON payload used by the receipt finality panel.
-- **Voiceover:**
-  > “This endpoint powers the finality panel UX: it returns rollup status data so users can understand inclusion and stability on Mantle Sepolia. It’s a small detail, but it makes on-chain receipts feel consumer-friendly. Now we’ll wrap with the full journey we just proved.”
+  > “This closes the loop. We upload the exported remix, publish it, and it’s live in the feed. This proves ClipYield isn’t just on-chain mechanics—it’s a full consumer creator pipeline.”
 
 ## Final Wrap-Up
 - **URL:** /profile/[id]
 - **Shot:** Creator profile showing follower state, visible Boost/Sponsor CTAs, and the creator’s posts including the new remix.
 - **Steps:**
-  1. **Current page:** `/api/mantle/rollup-info` — confirm JSON is visible.
+  1. **Current page:** `/` — confirm the new remix appears in the feed.
   2. **Verify final state:** Open URL directly: `/profile/[id]` — confirm “Following” state is visible, Boost/Sponsor CTAs are visible, and the new remix post appears in the creator’s posts list/grid.
 - **Voiceover:**
-  > “We proved a complete loop: Privy-powered wallet onboarding and transaction signing, KYC gating, yield vault deposits, creator boosts, clip sponsorship receipts with finality UX, transparent activity and leaderboards, and Boost Pass perks that unlock Remix Packs creators can edit and re-upload. ClipYield makes on-chain funding feel native to short-form video. Try it at [DEMO_URL].”
+  > “We proved a complete loop: Privy-powered wallet onboarding and transaction signing, KYC gating, yield vault deposits, creator boosts, clip sponsorship receipts, transparent activity and leaderboards, and Boost Pass perks that unlock Remix Packs creators can edit and re-upload. ClipYield makes on-chain funding feel native to short-form video. Try it at [DEMO_URL].”
