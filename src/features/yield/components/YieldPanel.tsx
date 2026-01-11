@@ -5,7 +5,6 @@ import {
   useAccount,
   useBalance,
   useChainId,
-  usePublicClient,
   useReadContract,
   useSwitchChain,
   useWriteContract,
@@ -72,7 +71,6 @@ export default function YieldPanel({
   const { ready, authenticated, login } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
-  const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
 
@@ -82,7 +80,6 @@ export default function YieldPanel({
   const [lastTx, setLastTx] = useState<{ action: ActionId; hash: string } | null>(null);
   const [lastDepositTxHash, setLastDepositTxHash] = useState<string | null>(null);
   const [receiptError, setReceiptError] = useState<string | null>(null);
-  const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
 
   const user = address as Address | undefined;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
@@ -193,14 +190,14 @@ export default function YieldPanel({
 
   const { data: nativeBalance } = useBalance({
     address: user,
+    chainId: mantleSepoliaContracts.chainId,
     query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
   });
 
-  const { data: wmntBalance } = useReadContract({
-    address: wmnt,
-    abi: erc20Abi,
-    functionName: "balanceOf",
-    args: user ? [user] : undefined,
+  const { data: wmntBalance } = useBalance({
+    address: user,
+    token: wmnt,
+    chainId: mantleSepoliaContracts.chainId,
     query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
   });
 
@@ -209,7 +206,7 @@ export default function YieldPanel({
   const shareDecimalsValue = typeof vaultDecimals === "number" ? vaultDecimals : 18;
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
   const nativeBalanceValue = nativeBalance?.value ?? 0n;
-  const wmntBalanceValue = typeof wmntBalance === "bigint" ? wmntBalance : 0n;
+  const wmntBalanceValue = wmntBalance?.value ?? 0n;
   const shareBalanceValue = typeof shareBalance === "bigint" ? shareBalance : 0n;
   const maxWithdrawValue =
     typeof previewAssetsFromShares === "bigint" ? previewAssetsFromShares : 0n;
@@ -228,10 +225,6 @@ export default function YieldPanel({
     shareBalanceValue > 0n &&
     maxWithdrawValue >= parsedAmount;
   const canUnwrap = canTransact && hasWmntForActions;
-  const canEstimateFee =
-    Boolean(publicClient && user && isOnMantle && parsedAmount > 0n) &&
-    isVerified &&
-    !needsApproval;
 
   const walletReady = isConnected && isOnMantle;
   const formattedTotalAssets = totalAssets
@@ -248,7 +241,7 @@ export default function YieldPanel({
     : "0";
   const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
   const formattedWmntBalance = walletReady
-    ? formatUnits(wmntBalanceValue, wmntDecimalsValue)
+    ? wmntBalance?.formatted ?? "—"
     : "—";
 
   const {
@@ -281,39 +274,6 @@ export default function YieldPanel({
     retry: 1,
   });
 
-  useEffect(() => {
-    let isActive = true;
-
-    if (!canEstimateFee || !publicClient || !user) {
-      setEstimatedFee(null);
-      return;
-    }
-
-    (async () => {
-      try {
-        const gas = await publicClient.estimateContractGas({
-          address: vault,
-          abi: vaultAbi,
-          functionName: "deposit",
-          args: [parsedAmount, user],
-          account: user,
-        });
-        const gasPrice = await publicClient.getGasPrice();
-        const fee = gas * gasPrice;
-        if (isActive) {
-          setEstimatedFee(formatUnits(fee, 18));
-        }
-      } catch {
-        if (isActive) {
-          setEstimatedFee(null);
-        }
-      }
-    })();
-
-    return () => {
-      isActive = false;
-    };
-  }, [canEstimateFee, parsedAmount, publicClient, user, vault]);
 
   const runTx = async (
     action: ActionId,
@@ -554,9 +514,6 @@ export default function YieldPanel({
               />
               <div className="text-xs text-muted-foreground">
                 Estimated shares: {formattedPreviewShares} {vaultSymbol || "cySHARE"}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Estimated network fee: {estimatedFee ? `${estimatedFee} MNT` : "—"}
               </div>
             </div>
 
