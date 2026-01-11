@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useAccount,
   useBalance,
@@ -8,11 +8,13 @@ import {
   usePublicClient,
   useReadContract,
   useSwitchChain,
+  useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 import { Address, formatUnits, getAddress, parseUnits } from "viem";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +30,7 @@ import useCreateVaultTx from "@/app/hooks/useCreateVaultTx";
 import useGetLatestVaultTx from "@/app/hooks/useGetLatestVaultTx";
 import useGetVaultTxByHash from "@/app/hooks/useGetVaultTxByHash";
 import type { VaultTxKind } from "@/app/types";
-import { formatShortHash } from "@/lib/utils";
+import { cn, formatShortHash } from "@/lib/utils";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import vaultAbi from "@/lib/contracts/abi/ClipYieldVault.json";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
@@ -83,6 +85,8 @@ export default function YieldPanel({
   const [lastDepositTxHash, setLastDepositTxHash] = useState<string | null>(null);
   const [receiptError, setReceiptError] = useState<string | null>(null);
   const [wrapTargetMismatch, setWrapTargetMismatch] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastConfirmedHash, setLastConfirmedHash] = useState<string | null>(null);
 
   const user = address as Address | undefined;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
@@ -99,7 +103,7 @@ export default function YieldPanel({
     setReceiptError(null);
   }, [user, vault, receiptKind, receiptCreatorId]);
 
-  const { data: kycStatus } = useReadContract({
+  const { data: kycStatus, refetch: refetchKycStatus } = useReadContract({
     address: kycRegistry,
     abi: kycRegistryAbi,
     functionName: "isVerified",
@@ -135,21 +139,21 @@ export default function YieldPanel({
     query: { enabled: isOnMantle },
   });
 
-  const { data: totalAssets } = useReadContract({
+  const { data: totalAssets, refetch: refetchTotalAssets } = useReadContract({
     address: vault,
     abi: vaultAbi,
     functionName: "totalAssets",
     query: { enabled: isOnMantle },
   });
 
-  const { data: totalSupply } = useReadContract({
+  const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     address: vault,
     abi: vaultAbi,
     functionName: "totalSupply",
     query: { enabled: isOnMantle },
   });
 
-  const { data: shareBalance } = useReadContract({
+  const { data: shareBalance, refetch: refetchShareBalance } = useReadContract({
     address: vault,
     abi: vaultAbi,
     functionName: "balanceOf",
@@ -157,7 +161,7 @@ export default function YieldPanel({
     query: { enabled: Boolean(user) && isOnMantle },
   });
 
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: wmnt,
     abi: wmntAbi,
     functionName: "allowance",
@@ -175,7 +179,7 @@ export default function YieldPanel({
     }
   }, [amount, wmntDecimals]);
 
-  const { data: previewShares } = useReadContract({
+  const { data: previewShares, refetch: refetchPreviewShares } = useReadContract({
     address: vault,
     abi: vaultAbi,
     functionName: "convertToShares",
@@ -183,7 +187,10 @@ export default function YieldPanel({
     query: { enabled: parsedAmount > 0n && isOnMantle },
   });
 
-  const { data: previewAssetsFromShares } = useReadContract({
+  const {
+    data: previewAssetsFromShares,
+    refetch: refetchPreviewAssetsFromShares,
+  } = useReadContract({
     address: vault,
     abi: vaultAbi,
     functionName: "convertToAssets",
@@ -191,7 +198,7 @@ export default function YieldPanel({
     query: { enabled: Boolean(shareBalance) && isOnMantle },
   });
 
-  const { data: nativeBalance } = useBalance({
+  const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
     address: user,
     chainId: mantleSepoliaContracts.chainId,
     query: { enabled: Boolean(user) && isOnMantle, refetchInterval: 10_000 },
@@ -201,6 +208,7 @@ export default function YieldPanel({
     data: wmntBalanceRaw,
     isLoading: isWmntBalanceLoading,
     isError: isWmntBalanceError,
+    refetch: refetchWmntBalance,
   } = useReadContract({
     address: wmnt,
     abi: wmntAbi,
@@ -250,7 +258,6 @@ export default function YieldPanel({
     ? formatUnits(previewShares, shareDecimalsValue)
     : "0";
   const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
-  const hasWmntBalance = typeof wmntBalanceRaw === "bigint";
   const formattedWmntBalance = !walletReady
     ? "—"
     : isWmntBalanceLoading
@@ -289,6 +296,56 @@ export default function YieldPanel({
     retry: 1,
   });
 
+  const {
+    isSuccess: isTxConfirmed,
+    isLoading: isTxConfirming,
+  } = useWaitForTransactionReceipt({
+    chainId: mantleSepoliaContracts.chainId,
+    hash: lastTx?.hash as `0x${string}` | undefined,
+    query: { enabled: Boolean(lastTx?.hash) },
+  });
+
+  const handleRefresh = useCallback(async () => {
+    if (!walletReady) return;
+    setIsRefreshing(true);
+    const tasks: Promise<unknown>[] = [
+      refetchNativeBalance(),
+      refetchWmntBalance(),
+      refetchAllowance(),
+      refetchShareBalance(),
+      refetchTotalAssets(),
+      refetchTotalSupply(),
+      refetchKycStatus(),
+    ];
+    if (parsedAmount > 0n) {
+      tasks.push(refetchPreviewShares());
+    }
+    if (shareBalanceValue > 0n) {
+      tasks.push(refetchPreviewAssetsFromShares());
+    }
+    await Promise.allSettled(tasks);
+    setIsRefreshing(false);
+  }, [
+    parsedAmount,
+    refetchAllowance,
+    refetchKycStatus,
+    refetchNativeBalance,
+    refetchPreviewAssetsFromShares,
+    refetchPreviewShares,
+    refetchShareBalance,
+    refetchTotalAssets,
+    refetchTotalSupply,
+    refetchWmntBalance,
+    shareBalanceValue,
+    walletReady,
+  ]);
+
+  useEffect(() => {
+    if (!lastTx?.hash || !isTxConfirmed) return;
+    if (lastConfirmedHash === lastTx.hash) return;
+    setLastConfirmedHash(lastTx.hash);
+    void handleRefresh();
+  }, [handleRefresh, isTxConfirmed, lastConfirmedHash, lastTx?.hash]);
 
   const runTx = async (
     action: ActionId,
@@ -467,11 +524,27 @@ export default function YieldPanel({
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Wallet status</CardTitle>
-            <CardDescription>
-              {user ? formatShortHash(user) : "Not connected"}
-            </CardDescription>
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <CardTitle>Wallet status</CardTitle>
+              <CardDescription>
+                {user ? formatShortHash(user) : "Not connected"}
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void handleRefresh()}
+              disabled={!walletReady || isRefreshing}
+            >
+              <RefreshCw
+                className={cn(
+                  "h-4 w-4",
+                  isRefreshing || isTxConfirming ? "animate-spin" : "",
+                )}
+              />
+              {isRefreshing ? "Refreshing" : "Refresh"}
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
@@ -551,11 +624,27 @@ export default function YieldPanel({
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Action center</CardTitle>
-          <CardDescription>
-            Wrap MNT, approve WMNT, and move funds in or out of the vault.
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <CardTitle>Action center</CardTitle>
+            <CardDescription>
+              Wrap MNT, approve WMNT, and move funds in or out of the vault.
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void handleRefresh()}
+            disabled={!walletReady || isRefreshing}
+          >
+            <RefreshCw
+              className={cn(
+                "h-4 w-4",
+                isRefreshing || isTxConfirming ? "animate-spin" : "",
+              )}
+            />
+            {isRefreshing ? "Refreshing" : "Refresh data"}
+          </Button>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
@@ -590,6 +679,9 @@ export default function YieldPanel({
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 Approve the vault when you increase the amount you want to deposit.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Use refresh after a transaction to sync balances and approvals.
               </p>
             </div>
           </div>
