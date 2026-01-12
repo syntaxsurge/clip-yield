@@ -110,13 +110,14 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **URL:** /sponsor/[postId]
 - **Shot:** Sponsorship page with clip preview, sponsorship breakdown panel, and “Confirm Sponsorship” CTA that mentions Invoice Receipt NFT.
 - **Steps:**
-  1. **Current page:** `/post/[postId]/[userId]`, confirm the clip and actions are visible.
-  2. **Navigate:** **Current page:** `/post/[postId]/[userId]`, click “Sponsor” → lands on `/sponsor/[postId]`, confirm “Sponsor” heading and clip preview appear.
-  3. **Action:** **Current page:** `/sponsor/[postId]`, click input labeled “Amount (WMNT)”, confirm cursor is active.
-  4. **Enter values:**
+  1. **Current page:** `/boost/[creatorId]`, confirm the Boost Vault UI is visible.
+  2. **Navigate:** **Current page:** `/boost/[creatorId]`, click “Explore” → click “Feed” → lands on `/` → click a clip → lands on `/post/[postId]/[userId]`, confirm the clip and actions are visible.
+  3. **Navigate:** **Current page:** `/post/[postId]/[userId]`, click “Sponsor” → lands on `/sponsor/[postId]`, confirm “Sponsor” heading and clip preview appear.
+  4. **Action:** **Current page:** `/sponsor/[postId]`, click input labeled “Amount (WMNT)”, confirm cursor is active.
+  5. **Enter values:**
      - Amount (WMNT) = `[SPONSOR_WMNT=0.10]`
-  5. Click “Confirm Sponsorship”, wait for wallet prompt and “Transaction submitted” state.
-  6. **Verify on-screen:** **Current page:** `/sponsor/[postId]`, confirm a success state shows “Invoice Receipt NFT minted” (token ID visible) or a “View Receipt” button appears.
+  6. Click “Confirm Sponsorship”, wait for wallet prompt and “Transaction submitted” state.
+  7. **Verify on-screen:** **Current page:** `/sponsor/[postId]`, confirm a success state shows “Invoice Receipt NFT minted” (token ID visible) or a “View Receipt” button appears.
 - **Voiceover:**
   > “This is the Real World Asset or RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 1 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details.”
 
