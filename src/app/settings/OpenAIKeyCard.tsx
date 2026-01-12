@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { toast } from "react-hot-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -29,6 +29,8 @@ function safeNextPath(next: string | null): string | null {
 export function OpenAIKeyCard() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const didFocusRef = useRef(false);
 
   const focus = searchParams.get("focus");
   const next = useMemo(
@@ -42,7 +44,8 @@ export function OpenAIKeyCard() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (focus !== "openai") return;
+    if (focus !== "openai" || didFocusRef.current) return;
+    didFocusRef.current = true;
     const el = document.getElementById("openai-byok-card");
     const prefersReduced =
       typeof window !== "undefined" &&
@@ -51,7 +54,11 @@ export function OpenAIKeyCard() {
       behavior: prefersReduced ? "auto" : "smooth",
       block: "start",
     });
-  }, [focus]);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("focus");
+    const nextUrl = params.toString();
+    router.replace(nextUrl ? `${pathname}?${nextUrl}` : pathname);
+  }, [focus, pathname, router, searchParams]);
 
   useEffect(() => {
     void (async () => {
