@@ -81,10 +81,13 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   2. **Navigate:** **Current page:** `/kyc/complete`, click “Explore” → click “Yield vault” → lands on `/yield`, confirm “Yield vault” heading is visible.
   3. **Action:** **Current page:** `/yield`, confirm “KYC” shows “Verified”, confirm the verified badge is visible in the wallet status panel.
   4. **Action:** **Current page:** `/yield`, confirm the “Yield engine” panel shows “Streaming now (est.)”.
-  5. **Action:** **Current page:** `/yield`, click “Wrap MNT to WMNT”, confirm a wallet signing prompt appears → approve the transaction.
-  6. **Verify on-screen:** **Current page:** `/yield`, click “Sync yield on-chain”, confirm a MantleScan tx link appears and the pending yield resets or share price updates.
+  5. **Action:** **Current page:** `/yield`, click “Wrap MNT to WMNT”, confirm a wallet signing prompt appears, approve the transaction.
+  6. **Action:** **Current page:** `/yield`, in the action center click “Approve” (if required), confirm approval state shows.
+  7. **Action:** **Current page:** `/yield`, click “Deposit”, confirm a wallet prompt appears and a success toast or updated shares render.
+  8. **Action:** **Current page:** `/yield`, click “Withdraw”, confirm a wallet prompt appears and the share balance updates.
+  9. **Verify on-screen:** **Current page:** `/yield`, click “Sync yield on-chain”, confirm a MantleScan tx link appears and the pending yield resets or share price updates.
 - **Voiceover:**
-  > “This is the custody layer: a KYC-gated ERC-4626 vault holding WMNT on Mantle Sepolia. The Yield Engine shows real-time streaming yield on testnet, and we can sync it on-chain to lift share value. In production, this simulator is replaced by audited yield strategies and protocol-fee donations.”
+  > “This is the custody layer: a KYC-gated ERC-4626 vault holding WMNT on Mantle Sepolia. In the action center we wrap MNT, approve spending, deposit into the vault, and withdraw to show the full lifecycle. The Yield Engine shows real-time streaming yield on testnet, and we can sync it on-chain to lift share value. In production, this simulator is replaced by audited yield strategies and protocol-fee donations.”
 
 ## 7. Creator Directory (Discovery for Cash-Flow Assets)
 - **URL:** /creators
