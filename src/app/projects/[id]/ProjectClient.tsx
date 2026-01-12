@@ -40,6 +40,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { toast } from "react-hot-toast";
 
 type Props = {
   projectId: string;
@@ -58,19 +59,27 @@ export default function ProjectClient({ projectId }: Props) {
   const { activeSection, activeElement } = projectState;
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadProject = async () => {
       if (projectId) {
         setIsLoading(true);
         const project = await getProject(projectId, ownerWallet);
+        if (cancelled) return;
         if (project) {
           dispatch(setCurrentProject(projectId));
           setIsLoading(false);
-        } else {
-          router.push("/projects");
+          return;
         }
+        setIsLoading(false);
+        toast.error("Project not found or not accessible.");
+        router.push("/projects");
       }
     };
     loadProject();
+    return () => {
+      cancelled = true;
+    };
   }, [projectId, dispatch, ownerWallet, router]);
 
   useEffect(() => {
