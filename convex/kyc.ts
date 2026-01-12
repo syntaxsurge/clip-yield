@@ -114,3 +114,34 @@ export const setWalletVerified = mutation({
     });
   },
 });
+
+export const deleteInquiriesForWallet = mutation({
+  args: {
+    walletAddress: v.string(),
+    secret: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const expected = getEnv("KYC_SYNC_SECRET");
+    if (expected && args.secret !== expected) {
+      throw new Error("Invalid KYC sync secret.");
+    }
+
+    if (!isAddress(args.walletAddress)) {
+      throw new Error("Invalid wallet address.");
+    }
+
+    const walletAddress = getAddress(args.walletAddress);
+    const rows = await ctx.db
+      .query("kycInquiries")
+      .withIndex("by_walletAddress", (q) =>
+        q.eq("walletAddress", walletAddress),
+      )
+      .collect();
+
+    for (const row of rows) {
+      await ctx.db.delete(row._id);
+    }
+
+    return { deleted: rows.length };
+  },
+});

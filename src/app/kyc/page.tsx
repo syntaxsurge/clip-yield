@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { usePrivy } from "@privy-io/react-auth";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -38,6 +38,7 @@ const FINAL_INQUIRY_STATUSES = new Set([
 
 export default function KycStartPage() {
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const { ready, authenticated, login } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const searchParams = useSearchParams();
@@ -50,6 +51,10 @@ export default function KycStartPage() {
     "idle" | "starting" | "syncing" | "error"
   >("idle");
   const [actionError, setActionError] = useState<string | null>(null);
+  const [resetStatus, setResetStatus] = useState<
+    "idle" | "resetting" | "success" | "error"
+  >("idle");
+  const [resetError, setResetError] = useState<string | null>(null);
 
   const loadStatus = useCallback(async () => {
     if (!address) return;
@@ -144,6 +149,42 @@ export default function KycStartPage() {
     }
   }, [address, loadStatus, statusInfo?.inquiry?.inquiryId]);
 
+  const handleReset = useCallback(async () => {
+    if (!address || !signMessageAsync) return;
+    setResetStatus("resetting");
+    setResetError(null);
+
+    const message = `ClipYield demo KYC reset for ${address} at ${new Date().toISOString()}`;
+
+    try {
+      const signature = await signMessageAsync({ message });
+      const res = await fetch("/api/kyc/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: address,
+          message,
+          signature,
+        }),
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+      if (!res.ok || !body.ok) {
+        setResetError(body?.error ?? "Reset failed.");
+        setResetStatus("error");
+        return;
+      }
+
+      await loadStatus();
+      setResetStatus("success");
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : "Reset failed.");
+      setResetStatus("error");
+    }
+  }, [address, loadStatus, signMessageAsync]);
+
   const verification = statusInfo?.verification ?? null;
   const inquiry = statusInfo?.inquiry ?? null;
   const inquiryStatus = inquiry?.status ?? "not started";
@@ -162,6 +203,7 @@ export default function KycStartPage() {
   const lastSyncedLabel = verification?.updatedAt
     ? new Date(verification.updatedAt).toLocaleString()
     : "Not synced";
+  const showRedactionHint = isVerified && !inquiry?.inquiryId;
 
   if (!isConnected) {
     return (
@@ -244,6 +286,16 @@ export default function KycStartPage() {
             </Alert>
           )}
 
+          {showRedactionHint && (
+            <Alert variant="warning">
+              <AlertTitle>Persona redaction doesn&apos;t revoke access</AlertTitle>
+              <AlertDescription>
+                Your Persona inquiry is unavailable, but your on-chain verification is
+                still active. Use the demo reset to revoke verification and restart KYC.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {actionStatus === "starting" && (
             <Alert variant="info">
               <AlertTitle>Redirecting...</AlertTitle>
@@ -270,11 +322,47 @@ export default function KycStartPage() {
             </Alert>
           )}
 
+          {resetStatus === "resetting" && (
+            <Alert variant="info">
+              <AlertTitle>Resetting KYC...</AlertTitle>
+              <AlertDescription>
+                Revoking on-chain verification and clearing local inquiry records.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {resetStatus === "success" && (
+            <Alert variant="success">
+              <AlertTitle>KYC reset</AlertTitle>
+              <AlertDescription>
+                Verification revoked. You can start a fresh inquiry now.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {resetStatus === "error" && resetError && (
+            <Alert variant="destructive">
+              <AlertTitle>Reset failed</AlertTitle>
+              <AlertDescription>{resetError}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex flex-wrap gap-3">
             {isVerified ? (
-              <Button asChild>
-                <a href={returnTo}>Continue</a>
-              </Button>
+              <>
+                <Button asChild>
+                  <a href={returnTo}>Continue</a>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => void handleReset()}
+                  disabled={resetStatus === "resetting"}
+                >
+                  {resetStatus === "resetting"
+                    ? "Resetting..."
+                    : "Reset KYC (demo)"}
+                </Button>
+              </>
             ) : (
               <>
                 {canSync && (
