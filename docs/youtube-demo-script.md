@@ -99,7 +99,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   4. **Action:** **Current page:** `/profile/[id]`, click “Boost”, confirm it navigates to the creator boost vault page.
   5. **Action:** **Current page:** `/boost/[creatorId]`, click the amount field labeled “Amount (WMNT)”, confirm cursor is active.
   6. **Enter values:**
-     - Amount (WMNT) = `[BOOST_WMNT=0.05]`
+     - Amount (WMNT) = `[BOOST_WMNT=5]`
   7. **Action:** **Current page:** `/boost/[creatorId]`, click “Approve” (if shown), wait for wallet prompt and “Approved” state.
   8. **Action:** **Current page:** `/boost/[creatorId]`, click “Deposit”, wait for “Transaction submitted” toast with explorer link.
   9. **Verify on-screen:** **Current page:** `/boost/[creatorId]`, confirm your boost position updates and a tx link is visible.
@@ -118,7 +118,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   5. Click “Confirm Sponsorship”, wait for wallet prompt and “Transaction submitted” state.
   6. **Verify on-screen:** **Current page:** `/sponsor/[postId]`, confirm a success state shows “Invoice Receipt NFT minted” (token ID visible) or a “View Receipt” button appears.
 - **Voiceover:**
-  > “This is the RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 0.10 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details.”
+  > “This is the Real World Asset or RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 1 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details.”
 
 ## 9. Campaign Receipt (RWA Proof + Terms Hash)
 - **URL:** /campaign/[campaignId]
