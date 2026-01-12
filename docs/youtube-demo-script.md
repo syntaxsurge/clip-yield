@@ -174,7 +174,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > "This is the creator workspace. We create a new draft called Creator draft and open the editor. AI Studio sends us to Settings to add the OpenAI key, then we generate a Sora clip, drop it on the timeline, add a title, preview, and export a finished MP4."
 
-## 11. Upload (Publish Remix Back to Feed)
+## 11. Upload (Publish AI Edit to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**
@@ -182,9 +182,9 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   2. **Navigate:** **Current page:** `/projects/[id]`, click “Upload” in top nav → lands on `/upload`, confirm “Upload” heading is visible.
   3. **Action:** **Current page:** `/upload`, click “Choose File”, confirm OS file picker opens.
   4. **Enter values:**
-     - Video file = `[FILE="clipyield_remix.mp4"]`
-     - Caption = `[CAPTION="Tokenized invoice sponsorship → Remix Pack → Exported edit 🚀"]`
+     - Video file = `[FILE="clipyield_ai_edit.mp4"]`
+     - Caption = `[CAPTION="Sora rooftop teaser edited in ClipYield"]`
   5. Click “Publish”, wait for “Uploaded” toast and redirect to `/`.
   6. **Verify on-screen:** **Current page:** `/`, confirm the new clip appears in the feed with the caption visible.
 - **Voiceover:**
-  > “We close the loop by uploading the exported video: ‘Tokenized invoice sponsorship → Remix Pack → Exported edit’. After publishing, the new post is live in the feed.”
+  > “We upload the AI edit we just exported and publish it to the feed. After publishing, the new post is live in the feed.”
