@@ -366,7 +366,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/projects/[id]` timeline editor + preview/export
 
 ## API endpoints
-- `/api/kyc/start` creates a Persona inquiry and returns the hosted flow URL
+- `/api/kyc/start` creates or resumes a Persona inquiry and returns the hosted flow URL
 - `/api/kyc/sync` fetches Persona inquiry status and triggers on-chain KYC updates
 - `/api/kyc/reset` revokes on-chain verification and clears local inquiry records (demo reset)
 - `/api/creator-vault/resolve` verifies creator KYC and provisions or returns the creator boost vault
@@ -389,7 +389,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - SimulatedYieldStreamer streams testnet WMNT into the yield vault to surface real-time pending yield, synced on-chain via a drip transaction
 - Wallet-gated views render skeleton placeholders while connection state resolves; wallet connect happens via the global nav
 - SponsorHub mints invoice receipt NFTs and donates protocol fees to the yield vault, while net WMNT mints boost vault shares for creators
-- Persona hosted-flow KYC uses redirect + `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
+- Persona hosted-flow KYC uses `/api/kyc/start` for hosted flow links and `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles
 
 ## Core Commands

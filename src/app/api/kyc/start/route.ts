@@ -15,7 +15,14 @@ function normalizeReturnTo(value?: string | null) {
 }
 
 export async function POST(req: Request) {
-  let payload: { walletAddress?: string; returnTo?: string } | null = null;
+  let payload:
+    | {
+        walletAddress?: string;
+        returnTo?: string;
+        inquiryId?: string;
+        resume?: boolean;
+      }
+    | null = null;
 
   try {
     payload = (await req.json()) as { walletAddress?: string; returnTo?: string };
@@ -29,12 +36,55 @@ export async function POST(req: Request) {
 
   const walletAddress = getAddress(payload.walletAddress);
   const returnTo = normalizeReturnTo(payload.returnTo);
+  const shouldResume = payload?.resume === true;
+  const resumeInquiryId = payload?.inquiryId?.trim();
 
   const personaApiKey = requireServerEnv("PERSONA_API_KEY");
   const personaTemplateId = requireServerEnv("PERSONA_INQUIRY_TEMPLATE_ID");
   const personaEnvironmentId = requireServerEnv("PERSONA_ENVIRONMENT_ID");
   const personaVersion = getServerEnv("PERSONA_VERSION") ?? "2023-01-05";
   const appUrl = requireServerEnv("APP_URL");
+
+  const redirectUri = new URL("/kyc/complete", appUrl);
+  redirectUri.searchParams.set("returnTo", returnTo);
+
+  if (shouldResume) {
+    if (!resumeInquiryId) {
+      return NextResponse.json(
+        { error: "Missing inquiryId for resume." },
+        { status: 400 },
+      );
+    }
+
+    const inquiry = await convexHttpClient.query(anyApi.kyc.getInquiryById, {
+      inquiryId: resumeInquiryId,
+    });
+
+    if (!inquiry) {
+      return NextResponse.json(
+        { error: "Inquiry not found for resume." },
+        { status: 404 },
+      );
+    }
+
+    if (getAddress(inquiry.walletAddress) !== walletAddress) {
+      return NextResponse.json(
+        { error: "Inquiry does not match the current wallet." },
+        { status: 403 },
+      );
+    }
+
+    const hostedFlowUrl = new URL("https://inquiry.withpersona.com/verify");
+    hostedFlowUrl.searchParams.set("inquiry-id", resumeInquiryId);
+    hostedFlowUrl.searchParams.set("environment-id", personaEnvironmentId);
+    hostedFlowUrl.searchParams.set("redirect-uri", redirectUri.toString());
+
+    return NextResponse.json({
+      inquiryId: resumeInquiryId,
+      hostedFlowUrl: hostedFlowUrl.toString(),
+      resumed: true,
+    });
+  }
 
   const personaResponse = await fetch(PERSONA_INQUIRY_URL, {
     method: "POST",
@@ -78,9 +128,6 @@ export async function POST(req: Request) {
     walletAddress,
     status: "created",
   });
-
-  const redirectUri = new URL("/kyc/complete", appUrl);
-  redirectUri.searchParams.set("returnTo", returnTo);
 
   const hostedFlowUrl = new URL("https://inquiry.withpersona.com/verify");
   hostedFlowUrl.searchParams.set("inquiry-id", inquiryId);

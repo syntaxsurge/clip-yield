@@ -54,6 +54,47 @@ export default function KycStartPage() {
   >("idle");
   const [resetError, setResetError] = useState<string | null>(null);
 
+  const redirectToHostedFlow = useCallback(
+    async (payload: {
+      walletAddress: string;
+      returnTo: string;
+      inquiryId?: string;
+      resume?: boolean;
+    }) => {
+      setActionStatus("starting");
+      setActionError(null);
+
+      try {
+        const res = await fetch("/api/kyc/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = (await res.json().catch(() => ({}))) as {
+          hostedFlowUrl?: string;
+          error?: string;
+        };
+
+        if (!res.ok || !data.hostedFlowUrl) {
+          setActionError(data.error ?? "Unable to open the verification flow.");
+          setActionStatus("error");
+          return;
+        }
+
+        window.location.assign(data.hostedFlowUrl);
+      } catch (err) {
+        setActionError(
+          err instanceof Error
+            ? err.message
+            : "Unable to open the verification flow.",
+        );
+        setActionStatus("error");
+      }
+    },
+    [],
+  );
+
   const loadStatus = useCallback(async () => {
     if (!address) return;
     setStatusLoading(true);
@@ -84,38 +125,18 @@ export default function KycStartPage() {
 
   const handleStart = useCallback(async () => {
     if (!address) return;
-    setActionStatus("starting");
-    setActionError(null);
+    await redirectToHostedFlow({ walletAddress: address, returnTo });
+  }, [address, redirectToHostedFlow, returnTo]);
 
-    try {
-      const res = await fetch("/api/kyc/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress: address, returnTo }),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setActionError(body?.error ?? "Failed to start KYC.");
-        setActionStatus("error");
-        return;
-      }
-
-      const data = (await res.json()) as { hostedFlowUrl?: string };
-      if (!data.hostedFlowUrl) {
-        setActionError("Missing hosted flow URL from server.");
-        setActionStatus("error");
-        return;
-      }
-
-      window.location.assign(data.hostedFlowUrl);
-    } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Failed to start KYC.",
-      );
-      setActionStatus("error");
-    }
-  }, [address, returnTo]);
+  const handleResume = useCallback(async () => {
+    if (!address || !statusInfo?.inquiry?.inquiryId) return;
+    await redirectToHostedFlow({
+      walletAddress: address,
+      returnTo,
+      inquiryId: statusInfo.inquiry.inquiryId,
+      resume: true,
+    });
+  }, [address, redirectToHostedFlow, returnTo, statusInfo?.inquiry?.inquiryId]);
 
   const handleSync = useCallback(async () => {
     if (!statusInfo?.inquiry?.inquiryId || !address) return;
@@ -193,6 +214,11 @@ export default function KycStartPage() {
       inquiryStatus === "declined" ||
       inquiryStatus === "rejected" ||
       inquiryStatus === "failed");
+  const canContinue =
+    !statusLoading &&
+    Boolean(inquiry?.inquiryId) &&
+    !FINAL_INQUIRY_STATUSES.has(inquiryStatus) &&
+    !isVerified;
   const canSync =
     Boolean(inquiry?.inquiryId) &&
     FINAL_INQUIRY_STATUSES.has(inquiryStatus) &&
@@ -363,6 +389,16 @@ export default function KycStartPage() {
                     disabled={actionStatus === "syncing"}
                   >
                     {actionStatus === "syncing" ? "Syncing..." : "Sync status"}
+                  </Button>
+                )}
+                {canContinue && (
+                  <Button
+                    onClick={() => void handleResume()}
+                    disabled={actionStatus === "starting"}
+                  >
+                    {actionStatus === "starting"
+                      ? "Redirecting..."
+                      : "Continue verification"}
                   </Button>
                 )}
                 {canRestart && (
