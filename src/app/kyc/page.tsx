@@ -304,6 +304,25 @@ export default function KycStartPage() {
             </Alert>
           )}
 
+          {canSync && (
+            <Alert variant="warning">
+              <AlertTitle>On-chain verification pending</AlertTitle>
+              <AlertDescription>
+                Persona verification is complete, but the wallet has not been
+                verified on-chain yet. Sync to write verification to the registry
+                and surface the transaction hash.
+              </AlertDescription>
+              <div className="mt-3">
+                <Button
+                  onClick={() => void handleSync()}
+                  disabled={actionStatus === "syncing"}
+                >
+                  {actionStatus === "syncing" ? "Syncing..." : "Sync status"}
+                </Button>
+              </div>
+            </Alert>
+          )}
+
           {showRedactionHint && (
             <Alert variant="warning">
               <AlertTitle>Persona redaction doesn&apos;t revoke access</AlertTitle>
@@ -383,14 +402,6 @@ export default function KycStartPage() {
               </>
             ) : (
               <>
-                {canSync && (
-                  <Button
-                    onClick={() => void handleSync()}
-                    disabled={actionStatus === "syncing"}
-                  >
-                    {actionStatus === "syncing" ? "Syncing..." : "Sync status"}
-                  </Button>
-                )}
                 {canContinue && (
                   <Button
                     onClick={() => void handleResume()}
