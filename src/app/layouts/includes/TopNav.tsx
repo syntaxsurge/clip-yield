@@ -5,8 +5,8 @@ import { debounce } from "debounce";
 import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { BiChevronDown, BiSearch, BiUser } from "react-icons/bi";
-import { AiOutlinePlus } from "react-icons/ai";
-import { FiLogOut, FiSettings } from "react-icons/fi";
+import { AiOutlineCopy, AiOutlinePlus } from "react-icons/ai";
+import { FiCheck, FiLogOut, FiSettings } from "react-icons/fi";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useAccount } from "wagmi";
 import { useUser } from "@/app/context/user";
@@ -16,7 +16,7 @@ import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 import { isAdminAddress } from "@/lib/admin/adminAllowlist";
-import { formatShortHash } from "@/lib/utils";
+import { copyToClipboard, formatShortHash } from "@/lib/utils";
 
 export default function TopNav() {
     const userContext = useUser();
@@ -26,10 +26,20 @@ export default function TopNav() {
     const [searchProfiles, setSearchProfiles] = useState<RandomUsers[]>([]);
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [showNavMenu, setShowNavMenu] = useState<boolean>(false);
+    const [isCopying, setIsCopying] = useState(false);
+    const [hasCopied, setHasCopied] = useState(false);
     const isAdmin = useMemo(
         () => isAdminAddress(address ?? userContext?.user?.id ?? null),
         [address, userContext?.user?.id],
     );
+    const profileImageUrl = useCreateBucketUrl(userContext?.user?.image || "");
+    const walletAddress = userContext?.user?.id ?? "";
+    const displayName = userContext?.user?.name?.trim() || "Creator";
+    const userHandle = userContext?.user?.username
+        ? `@${userContext.user.username}`
+        : walletAddress
+            ? `@${formatShortHash(walletAddress)}`
+            : "@unknown";
 
     const navSections = useMemo(
         () => {
@@ -83,6 +93,12 @@ export default function TopNav() {
         setShowNavMenu(false);
     }, [pathname]);
 
+    useEffect(() => {
+        if (!hasCopied) return;
+        const timer = window.setTimeout(() => setHasCopied(false), 2000);
+        return () => window.clearTimeout(timer);
+    }, [hasCopied]);
+
     const handleSearchName = debounce(async (event: { target: { value: string } }) => {
         if (event.target.value == "") return setSearchProfiles([]);
 
@@ -104,6 +120,14 @@ export default function TopNav() {
             event.preventDefault();
             await userContext?.openConnect();
         }
+    };
+
+    const handleCopyWallet = async () => {
+        if (!walletAddress || isCopying) return;
+        setIsCopying(true);
+        const didCopy = await copyToClipboard(walletAddress);
+        setIsCopying(false);
+        setHasCopied(didCopy);
     };
 
     return (
@@ -229,43 +253,107 @@ export default function TopNav() {
                                 <div className="flex items-center">
                                     <div className="relative">
                                         <button
+                                            type="button"
                                             onClick={() => setShowMenu((prev) => !prev)}
-                                            className="mt-1 border border-gray-200 rounded-full dark:border-white/10"
+                                            aria-expanded={showMenu}
+                                            aria-haspopup="menu"
+                                            aria-label="Open account menu"
+                                            className="mt-1 rounded-full border border-gray-200 ring-1 ring-transparent transition hover:ring-gray-200 dark:border-white/10 dark:hover:ring-white/20"
                                         >
-                                            <img className="rounded-full w-[35px] h-[35px]" src={useCreateBucketUrl(userContext?.user?.image || '')} />
+                                            <img
+                                                className="h-[35px] w-[35px] rounded-full"
+                                                src={profileImageUrl}
+                                                alt={`${displayName} avatar`}
+                                            />
                                         </button>
 
                                         {showMenu ? (
-                                            <div className="absolute bg-white rounded-lg py-1.5 w-[200px] shadow-xl border top-[40px] right-0 dark:border-white/10 dark:bg-[#0f0f12]">
+                                            <div
+                                                role="menu"
+                                                className="absolute right-0 top-[48px] w-[280px] rounded-2xl border border-gray-200/80 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-[#0f0f12]/95"
+                                            >
+                                                <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-white to-[#F6F6F8] p-3 dark:border-white/10 dark:from-[#15151c] dark:to-[#0f0f12]">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-11 w-11 overflow-hidden rounded-full border border-white/70 bg-gray-100 dark:border-white/10 dark:bg-white/10">
+                                                            <img
+                                                                className="h-full w-full object-cover"
+                                                                src={profileImageUrl}
+                                                                alt={`${displayName} avatar`}
+                                                            />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <div className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                                                                {displayName}
+                                                            </div>
+                                                            <div className="truncate text-xs text-gray-500 dark:text-white/60">
+                                                                {userHandle}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-3 rounded-lg border border-gray-200/80 bg-white/80 px-3 py-2 dark:border-white/10 dark:bg-black/40">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-white/50">
+                                                                Wallet
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => void handleCopyWallet()}
+                                                                disabled={!walletAddress || isCopying}
+                                                                className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-[11px] font-semibold text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/10"
+                                                                aria-label="Copy wallet address"
+                                                            >
+                                                                {hasCopied ? <FiCheck size={12} /> : <AiOutlineCopy size={12} />}
+                                                                {hasCopied ? "Copied" : "Copy"}
+                                                            </button>
+                                                        </div>
+                                                        <div
+                                                            className="mt-1 break-all font-mono text-xs text-gray-700 dark:text-white/70"
+                                                            title={walletAddress}
+                                                        >
+                                                            {walletAddress}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-3 space-y-1">
+                                                    <div className="px-2 pt-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-white/50">
+                                                        Account
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            router.push(`/profile/${userContext?.user?.id}`)
+                                                            setShowMenu(false)
+                                                        }}
+                                                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-gray-800 transition hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+                                                    >
+                                                        <BiUser size={18} />
+                                                        Profile
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            router.push("/settings")
+                                                            setShowMenu(false)
+                                                        }}
+                                                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-semibold text-gray-800 transition hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+                                                    >
+                                                        <FiSettings size={18} />
+                                                        Settings
+                                                    </button>
+                                                </div>
+
                                                 <button
-                                                    onClick={() => {
-                                                        router.push(`/profile/${userContext?.user?.id}`)
-                                                        setShowMenu(false)
-                                                    }}
-                                                    className="flex items-center w-full justify-start py-3 px-2 text-gray-800 hover:bg-gray-100 cursor-pointer dark:text-white dark:hover:bg-white/10"
-                                                >
-                                                    <BiUser size="20"/>
-                                                    <span className="pl-2 font-semibold text-sm">Profile</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        router.push("/settings")
-                                                        setShowMenu(false)
-                                                    }}
-                                                    className="flex items-center w-full justify-start py-3 px-2 text-gray-800 hover:bg-gray-100 cursor-pointer dark:text-white dark:hover:bg-white/10"
-                                                >
-                                                    <FiSettings size={20} />
-                                                    <span className="pl-2 font-semibold text-sm">Settings</span>
-                                                </button>
-                                                <button
+                                                    type="button"
                                                     onClick={async () => {
                                                         await userContext?.logout()
                                                         setShowMenu(false)
                                                     }}
-                                                    className="flex items-center justify-start w-full py-3 px-1.5 hover:bg-gray-100 border-t cursor-pointer text-gray-800 dark:border-white/10 dark:text-white dark:hover:bg-white/10"
+                                                    className="mt-3 flex w-full items-center gap-2 rounded-lg border-t border-gray-200 px-2 pt-3 text-sm font-semibold text-gray-800 transition hover:text-gray-900 dark:border-white/10 dark:text-white"
                                                 >
-                                                    <FiLogOut size={20} />
-                                                    <span className="pl-2 font-semibold text-sm">Disconnect</span>
+                                                    <FiLogOut size={18} />
+                                                    Disconnect
                                                 </button>
                                             </div>
                                         ) : null}

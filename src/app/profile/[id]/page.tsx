@@ -19,7 +19,7 @@ import useGetLikedPostsByUserId from "@/app/hooks/useGetLikedPostsByUserId"
 import useIsFollowing from "@/app/hooks/useIsFollowing"
 import useToggleFollow from "@/app/hooks/useToggleFollow"
 import { toast } from "react-hot-toast"
-import { formatShortHash } from "@/lib/utils"
+import { copyToClipboard, formatShortHash } from "@/lib/utils"
 
 export default function Profile({ params }: ProfilePageTypes) {
     const contextUser = useUser()
@@ -126,22 +126,12 @@ export default function Profile({ params }: ProfilePageTypes) {
         if (!id || isCopying) return
         setIsCopying(true)
         try {
-            if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(id)
+            const didCopy = await copyToClipboard(id)
+            if (didCopy) {
+                toast.success("Wallet address copied")
             } else {
-                const textarea = document.createElement("textarea")
-                textarea.value = id
-                textarea.style.position = "fixed"
-                textarea.style.opacity = "0"
-                document.body.appendChild(textarea)
-                textarea.select()
-                document.execCommand("copy")
-                document.body.removeChild(textarea)
+                toast.error("Failed to copy wallet address")
             }
-            toast.success("Wallet address copied")
-        } catch (error) {
-            console.error(error)
-            toast.error("Failed to copy wallet address")
         } finally {
             setIsCopying(false)
         }

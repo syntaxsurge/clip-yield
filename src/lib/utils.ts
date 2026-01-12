@@ -127,3 +127,27 @@ export function formatShortHash(value: string, visibleStart = 6, visibleEnd = 4)
   if (value.length <= minLength) return value;
   return `${value.slice(0, visibleStart)}...${value.slice(-visibleEnd)}`;
 }
+
+export async function copyToClipboard(value: string) {
+  if (!value || typeof navigator === "undefined") return false;
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+
+    if (typeof document === "undefined") return false;
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const didCopy = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    return didCopy;
+  } catch {
+    return false;
+  }
+}
