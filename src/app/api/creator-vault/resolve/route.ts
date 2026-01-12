@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createPublicClient, getAddress, http, isAddress } from "viem";
+import { createPublicClient, getAddress, http, isAddress, zeroAddress } from "viem";
 import { anyApi } from "convex/server";
 import { convexHttpClient } from "@/lib/convex/http";
 import { getServerEnv } from "@/lib/env/server";
@@ -22,6 +22,16 @@ type ResolveResponse = {
   txHash?: string | null;
   reason?: string;
 };
+
+const factoryAbi = [
+  {
+    type: "function",
+    name: "vaultOf",
+    stateMutability: "view",
+    inputs: [{ name: "creator", type: "address" }],
+    outputs: [{ name: "", type: "address" }],
+  },
+] as const;
 
 function resolveRpcUrl() {
   return (
@@ -73,6 +83,11 @@ export async function POST(req: Request) {
 
   const walletAddress = getAddress(wallet);
 
+  const publicClient = createPublicClient({
+    chain: mantleSepolia,
+    transport: http(resolveRpcUrl()),
+  });
+
   const verification = await convexHttpClient.query(
     anyApi.kyc.getWalletVerification,
     { walletAddress },
@@ -82,11 +97,6 @@ export async function POST(req: Request) {
 
   if (!isVerified) {
     try {
-      const publicClient = createPublicClient({
-        chain: mantleSepolia,
-        transport: http(resolveRpcUrl()),
-      });
-
       const registryAddress = resolveRegistryAddress();
       const onchainVerified = (await publicClient.readContract({
         address: registryAddress,
@@ -133,7 +143,45 @@ export async function POST(req: Request) {
     { wallet: walletAddress },
   );
 
-  if (existing?.vault) {
+  const factoryAddress = resolveBoostFactoryAddress();
+  const syncSecret = getServerEnv("KYC_SYNC_SECRET");
+  let onchainVault: string | null = null;
+  let onchainReadFailed = false;
+
+  if (factoryAddress) {
+    try {
+      onchainVault = (await publicClient.readContract({
+        address: factoryAddress,
+        abi: factoryAbi,
+        functionName: "vaultOf",
+        args: [walletAddress],
+      })) as string;
+    } catch {
+      onchainReadFailed = true;
+    }
+  }
+
+  if (factoryAddress && onchainVault && onchainVault !== zeroAddress) {
+    const normalizedVault = getAddress(onchainVault);
+    if (!existing || getAddress(existing.vault) !== normalizedVault) {
+      await convexHttpClient.mutation(anyApi.creatorVaults.upsertVaultFromServer, {
+        wallet: walletAddress,
+        vault: normalizedVault,
+        txHash: existing?.txHash ?? null,
+        secret: syncSecret,
+      });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      walletAddress,
+      verified: true,
+      vault: normalizedVault,
+      txHash: existing?.txHash ?? null,
+    } satisfies ResolveResponse);
+  }
+
+  if (existing?.vault && (!factoryAddress || onchainReadFailed)) {
     return NextResponse.json({
       ok: true,
       walletAddress,
@@ -148,7 +196,7 @@ export async function POST(req: Request) {
       anyApi.creatorVaults.provisionCreatorVault,
       {
         creatorWallet: walletAddress,
-        factoryAddress: resolveBoostFactoryAddress(),
+        factoryAddress,
         managerPrivateKey:
           process.env.NODE_ENV === "development"
             ? getServerEnv("KYC_MANAGER_PRIVATE_KEY")
