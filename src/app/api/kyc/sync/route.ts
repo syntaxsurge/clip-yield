@@ -51,6 +51,16 @@ const factoryAbi = [
   },
 ] as const;
 
+const boostVaultAbi = [
+  {
+    type: "function",
+    name: "kyc",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+  },
+] as const;
+
 
 async function fetchPersonaInquiry(inquiryId: string) {
   const personaApiKey = requireServerEnv("PERSONA_API_KEY");
@@ -130,8 +140,29 @@ async function provisionCreatorVault({
     { wallet: creatorWallet },
   );
 
+  const registryAddress = resolveAddress(
+    "KYC_REGISTRY_ADDRESS",
+    "NEXT_PUBLIC_KYC_REGISTRY_ADDRESS",
+  );
+  let existingVault: Address | null = null;
+  let existingVaultMismatch = false;
+
   if (existing?.vault && isAddress(existing.vault)) {
-    return { vault: getAddress(existing.vault), txHash: existing.txHash ?? null };
+    existingVault = getAddress(existing.vault);
+    try {
+      const vaultRegistry = (await publicClient.readContract({
+        address: existingVault,
+        abi: boostVaultAbi,
+        functionName: "kyc",
+      })) as Address;
+      existingVaultMismatch = getAddress(vaultRegistry) !== registryAddress;
+    } catch {
+      existingVaultMismatch = false;
+    }
+  }
+
+  if (existingVault && !existingVaultMismatch) {
+    return { vault: existingVault, txHash: existing.txHash ?? null };
   }
 
   const factoryAddress = resolveAddress(

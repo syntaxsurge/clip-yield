@@ -121,6 +121,7 @@ export const provisionCreatorVault = action({
     creatorWallet: v.string(),
     factoryAddress: v.optional(v.string()),
     managerPrivateKey: v.optional(v.string()),
+    forceRefresh: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     if (!isAddress(args.creatorWallet)) {
@@ -133,10 +134,6 @@ export const provisionCreatorVault = action({
       anyApi.creatorVaults.getByWalletInternal,
       { wallet: creatorWallet },
     );
-
-    if (existing) {
-      return { vault: existing.vault, txHash: existing.txHash ?? null };
-    }
 
     const factoryFromEnv =
       getEnv("BOOST_FACTORY_ADDRESS") ??
@@ -151,8 +148,10 @@ export const provisionCreatorVault = action({
       throw new Error("Missing or invalid boost factory address.");
     }
 
-    const privateKey = args.managerPrivateKey ?? requireEnv("KYC_MANAGER_PRIVATE_KEY");
+    const privateKey =
+      args.managerPrivateKey ?? requireEnv("KYC_MANAGER_PRIVATE_KEY");
     const { publicClient, walletClient } = createMantleClients(privateKey);
+    const syncSecret = getEnv("KYC_SYNC_SECRET");
 
     const onchainVault = (await publicClient.readContract({
       address: factoryAddress,
@@ -162,11 +161,17 @@ export const provisionCreatorVault = action({
     })) as `0x${string}`;
 
     if (onchainVault && onchainVault !== zeroAddress) {
-      await ctx.runMutation(anyApi.creatorVaults.insertVaultInternal, {
+      await ctx.runMutation(anyApi.creatorVaults.upsertVaultFromServer, {
         wallet: creatorWallet,
         vault: onchainVault,
+        txHash: existing?.txHash ?? null,
+        secret: syncSecret,
       });
-      return { vault: onchainVault, txHash: null };
+      return { vault: onchainVault, txHash: existing?.txHash ?? null };
+    }
+
+    if (existing && !args.forceRefresh) {
+      return { vault: existing.vault, txHash: existing.txHash ?? null };
     }
 
     const txHash = await walletClient.writeContract({
@@ -189,10 +194,11 @@ export const provisionCreatorVault = action({
       throw new Error("Vault creation did not return a valid address.");
     }
 
-    await ctx.runMutation(anyApi.creatorVaults.insertVaultInternal, {
+    await ctx.runMutation(anyApi.creatorVaults.upsertVaultFromServer, {
       wallet: creatorWallet,
       vault,
       txHash,
+      secret: syncSecret,
     });
 
     return { vault, txHash };

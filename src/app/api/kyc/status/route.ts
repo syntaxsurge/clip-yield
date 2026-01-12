@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getAddress, isAddress } from "viem";
+import { createPublicClient, getAddress, http, isAddress } from "viem";
 import { anyApi } from "convex/server";
 import { convexHttpClient } from "@/lib/convex/http";
+import { getServerEnv } from "@/lib/env/server";
+import { mantleSepolia } from "@/lib/web3/mantle";
+import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,6 +13,25 @@ export const dynamic = "force-dynamic";
 const QuerySchema = z.object({
   wallet: z.string().min(1),
 });
+
+function resolveRpcUrl() {
+  return (
+    getServerEnv("MANTLE_SEPOLIA_RPC_URL") ??
+    mantleSepolia.rpcUrls.default.http[0]
+  );
+}
+
+function resolveRegistryAddress() {
+  const value =
+    getServerEnv("KYC_REGISTRY_ADDRESS") ??
+    getServerEnv("NEXT_PUBLIC_KYC_REGISTRY_ADDRESS");
+
+  if (!value || !isAddress(value)) {
+    throw new Error("Missing or invalid KYC registry address.");
+  }
+
+  return getAddress(value);
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -39,15 +61,59 @@ export async function GET(req: Request) {
     }),
   ]);
 
+  let onchainVerified: boolean | null = null;
+  try {
+    const publicClient = createPublicClient({
+      chain: mantleSepolia,
+      transport: http(resolveRpcUrl()),
+    });
+    onchainVerified = (await publicClient.readContract({
+      address: resolveRegistryAddress(),
+      abi: kycRegistryAbi,
+      functionName: "isVerified",
+      args: [walletAddress],
+    })) as boolean;
+  } catch {
+    onchainVerified = null;
+  }
+
+  if (onchainVerified && !verification?.verified) {
+    const syncSecret = getServerEnv("KYC_SYNC_SECRET");
+    await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
+      walletAddress,
+      verified: true,
+      txHash: verification?.txHash ?? undefined,
+      secret: syncSecret,
+    });
+  }
+
+  const effectiveVerification =
+    onchainVerified === null
+      ? verification
+      : onchainVerified
+        ? {
+            verified: true,
+            txHash: verification?.txHash ?? null,
+            createdAt: verification?.createdAt ?? Date.now(),
+            updatedAt: verification?.updatedAt ?? Date.now(),
+          }
+        : verification
+          ? {
+              ...verification,
+              verified: false,
+              txHash: null,
+            }
+          : null;
+
   return NextResponse.json({
     ok: true,
     walletAddress,
-    verification: verification
+    verification: effectiveVerification
       ? {
-          verified: verification.verified,
-          txHash: verification.txHash ?? null,
-          createdAt: verification.createdAt,
-          updatedAt: verification.updatedAt,
+          verified: effectiveVerification.verified,
+          txHash: effectiveVerification.txHash ?? null,
+          createdAt: effectiveVerification.createdAt,
+          updatedAt: effectiveVerification.updatedAt,
         }
       : null,
     inquiry: inquiry

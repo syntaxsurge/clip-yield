@@ -33,6 +33,16 @@ const factoryAbi = [
   },
 ] as const;
 
+const boostVaultAbi = [
+  {
+    type: "function",
+    name: "kyc",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+  },
+] as const;
+
 function resolveRpcUrl() {
   return (
     getServerEnv("MANTLE_SEPOLIA_RPC_URL") ??
@@ -83,6 +93,24 @@ export async function POST(req: Request) {
 
   const walletAddress = getAddress(wallet);
 
+  let registryAddress: `0x${string}`;
+  try {
+    registryAddress = resolveRegistryAddress();
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        walletAddress,
+        verified: false,
+        reason:
+          error instanceof Error
+            ? error.message
+            : "Unable to resolve KYC registry.",
+      } satisfies ResolveResponse,
+      { status: 500 },
+    );
+  }
+
   const publicClient = createPublicClient({
     chain: mantleSepolia,
     transport: http(resolveRpcUrl()),
@@ -97,7 +125,6 @@ export async function POST(req: Request) {
 
   if (!isVerified) {
     try {
-      const registryAddress = resolveRegistryAddress();
       const onchainVerified = (await publicClient.readContract({
         address: registryAddress,
         abi: kycRegistryAbi,
@@ -143,6 +170,25 @@ export async function POST(req: Request) {
     { wallet: walletAddress },
   );
 
+  const existingVault =
+    existing?.vault && isAddress(existing.vault)
+      ? getAddress(existing.vault)
+      : null;
+  let existingVaultMismatch = false;
+
+  if (existingVault) {
+    try {
+      const vaultRegistry = (await publicClient.readContract({
+        address: existingVault,
+        abi: boostVaultAbi,
+        functionName: "kyc",
+      })) as `0x${string}`;
+      existingVaultMismatch = getAddress(vaultRegistry) !== registryAddress;
+    } catch {
+      existingVaultMismatch = false;
+    }
+  }
+
   const factoryAddress = resolveBoostFactoryAddress();
   const syncSecret = getServerEnv("KYC_SYNC_SECRET");
   let onchainVault: string | null = null;
@@ -181,7 +227,7 @@ export async function POST(req: Request) {
     } satisfies ResolveResponse);
   }
 
-  if (existing?.vault && (!factoryAddress || onchainReadFailed)) {
+  if (existing?.vault && (!factoryAddress || onchainReadFailed) && !existingVaultMismatch) {
     return NextResponse.json({
       ok: true,
       walletAddress,
@@ -201,6 +247,7 @@ export async function POST(req: Request) {
           process.env.NODE_ENV === "development"
             ? getServerEnv("KYC_MANAGER_PRIVATE_KEY")
             : undefined,
+        forceRefresh: existingVaultMismatch,
       },
     );
 

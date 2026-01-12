@@ -168,7 +168,12 @@ async function main() {
   await writeCompiledAbi(boostVaultArtifact, "ClipYieldBoostVault");
 
   const envTarget = await resolveEnvTarget();
-  let updatedEnv = upsertEnvValue(envTarget.contents, "NEXT_PUBLIC_KYC_REGISTRY_ADDRESS", kycRegistry);
+  let updatedEnv = upsertEnvValue(
+    envTarget.contents,
+    "NEXT_PUBLIC_KYC_REGISTRY_ADDRESS",
+    kycRegistry,
+  );
+  updatedEnv = upsertEnvValue(updatedEnv, "KYC_REGISTRY_ADDRESS", kycRegistry);
   updatedEnv = upsertEnvValue(updatedEnv, "NEXT_PUBLIC_CLIPYIELD_VAULT_ADDRESS", clipYieldVault);
   if (boostFactory) {
     updatedEnv = upsertEnvValue(
