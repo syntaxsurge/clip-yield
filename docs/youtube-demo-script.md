@@ -147,9 +147,9 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer, nothing is hidden.”
 
-## 10. Projects + Editor + Export (Creator Workspace)
+## 10. Projects + AI Editor + Export (Creator Workspace)
 - **URL:** /projects
-- **Shot:** Projects list with a new project flow, then the editor with timeline, preview, and export UI.
+- **Shot:** Projects list with a new project flow, then AI Studio generation, timeline edit, and export UI.
 - **Steps:**
   1. **Current page:** `/settings`, confirm settings heading is visible.
   2. **Navigate:** **Current page:** `/settings`, click "Projects" in the sidebar/nav → lands on `/projects`, confirm project list heading appears.
@@ -158,12 +158,21 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
      - Project name = `[PROJECT_NAME="Creator draft"]`
   5. **Action:** **Current page:** `/projects`, click "Create", confirm the new project row appears.
   6. **Action:** **Current page:** `/projects`, click "Open" on "Creator draft", confirm navigation to `/projects/[id]`.
-  7. **Action:** **Current page:** `/projects/[id]`, drag a clip block slightly, confirm clip block position changes.
-  8. **Action:** **Current page:** `/projects/[id]`, click "Preview", confirm playback starts and playhead moves.
-  9. **Action:** **Current page:** `/projects/[id]`, click "Export" then "Start Export", wait for "Export complete" state.
-  10. **Verify on-screen:** **Current page:** `/projects/[id]`, confirm "Export complete" and "Download MP4" are visible.
+  7. **Action:** **Current page:** `/projects/[id]`, in the Library panel under "AI Studio", click "Generate", confirm redirect to `/settings` with the OpenAI key card visible.
+  8. **Enter values:** **Current page:** `/settings`
+     - OpenAI API key = `[OPENAI_API_KEY="sk-your-key"]`
+  9. **Action:** **Current page:** `/settings`, click "Save key", confirm success toast and return to `/projects/[id]`.
+  10. **Action:** **Current page:** `/projects/[id]`, open "AI Studio" → click "Generate" to open "Generate with Sora".
+  11. **Enter values:**
+      - Prompt = `[SORA_PROMPT="A creator filming a short clip on a city rooftop at sunrise, cinematic, smooth handheld motion"]`
+  12. **Action:** **Current page:** `/projects/[id]`, click "Generate clip", confirm the job appears in "History" and the clip shows in the Library when ready.
+  13. **Action:** **Current page:** `/projects/[id]`, drag the generated clip onto the timeline, confirm the clip block appears.
+  14. **Action:** **Current page:** `/projects/[id]`, click "Text" in the left sidebar, set "Default text" to `[TITLE_TEXT="Sora vault teaser"]`, click "Title", confirm the title appears on the canvas.
+  15. **Action:** **Current page:** `/projects/[id]`, click "Preview", confirm playback starts and playhead moves.
+  16. **Action:** **Current page:** `/projects/[id]`, click "Export" then "Start Export", wait for "Export complete" state.
+  17. **Verify on-screen:** **Current page:** `/projects/[id]`, confirm "Export complete" and "Download MP4" are visible.
 - **Voiceover:**
-  > "This is the creator workspace. We create a new draft called Creator draft, open it in the editor, then preview and export a finished MP4 with clear progress feedback."
+  > "This is the creator workspace. We create a new draft called Creator draft and open the editor. AI Studio sends us to Settings to add the OpenAI key, then we generate a Sora clip, drop it on the timeline, add a title, preview, and export a finished MP4."
 
 ## 11. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
