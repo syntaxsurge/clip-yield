@@ -24,12 +24,13 @@ const privyConfig = {
       createOnLogin: "users-without-wallets",
     },
   },
-  loginMethods: ["email"],
   loginMethodsAndOrder: {
-    primary: ["email"],
+    primary: ["metamask", "wallet_connect", "coinbase_wallet", "email"],
+    overflow: ["rainbow"],
   },
-  externalWallets: {
-    disableAllExternalWallets: true,
+  appearance: {
+    walletChainType: "ethereum-only",
+    walletList: ["metamask", "wallet_connect", "coinbase_wallet", "rainbow"],
   },
   defaultChain: mantleSepolia,
   supportedChains,
