@@ -328,9 +328,8 @@ export default function Projects() {
                 </Badge>
               </div>
               <p className="max-w-2xl text-gray-500 dark:text-white/60">
-                Start a new timeline, remix an IP asset, or continue a draft. Projects are scoped
-                to your connected wallet and save locally in your browser with best effort cloud
-                sync.
+                Start a new timeline, remix an IP asset, or continue a draft. Projects save locally
+                in your browser and sync to the cloud when possible.
               </p>
             </div>
 
@@ -488,7 +487,7 @@ export default function Projects() {
                 <CardDescription>
                   {authenticated || walletAddress
                     ? "Create your first timeline to start editing."
-                    : "Projects are scoped to the connected wallet. Connect to view or create projects."}
+                    : "Connect a wallet to create projects and sync them to the cloud."}
                 </CardDescription>
               </CardHeader>
               <CardContent>

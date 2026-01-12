@@ -146,30 +146,11 @@ const sanitizeProjectForStorage = (project: any) => {
   return sanitized;
 };
 
-const normalizeWallet = (wallet?: string | null) => {
-  if (!wallet) return undefined;
-  const trimmed = wallet.trim();
-  return trimmed ? trimmed.toLowerCase() : undefined;
-};
-
-const ensureProjectOwner = (project: any, ownerWallet?: string | null) => {
-  if (!project || typeof project !== "object") return project;
-  const normalizedOwner = normalizeWallet(ownerWallet);
-  const existingOwner = normalizeWallet(project.ownerWallet);
-  const nextOwner = normalizedOwner ?? existingOwner;
-  if (!nextOwner) return project;
-  return { ...project, ownerWallet: nextOwner };
-};
-
-const matchesOwner = (project: any, ownerWallet?: string | null) => {
-  const normalizedOwner = normalizeWallet(ownerWallet);
-  if (!normalizedOwner) return true;
-  const projectOwner = normalizeWallet(project?.ownerWallet);
-  return projectOwner === normalizedOwner;
-};
-
 // Project storage functions
-export const storeProject = async (project: any, ownerWallet?: string | null) => {
+export const storeProject = async (
+  project: any,
+  _ownerWallet?: string | null,
+) => {
   if (typeof window === "undefined") return null;
   try {
     const db = await setupDB();
@@ -179,10 +160,9 @@ export const storeProject = async (project: any, ownerWallet?: string | null) =>
       return null;
     }
 
-    const preparedProject = ensureProjectOwner(project, ownerWallet);
-    await db.put("projects", sanitizeProjectForStorage(preparedProject));
+    await db.put("projects", sanitizeProjectForStorage(project));
 
-    return preparedProject.id;
+    return project.id;
   } catch (error) {
     toast.error("Error storing project");
     console.error("Error storing project:", error);
@@ -192,7 +172,7 @@ export const storeProject = async (project: any, ownerWallet?: string | null) =>
 
 export const getProject = async (
   projectId: string,
-  ownerWallet?: string | null,
+  _ownerWallet?: string | null,
 ) => {
   if (typeof window === "undefined") return null;
   try {
@@ -200,15 +180,7 @@ export const getProject = async (
     if (!db) return null;
     const project = await db.get("projects", projectId);
     if (!project) return null;
-    const sanitized = sanitizeProjectForStorage(project);
-    const normalizedOwner = normalizeWallet(ownerWallet);
-    if (normalizedOwner && !sanitized.ownerWallet) {
-      const claimed = { ...sanitized, ownerWallet: normalizedOwner };
-      await db.put("projects", claimed);
-      return claimed;
-    }
-    if (!matchesOwner(sanitized, ownerWallet)) return null;
-    return sanitized;
+    return sanitizeProjectForStorage(project);
   } catch (error) {
     toast.error("Error retrieving project");
     console.error("Error retrieving project:", error);
@@ -228,26 +200,15 @@ export const deleteProject = async (projectId: string) => {
   }
 };
 
-export const listProjects = async (ownerWallet?: string | null) => {
+export const listProjects = async (_ownerWallet?: string | null) => {
   if (typeof window === "undefined") return [];
   try {
     const db = await setupDB();
     if (!db) return [];
     const projects = await db.getAll("projects");
-    const sanitized = Array.isArray(projects)
+    return Array.isArray(projects)
       ? projects.map((project) => sanitizeProjectForStorage(project))
       : [];
-    const normalizedOwner = normalizeWallet(ownerWallet);
-    if (!normalizedOwner) return sanitized;
-    const claimed = await Promise.all(
-      sanitized.map(async (project) => {
-        if (project?.ownerWallet) return project;
-        const next = { ...project, ownerWallet: normalizedOwner };
-        await db.put("projects", next);
-        return next;
-      }),
-    );
-    return claimed.filter((project) => matchesOwner(project, normalizedOwner));
   } catch (error) {
     console.error("Error listing projects:", error);
     return [];
@@ -349,9 +310,6 @@ export const importProjectBundle = async (
       src: undefined,
     };
   });
-  const nextOwner =
-    normalizeWallet(ownerWallet) ?? normalizeWallet(bundle.project.ownerWallet);
-
   const importedProject = {
     ...bundle.project,
     id: newProjectId,
@@ -362,7 +320,6 @@ export const importProjectBundle = async (
     lastModified: now,
     mediaFiles: clonedMedia,
     filesID: Array.from(fileIdMap.values()),
-    ownerWallet: nextOwner,
   };
 
   await storeProject(importedProject, ownerWallet);
