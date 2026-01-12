@@ -88,7 +88,7 @@ function formatLocalDate(iso: string) {
 }
 
 export default function Projects() {
-  const { authenticated, user } = usePrivy();
+  const { ready, authenticated, user } = usePrivy();
   const { address } = useAccount();
   const walletAddress = address ?? user?.wallet?.address ?? null;
   const ownerWallet = walletAddress ? walletAddress.toLowerCase() : undefined;
@@ -112,6 +112,8 @@ export default function Projects() {
     null,
   );
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const isWalletLoading = ready && authenticated && !walletAddress;
+  const isInitialLoading = isLoading || !ready || isWalletLoading;
 
   const handleCreateProject = useCallback(async () => {
     const title = newProjectName.trim();
@@ -469,7 +471,7 @@ export default function Projects() {
           </p>
         </div>
 
-          {isLoading ? (
+          {isInitialLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="h-[164px] rounded-2xl" />
