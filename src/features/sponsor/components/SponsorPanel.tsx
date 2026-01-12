@@ -339,14 +339,17 @@ export default function SponsorPanel({
     return <WalletGateSkeleton cards={2} />;
   }
 
-  const runTx = async (
-    action: ActionId,
-    request: Parameters<typeof writeContractAsync>[0],
-  ) => {
+  type WriteRequest = Omit<Parameters<typeof writeContractAsync>[0], "value"> & {
+    value?: bigint;
+  };
+
+  const runTx = async (action: ActionId, request: WriteRequest) => {
     setPendingAction(action);
     setActionError(null);
     try {
-      const hash = await writeContractAsync(request);
+      const hash = await writeContractAsync(
+        request as Parameters<typeof writeContractAsync>[0],
+      );
       setLastTx({ action, hash });
       if (publicClient) {
         await publicClient.waitForTransactionReceipt({ hash });
@@ -464,7 +467,7 @@ export default function SponsorPanel({
             topics: log.topics,
           });
           if (decoded.eventName !== "ClipSponsored") continue;
-          const args = decoded.args as {
+          const args = decoded.args as unknown as {
             campaignId: `0x${string}`;
             receiptTokenId: bigint;
             protocolFee: bigint;

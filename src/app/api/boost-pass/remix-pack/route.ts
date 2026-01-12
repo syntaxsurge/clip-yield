@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     };
 
     const address = body?.address?.trim();
-    const signature = body?.signature;
+    const signature = body?.signature?.trim();
     const rawEpoch = body?.epoch;
     const epoch =
       typeof rawEpoch === "string" ? Number.parseInt(rawEpoch, 10) : rawEpoch;
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const verified = await verifyMessage({
       address: getAddress(address),
       message,
-      signature,
+      signature: signature as `0x${string}`,
     });
 
     if (!verified) {

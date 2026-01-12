@@ -229,6 +229,7 @@ export default function KycStartPage() {
     ? new Date(verification.updatedAt).toLocaleString()
     : "Not synced";
   const showRedactionHint = isVerified && !inquiry?.inquiryId;
+  const canReset = Boolean(statusInfo && address);
 
   if (!isConnected) {
     return (
@@ -405,15 +406,17 @@ export default function KycStartPage() {
                 <Button asChild>
                   <a href={returnTo}>Continue</a>
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => void handleReset()}
-                  disabled={resetStatus === "resetting"}
-                >
-                  {resetStatus === "resetting"
-                    ? "Resetting..."
-                    : "Reset KYC (demo)"}
-                </Button>
+                {canReset && (
+                  <Button
+                    variant="outline"
+                    onClick={() => void handleReset()}
+                    disabled={resetStatus === "resetting"}
+                  >
+                    {resetStatus === "resetting"
+                      ? "Resetting..."
+                      : "Reset KYC (demo)"}
+                  </Button>
+                )}
               </>
             ) : (
               <>
@@ -435,6 +438,17 @@ export default function KycStartPage() {
                     {actionStatus === "starting"
                       ? "Redirecting..."
                       : "Start verification"}
+                  </Button>
+                )}
+                {canReset && (
+                  <Button
+                    variant="outline"
+                    onClick={() => void handleReset()}
+                    disabled={resetStatus === "resetting"}
+                  >
+                    {resetStatus === "resetting"
+                      ? "Resetting..."
+                      : "Reset KYC (demo)"}
                   </Button>
                 )}
               </>

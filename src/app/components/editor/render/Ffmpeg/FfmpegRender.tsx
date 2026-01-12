@@ -76,7 +76,9 @@ export default function FfmpegRender({
 	          tracks,
 	          exportSettings,
 	          onProgress: (p) => {
-	            const percent = p.total > 0 ? (p.progress / p.total) * 100 : 0;
+	            const total = p.total ?? 0;
+	            const progress = p.progress ?? 0;
+	            const percent = total > 0 ? (progress / total) * 100 : p.percent ?? 0;
 	            setGpuProgress(percent);
 	          },
 	        });

@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:code": "prettier --write \"**/*.{ts,tsx,js,jsx,cjs,mjs,cts,mts,json,css,scss,mdx,html}\"",
     "lint:all": "pnpm run lint:fix && pnpm run lint && pnpm run format:code",
@@ -73,6 +73,7 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.966.0",
     "@types/debounce": "^1.2.1",
     "@types/lodash": "^4.17.16",
     "@types/node": "22.9.4",

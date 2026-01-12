@@ -39,7 +39,8 @@ export default function SideNavMain() {
     useEffect(() => { setRandomUsers() }, [setRandomUsers])
 
     useEffect(() => {
-        if (!contextUser?.user?.id) {
+        const userId = contextUser?.user?.id
+        if (!userId) {
             setFollowingUsers([])
             return
         }
@@ -48,7 +49,7 @@ export default function SideNavMain() {
 
         const loadFollowing = async () => {
             try {
-                const result = await useGetFollowingProfiles(contextUser.user.id, 6)
+                const result = await useGetFollowingProfiles(userId, 6)
                 if (!isMounted) return
                 setFollowingUsers(result)
             } catch {

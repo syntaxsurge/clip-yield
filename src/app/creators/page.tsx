@@ -46,7 +46,8 @@ export default function CreatorsPage() {
   }, []);
 
   useEffect(() => {
-    if (!contextUser?.user?.id) {
+    const userId = contextUser?.user?.id;
+    if (!userId) {
       setFollowing([]);
       setFollowingStatus("idle");
       return;
@@ -57,10 +58,7 @@ export default function CreatorsPage() {
 
     const loadFollowing = async () => {
       try {
-        const result = await useGetFollowingProfiles(
-          contextUser.user.id,
-          FOLLOWING_LIMIT,
-        );
+        const result = await useGetFollowingProfiles(userId, FOLLOWING_LIMIT);
         if (!isMounted) return;
         setFollowing(result);
         setFollowingStatus("ready");

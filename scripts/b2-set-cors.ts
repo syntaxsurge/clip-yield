@@ -43,7 +43,8 @@ function parseOrigins(argv: string[]) {
 
 function ruleAllowsOriginForUpload(rule: CORSRule, origin: string) {
   const allowedOrigins = rule.AllowedOrigins?.map(normalize) ?? [];
-  const allowedMethods = rule.AllowedMethods?.map((m) => m.toUpperCase()) ?? [];
+  const allowedMethods =
+    rule.AllowedMethods?.map((method: string) => method.toUpperCase()) ?? [];
   const allowedHeaders = rule.AllowedHeaders?.map(normalize) ?? [];
 
   const originAllowed =
@@ -61,17 +62,17 @@ async function readCorsRules(client: S3Client, bucket: string) {
   try {
     const res = await client.send(new GetBucketCorsCommand({ Bucket: bucket }));
     return res.CORSRules ?? [];
-  } catch (error: any) {
+  } catch (error: unknown) {
     const status =
       error && typeof error === "object" && "$metadata" in error
-        ? (error.$metadata?.httpStatusCode as number | undefined)
+        ? (error as { $metadata?: { httpStatusCode?: number } }).$metadata
+            ?.httpStatusCode
         : undefined;
-    if (
-      status === 404 ||
-      (error &&
-        typeof error === "object" &&
-        error.name === "NoSuchCORSConfiguration")
-    ) {
+    const errorName =
+      error && typeof error === "object" && "name" in error
+        ? (error as { name?: string }).name
+        : undefined;
+    if (status === 404 || errorName === "NoSuchCORSConfiguration") {
       return [];
     }
     throw error;
@@ -115,7 +116,10 @@ async function main() {
 
   const existing = await readCorsRules(client, B2_BUCKET);
   const missingOrigins = origins.filter(
-    (origin) => !existing.some((rule) => ruleAllowsOriginForUpload(rule, origin)),
+    (origin) =>
+      !existing.some((rule: CORSRule) =>
+        ruleAllowsOriginForUpload(rule, origin),
+      ),
   );
 
   if (missingOrigins.length === 0) {

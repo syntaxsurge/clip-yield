@@ -36,7 +36,7 @@ const useGetCreatorVaultByWallet = async (
   return {
     wallet: getAddress(payload.walletAddress),
     vault: getAddress(payload.vault),
-    txHash: payload.txHash ?? null,
+    txHash: payload.txHash ?? undefined,
     createdAt: Date.now(),
   };
 };

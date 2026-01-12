@@ -16,7 +16,7 @@ type MantleRpcOptions = {
   cacheKey?: string;
 };
 
-const rpcCache = new LRUCache<string, unknown>({ max: 128 });
+const rpcCache = new LRUCache<string, {}>({ max: 128 });
 
 export async function mantleRpc<T>(
   method: string,

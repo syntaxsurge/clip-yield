@@ -10,10 +10,16 @@ import type {
 import { clientEnv } from "@/lib/env/client";
 
 type DiffusionCore = typeof import("@diffusionstudio/core");
-type DiffusionHex = DiffusionCore["hex"];
-type EncoderProgress = NonNullable<
-  InstanceType<DiffusionCore["Encoder"]>["onProgress"]
->;
+type DiffusionHex = `#${string}`;
+type EncoderProgressPayload = import("@diffusionstudio/core").EncoderProgress;
+type EncoderProgressHandler = (progress: EncoderProgressPayload) => void;
+type DiffusionLayer = import("@diffusionstudio/core").Layer;
+type DiffusionFont = import("@diffusionstudio/core").Font;
+type DiffusionEffect = import("@diffusionstudio/core").Effect;
+type DiffusionVideoSource = import("@diffusionstudio/core").VideoSource;
+type DiffusionImageSource = import("@diffusionstudio/core").ImageSource;
+type DiffusionAudioSource = import("@diffusionstudio/core").AudioSource;
+type ClipAnimationOptions = import("@diffusionstudio/core").ClipAnimationOptions;
 
 let cachedCore: DiffusionCore | null = null;
 
@@ -29,7 +35,7 @@ type CoreRenderInput = {
   textElements: TextElement[];
   tracks: TimelineTrack[];
   exportSettings: ExportConfig;
-  onProgress?: EncoderProgress;
+  onProgress?: EncoderProgressHandler;
 };
 
 const resolutionToSize = (resolution: string) => {
@@ -70,9 +76,9 @@ const normalizeOpacity = (opacity?: number) =>
 const normalizeVolume = (volume?: number) =>
   Math.min(Math.max((volume ?? 100) / 100, 0), 1);
 
-const toHexColor = (input?: string) => {
+const toHexColor = (input?: string): DiffusionHex => {
   if (!input) return "#ffffff";
-  if (input.startsWith("#")) return input.slice(0, 7);
+  if (input.startsWith("#")) return input.slice(0, 7) as DiffusionHex;
   const lowered = input.toLowerCase();
   if (lowered === "white") return "#ffffff";
   if (lowered === "black") return "#000000";
@@ -171,7 +177,7 @@ export async function renderWithDiffusionCore({
     }
 
     const zOrder = Array.from(groups.keys()).sort((a, b) => b - a);
-    const layersByZ = new Map<number, core.Layer>();
+    const layersByZ = new Map<number, DiffusionLayer>();
     for (const z of zOrder) {
       const layer = new core.Layer();
       await composition.add(layer, composition.layers.length);
@@ -181,7 +187,7 @@ export async function renderWithDiffusionCore({
     const uniqueFonts = Array.from(
       new Set(textElements.map((t) => (t.font || "Inter").trim()).filter(Boolean)),
     );
-    const fontsByFamily = new Map<string, core.Font>();
+    const fontsByFamily = new Map<string, DiffusionFont>();
     for (const family of uniqueFonts) {
       try {
         const font = await core.loadFont({
@@ -229,7 +235,7 @@ export async function renderWithDiffusionCore({
       const fadeInEnd = options.start + fadeIn;
       const animation = options.animation || "none";
 
-      const animations: any[] = [];
+      const animations: ClipAnimationOptions = [];
 
       if ((animation === "slide-in" || animation === "slide-up") && fadeIn > 0) {
         animations.push({
@@ -282,8 +288,10 @@ export async function renderWithDiffusionCore({
         const duration = safeDuration(file.positionStart, file.positionEnd);
         if (duration <= 0) continue;
 
-        const effects: core.Effect[] | undefined =
-          file.blur && file.blur > 0 ? [{ type: "blur", value: file.blur }] : undefined;
+        const effects: DiffusionEffect[] | undefined =
+          file.blur && file.blur > 0
+            ? [{ type: "blur", value: file.blur }]
+            : undefined;
 
         const widthPx = safeNumber(file.width, composition.width);
         const heightPx = safeNumber(file.height, composition.height);
@@ -332,7 +340,7 @@ export async function renderWithDiffusionCore({
         };
 
         if (file.type === "video") {
-          const source = await core.Source.from<core.VideoSource>(fileData);
+          const source = (await core.Source.from(fileData)) as DiffusionVideoSource;
           const rangeEnd = safeNumber(file.endTime, file.startTime + duration);
           const clip = new core.VideoClip(source, {
             ...commonProps,
@@ -341,7 +349,7 @@ export async function renderWithDiffusionCore({
           });
           await layer.add(clip);
         } else if (file.type === "image") {
-          const source = await core.Source.from<core.ImageSource>(fileData);
+          const source = (await core.Source.from(fileData)) as DiffusionImageSource;
           const clip = new core.ImageClip(source, commonProps);
           await layer.add(clip);
         }
@@ -355,8 +363,10 @@ export async function renderWithDiffusionCore({
         const fadeOut = clampNumber(safeNumber(text.fadeOutDuration, 0.4), 0, duration);
         const baseOpacity = normalizeOpacity(text.opacity);
         const rotation = text.rotation ?? 0;
-        const effects: core.Effect[] | undefined =
-          text.blur && text.blur > 0 ? [{ type: "blur", value: text.blur }] : undefined;
+        const effects: DiffusionEffect[] | undefined =
+          text.blur && text.blur > 0
+            ? [{ type: "blur", value: text.blur }]
+            : undefined;
 
         const boxWidth = safeNumber(text.width, 800);
         const boxHeight = safeNumber(text.height, 200);
@@ -410,7 +420,7 @@ export async function renderWithDiffusionCore({
           y: text.y,
           rotation,
           opacity: baseOpacity,
-          color: toHexColor(text.color) as core.hex,
+          color: toHexColor(text.color),
           font: {
             family,
             size: fontSize,
@@ -446,7 +456,7 @@ export async function renderWithDiffusionCore({
         const duration = safeDuration(file.positionStart, file.positionEnd);
         if (duration <= 0) continue;
 
-        const source = await core.Source.from<core.AudioSource>(fileData);
+        const source = (await core.Source.from(fileData)) as DiffusionAudioSource;
         const rangeEnd = safeNumber(file.endTime, file.startTime + duration);
         const clip = new core.AudioClip(source, {
           delay: file.positionStart,

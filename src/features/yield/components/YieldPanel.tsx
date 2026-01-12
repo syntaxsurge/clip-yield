@@ -331,15 +331,28 @@ export default function YieldPanel({
     maxWithdrawValue >= parsedVaultAmount;
 
   const walletReady = isConnected && isOnMantle;
-  const formattedTotalAssets = totalAssets
-    ? formatUnits(totalAssets, assetDecimalsValue)
-    : "0";
-  const formattedTotalSupply = totalSupply
-    ? formatUnits(totalSupply, shareDecimalsValue)
-    : "0";
+  const totalAssetsValue = typeof totalAssets === "bigint" ? totalAssets : null;
+  const totalSupplyValue = typeof totalSupply === "bigint" ? totalSupply : null;
+  const assetsPerShareValue =
+    typeof assetsPerShare === "bigint" ? assetsPerShare : null;
+  const previewSharesValue =
+    typeof previewShares === "bigint" ? previewShares : null;
+  const vaultNameLabel =
+    typeof vaultName === "string" && vaultName ? vaultName : "ClipYield Vault";
+  const vaultSymbolLabel =
+    typeof vaultSymbol === "string" && vaultSymbol ? vaultSymbol : "cySHARE";
+
+  const formattedTotalAssets =
+    totalAssetsValue !== null
+      ? formatUnits(totalAssetsValue, assetDecimalsValue)
+      : "0";
+  const formattedTotalSupply =
+    totalSupplyValue !== null
+      ? formatUnits(totalSupplyValue, shareDecimalsValue)
+      : "0";
   const formattedSharePrice =
-    typeof assetsPerShare === "bigint"
-      ? formatUnits(assetsPerShare, assetDecimalsValue)
+    assetsPerShareValue !== null
+      ? formatUnits(assetsPerShareValue, assetDecimalsValue)
       : "—";
   const formattedShareBalance = walletReady
     ? formatUnits(shareBalanceValue, shareDecimalsValue)
@@ -347,9 +360,10 @@ export default function YieldPanel({
   const formattedVaultClaim = walletReady
     ? formatUnits(maxWithdrawValue, assetDecimalsValue)
     : "—";
-  const formattedPreviewShares = previewShares
-    ? formatUnits(previewShares, shareDecimalsValue)
-    : "0";
+  const formattedPreviewShares =
+    previewSharesValue !== null
+      ? formatUnits(previewSharesValue, shareDecimalsValue)
+      : "0";
   const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
   const formattedAssetBalance = !walletReady
     ? "—"
@@ -449,14 +463,17 @@ export default function YieldPanel({
     void handleRefresh();
   }, [handleRefresh, isTxConfirmed, lastConfirmedHash, lastTx?.hash]);
 
-  const runTx = async (
-    action: ActionId,
-    request: Parameters<typeof writeContractAsync>[0],
-  ) => {
+  type WriteRequest = Omit<Parameters<typeof writeContractAsync>[0], "value"> & {
+    value?: bigint;
+  };
+
+  const runTx = async (action: ActionId, request: WriteRequest) => {
     setPendingAction(action);
     setActionError(null);
     try {
-      const hash = await writeContractAsync(request);
+      const hash = await writeContractAsync(
+        request as Parameters<typeof writeContractAsync>[0],
+      );
       setLastTx({ action, hash });
       return hash;
     } catch (error) {
@@ -610,8 +627,8 @@ export default function YieldPanel({
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Vault overview</CardTitle>
-            <CardDescription>{vaultName || "ClipYield Vault"}</CardDescription>
+          <CardTitle>Vault overview</CardTitle>
+          <CardDescription>{vaultNameLabel}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
@@ -621,7 +638,7 @@ export default function YieldPanel({
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Share supply (cySHARE)</span>
               <span>
-                {formattedTotalSupply} {vaultSymbol || "cySHARE"}
+                {formattedTotalSupply} {vaultSymbolLabel}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -691,7 +708,7 @@ export default function YieldPanel({
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Vault shares (cySHARE)</span>
               <span>
-                {formattedShareBalance} {vaultSymbol || "cySHARE"}
+                {formattedShareBalance} {vaultSymbolLabel}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -824,7 +841,7 @@ export default function YieldPanel({
                 className="mt-3"
               />
               <div className="mt-2 text-xs text-muted-foreground">
-                Estimated shares: {formattedPreviewShares} {vaultSymbol || "cySHARE"}
+                Estimated shares: {formattedPreviewShares} {vaultSymbolLabel}
               </div>
             </div>
           </div>

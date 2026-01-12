@@ -44,12 +44,16 @@ export default function Post({ params }: PostPageTypes) {
             const nextPost = postsByUser[nextIndex]
             if (!nextPost) return
             const url = `/post/${nextPost.id}/${userId}`
-            if (typeof document !== "undefined" && "startViewTransition" in document) {
-                // @ts-expect-error View transitions are not typed yet.
-                document.startViewTransition(() => router.push(url))
-            } else {
-                router.push(url)
+            if (typeof document !== "undefined") {
+                const doc = document as Document & {
+                    startViewTransition?: (callback: () => void) => void
+                }
+                if (doc.startViewTransition) {
+                    doc.startViewTransition(() => router.push(url))
+                    return
+                }
             }
+            router.push(url)
         },
         [postsByUser, router, userId],
     )

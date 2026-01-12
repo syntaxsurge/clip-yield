@@ -1,9 +1,17 @@
-import { createPublicClient, erc20Abi, getAddress, http, isAddress, verifyMessage } from "viem";
+import {
+  createPublicClient,
+  erc20Abi,
+  getAddress,
+  http,
+  isAddress,
+  verifyMessage,
+} from "viem";
 import { mantleSepolia } from "@/lib/web3/mantle";
 import { convexHttpClient } from "@/lib/convex/http";
 import { getSponsorCampaignByPostId } from "@/lib/convex/functions";
 import { buildSponsorPackMessage } from "@/features/sponsor/message";
 import { isSponsorCampaignActive } from "@/features/sponsor/utils";
+import type { SponsorCampaign } from "@/app/types";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +49,7 @@ export async function POST(req: Request) {
 
     const postId = body?.postId?.trim();
     const address = body?.address?.trim();
-    const signature = body?.signature;
+    const signature = body?.signature?.trim();
 
     if (!postId || !address || !signature) {
       return new Response("Missing postId, address, or signature.", { status: 400 });
@@ -53,10 +61,7 @@ export async function POST(req: Request) {
 
     const campaign = (await convexHttpClient.query(getSponsorCampaignByPostId, {
       postId,
-    })) as {
-      vaultAddress: string;
-      createdAt: number;
-    } | null;
+    })) as SponsorCampaign | null;
 
     if (!campaign) {
       return new Response("No sponsor campaign found.", { status: 404 });
@@ -74,7 +79,7 @@ export async function POST(req: Request) {
     const verified = await verifyMessage({
       address: getAddress(address),
       message,
-      signature,
+      signature: signature as `0x${string}`,
     });
 
     if (!verified) {

@@ -9,10 +9,10 @@ import { mantleSepolia } from "@/lib/web3/mantle";
 import { mantleConfig } from "@/lib/web3/mantleConfig";
 import { requirePublicEnv } from "@/lib/env/public";
 
-const supportedChains = [mantleSepolia] as const;
+const supportedChains = [mantleSepolia];
 
 const wagmiConfig = createConfig({
-  chains: supportedChains,
+  chains: supportedChains as [typeof mantleSepolia],
   transports: {
     [mantleSepolia.id]: http(mantleConfig.rpcUrl),
   },
