@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { usePrivy } from "@privy-io/react-auth";
 import type { User, UserContextTypes } from "@/app/types";
 import { convexClient } from "@/lib/convex/client";
@@ -10,8 +10,15 @@ import { ensureProfile, getProfile } from "@/lib/convex/functions";
 const UserContext = createContext<UserContextTypes | null>(null);
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const { address } = useAccount();
-  const { ready, authenticated, login, logout: privyLogout, user: privyUser } = usePrivy();
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const {
+    ready,
+    authenticated,
+    login,
+    logout: privyLogout,
+    user: privyUser,
+  } = usePrivy();
   const walletAddress = privyUser?.wallet?.address ?? address;
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +49,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
     const syncProfile = async () => {
-      if (!ready) {
+      if (!ready && !isConnected) {
         if (!isMounted) return;
         setIsLoading(true);
         return;
@@ -50,7 +57,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
       setIsLoading(true);
 
-      if (!authenticated || !walletAddress) {
+      if (!walletAddress || (!authenticated && !isConnected)) {
         if (!isMounted) return;
         setUser(null);
         setIsLoading(false);
@@ -73,7 +80,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       isMounted = false;
     };
-  }, [authenticated, ready, walletAddress]);
+  }, [authenticated, isConnected, ready, walletAddress]);
 
   const openConnect = async () => {
     if (!ready) return;
@@ -81,7 +88,12 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    await privyLogout();
+    if (authenticated) {
+      await privyLogout();
+    }
+    if (isConnected) {
+      disconnect();
+    }
     setUser(null);
   };
 

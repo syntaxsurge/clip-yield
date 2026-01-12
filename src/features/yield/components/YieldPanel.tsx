@@ -12,7 +12,6 @@ import {
   useWriteContract,
 } from "wagmi";
 import { Address, formatUnits, getAddress, parseUnits } from "viem";
-import { usePrivy } from "@privy-io/react-auth";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -73,9 +72,7 @@ export default function YieldPanel({
   recordDeposit = true,
   onDeposit,
 }: YieldPanelProps) {
-  const { address } = useAccount();
-  const { authenticated } = usePrivy();
-  const isConnected = authenticated && Boolean(address);
+  const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
   const { switchChainAsync } = useSwitchChain();

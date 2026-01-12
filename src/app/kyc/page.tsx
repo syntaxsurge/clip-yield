@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
-import { usePrivy } from "@privy-io/react-auth";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -38,10 +37,8 @@ const FINAL_INQUIRY_STATUSES = new Set([
 ]);
 
 export default function KycStartPage() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const { authenticated } = usePrivy();
-  const isConnected = authenticated && Boolean(address);
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "/yield";
 

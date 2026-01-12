@@ -10,7 +10,6 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,9 +35,7 @@ import type { LeaderboardSnapshot } from "@/app/types";
 const boostPassAddress = mantleSepoliaContracts.boostPass as Address;
 
 export default function AdminBoostPassPanel() {
-  const { address } = useAccount();
-  const { authenticated } = usePrivy();
-  const isConnected = authenticated && Boolean(address);
+  const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();

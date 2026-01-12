@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePaginatedQuery } from "convex/react";
 import { useAccount } from "wagmi";
-import { usePrivy } from "@privy-io/react-auth";
 import { formatUnits, getAddress, isAddress } from "viem";
 
 import ActivityFilters, { type ActivityFilter } from "@/app/activity/components/ActivityFilters";
@@ -36,14 +35,13 @@ function formatAmount(value?: string) {
 }
 
 export default function ActivityFeed() {
-  const { address } = useAccount();
-  const { authenticated } = usePrivy();
+  const { address, isConnected } = useAccount();
   const [filter, setFilter] = useState<ActivityFilter>("all");
 
   const normalizedWallet = useMemo(() => {
-    if (!authenticated || !address || !isAddress(address)) return null;
+    if (!isConnected || !address || !isAddress(address)) return null;
     return getAddress(address);
-  }, [address, authenticated]);
+  }, [address, isConnected]);
 
   const queryArgs = useMemo(() => {
     if (!normalizedWallet) return "skip" as const;

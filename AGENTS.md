@@ -382,7 +382,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with a cron recompute of leaderboards
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence (`src/app/store`)
 - AI generation uses Sora BYOK keys stored via encrypted cookies (`OPENAI_BYOK_COOKIE_SECRET`) and `/api/sora` routes, surfaced in the editor library AI Studio
-- Mantle Sepolia wallet stack using Privy embedded wallets + wagmi + viem (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`)
+- Mantle Sepolia wallet stack uses Privy for email/embedded wallets and wagmi injected connectors for external wallets (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`, `src/components/ui/PrivyConnectButton.tsx`)
 - Admin routes are gated by an allowlist in `NEXT_PUBLIC_ADMIN_WALLET_ADDRESSES` and enforced via `src/app/admin/layout.tsx`
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
 - RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldInvoiceReceipts, ClipYieldBoostPass, SimulatedYieldStreamer) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`

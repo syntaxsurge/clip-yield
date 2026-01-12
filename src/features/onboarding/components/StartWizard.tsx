@@ -11,7 +11,6 @@ import {
   useWriteContract,
 } from "wagmi";
 import { parseUnits } from "viem";
-import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,8 +24,7 @@ import { wmntAbi } from "@/lib/web3/wmnt";
 const DEFAULT_WRAP_AMOUNT = "0.1";
 
 export default function StartWizard() {
-  const { address } = useAccount();
-  const { authenticated } = usePrivy();
+  const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -40,7 +38,6 @@ export default function StartWizard() {
     setIsMounted(true);
   }, []);
 
-  const isConnected = authenticated && Boolean(address);
   const isConnectedReady = isMounted && isConnected;
   const isOnMantle = isMounted && chainId === mantleConfig.chainId;
 

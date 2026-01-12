@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useAccount, useChainId, useReadContract } from "wagmi";
-import { usePrivy } from "@privy-io/react-auth";
 import { Address, getAddress } from "viem";
 import MainLayout from "@/app/layouts/MainLayout";
 import { useGeneralStore } from "@/app/stores/general";
@@ -20,13 +19,11 @@ import { formatShortHash } from "@/lib/utils";
 import { OpenAIKeyCard } from "./OpenAIKeyCard";
 
 export default function SettingsPage() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { authenticated } = usePrivy();
   const { isFeedMuted, setIsFeedMuted, isAutoScrollEnabled, setIsAutoScrollEnabled } =
     useGeneralStore();
 
-  const isConnected = authenticated && Boolean(address);
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
   const walletLabel = useMemo(
     () => (address ? formatShortHash(address) : "Not connected"),

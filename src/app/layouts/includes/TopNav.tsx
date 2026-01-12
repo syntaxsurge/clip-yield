@@ -14,6 +14,7 @@ import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
 import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
 import ThemeToggle from "@/components/ui/theme-toggle";
+import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 import { isAdminAddress } from "@/lib/admin/adminAllowlist";
 import { formatShortHash } from "@/lib/utils";
 
@@ -219,12 +220,11 @@ export default function TopNav() {
                                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-500 dark:border-white/30 dark:border-t-white" />
                                 </div>
                             ) : !userContext?.user?.id ? (
-                                <button
-                                    onClick={() => void userContext?.openConnect()}
-                                    className="flex items-center rounded-md border border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] px-3 py-[6px] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
-                                >
-                                    <span className="whitespace-nowrap mx-4 font-semibold text-[15px]">Connect</span>
-                                </button>
+                                <PrivyConnectButton
+                                    className="h-9 rounded-md border border-[color:var(--brand-accent)] bg-[color:var(--brand-accent)] px-4 text-[15px] text-[color:var(--brand-ink)] hover:bg-[color:var(--brand-accent-strong)]"
+                                    size="sm"
+                                    variant="default"
+                                />
                             ) : (
                                 <div className="flex items-center">
                                     <div className="relative">

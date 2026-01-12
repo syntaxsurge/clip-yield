@@ -16,10 +16,11 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
   const { ready, authenticated, login, logout } = usePrivy();
 
-  const hasWallet = Boolean(ready && authenticated && isConnected && address);
+  const hasWallet = Boolean(isConnected && address);
   const isAdmin = hasWallet && isAdminAddress(address);
 
   const handleSwitchAccount = async () => {
+    if (!ready) return;
     if (authenticated) {
       await logout();
     }
@@ -27,7 +28,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     router.refresh();
   };
 
-  if (!ready) {
+  if (!ready && !isConnected) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-lg items-center px-6">
         <WalletGateSkeleton cards={1} className="w-full" />
