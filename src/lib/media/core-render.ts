@@ -11,7 +11,11 @@ import { clientEnv } from "@/lib/env/client";
 
 type DiffusionCore = typeof import("@diffusionstudio/core");
 type DiffusionHex = `#${string}`;
-type EncoderProgressPayload = import("@diffusionstudio/core").EncoderProgress;
+type EncoderProgressPayload = {
+  total: number;
+  progress: number;
+  remaining: Date;
+};
 type EncoderProgressHandler = (progress: EncoderProgressPayload) => void;
 type DiffusionLayer = import("@diffusionstudio/core").Layer;
 type DiffusionFont = import("@diffusionstudio/core").Font;
@@ -19,7 +23,14 @@ type DiffusionEffect = import("@diffusionstudio/core").Effect;
 type DiffusionVideoSource = import("@diffusionstudio/core").VideoSource;
 type DiffusionImageSource = import("@diffusionstudio/core").ImageSource;
 type DiffusionAudioSource = import("@diffusionstudio/core").AudioSource;
-type ClipAnimationOptions = import("@diffusionstudio/core").ClipAnimationOptions;
+type KeyframeOptions<K, T> = import("@diffusionstudio/core").KeyframeOptions<K, T>;
+type RectangleClipAnimationOptions =
+  import("@diffusionstudio/core").RectangleClipAnimationOptions;
+type TextClipAnimationOptions =
+  import("@diffusionstudio/core").TextClipAnimationOptions;
+type TransformAnimation =
+  | KeyframeOptions<"translateY", number>
+  | KeyframeOptions<"scale", number>;
 
 let cachedCore: DiffusionCore | null = null;
 
@@ -206,7 +217,7 @@ export async function renderWithDiffusionCore({
       fadeIn: number;
       fadeOut: number;
       finalOpacity: number;
-    }) => {
+    }): KeyframeOptions<"opacity", number> => {
       const duration = Math.max(0, options.end - options.start);
       const fadeIn = clampNumber(options.fadeIn, 0, duration);
       const fadeOut = clampNumber(options.fadeOut, 0, duration);
@@ -230,12 +241,12 @@ export async function renderWithDiffusionCore({
       start: number;
       fadeIn: number;
       animation?: TextElement["animation"];
-    }) => {
+    }): TransformAnimation[] => {
       const fadeIn = Math.max(0, options.fadeIn);
       const fadeInEnd = options.start + fadeIn;
       const animation = options.animation || "none";
 
-      const animations: ClipAnimationOptions = [];
+      const animations: TransformAnimation[] = [];
 
       if ((animation === "slide-in" || animation === "slide-up") && fadeIn > 0) {
         animations.push({
@@ -380,6 +391,16 @@ export async function renderWithDiffusionCore({
         const bg = parseHexWithAlpha(text.backgroundColor);
         const bgOpacity = clampNumber(baseOpacity * bg.alpha, 0, 1);
         if (bgOpacity > 0 && boxWidth > 0 && boxHeight > 0) {
+          const rectAnimations: RectangleClipAnimationOptions = [
+            buildFadeAnimation({
+              start: text.positionStart,
+              end: text.positionEnd,
+              fadeIn,
+              fadeOut,
+              finalOpacity: bgOpacity,
+            }),
+            ...transformAnimations,
+          ];
           const rect = new core.RectangleClip({
             fill: bg.hex,
             delay: text.positionStart,
@@ -391,16 +412,7 @@ export async function renderWithDiffusionCore({
             rotation,
             opacity: bgOpacity,
             effects,
-            animations: [
-              buildFadeAnimation({
-                start: text.positionStart,
-                end: text.positionEnd,
-                fadeIn,
-                fadeOut,
-                finalOpacity: bgOpacity,
-              }),
-              ...transformAnimations,
-            ],
+            animations: rectAnimations,
           });
           await layer.add(rect);
         }
@@ -411,6 +423,17 @@ export async function renderWithDiffusionCore({
         const family = (text.font || "Inter").trim();
         const loadedFont = fontsByFamily.get(family);
         const fontSize = text.fontSize || loadedFont?.size || 24;
+
+        const textAnimations: TextClipAnimationOptions = [
+          buildFadeAnimation({
+            start: text.positionStart,
+            end: text.positionEnd,
+            fadeIn,
+            fadeOut,
+            finalOpacity: baseOpacity,
+          }),
+          ...transformAnimations,
+        ];
 
         const clip = new core.TextClip({
           text: text.text,
@@ -430,16 +453,7 @@ export async function renderWithDiffusionCore({
           maxWidth: boxWidth > 0 ? boxWidth : undefined,
           align: text.align,
           effects,
-          animations: [
-            buildFadeAnimation({
-              start: text.positionStart,
-              end: text.positionEnd,
-              fadeIn,
-              fadeOut,
-              finalOpacity: baseOpacity,
-            }),
-            ...transformAnimations,
-          ],
+          animations: textAnimations,
         });
 
         await layer.add(clip);

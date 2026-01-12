@@ -16,7 +16,9 @@ type MantleRpcOptions = {
   cacheKey?: string;
 };
 
-const rpcCache = new LRUCache<string, {}>({ max: 128 });
+type CacheEntry = { value: unknown };
+
+const rpcCache = new LRUCache<string, CacheEntry>({ max: 128 });
 
 export async function mantleRpc<T>(
   method: string,
@@ -40,7 +42,7 @@ export async function mantleRpc<T>(
   if (shouldCache && cacheKey) {
     const cached = rpcCache.get(cacheKey);
     if (cached !== undefined) {
-      return cached as T;
+      return cached.value as T;
     }
   }
 
@@ -62,7 +64,7 @@ export async function mantleRpc<T>(
   }
 
   if (shouldCache && cacheKey) {
-    rpcCache.set(cacheKey, payload.result, { ttl: options.cacheTtlMs });
+    rpcCache.set(cacheKey, { value: payload.result }, { ttl: options.cacheTtlMs });
   }
 
   return payload.result;

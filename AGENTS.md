@@ -368,7 +368,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 ## API endpoints
 - `/api/kyc/start` creates or resumes a Persona inquiry and returns the hosted flow URL
 - `/api/kyc/sync` fetches Persona inquiry status and triggers on-chain KYC updates, returning a pending tx hash when confirmation is still in flight
-- `/api/kyc/reset` revokes on-chain verification and clears local inquiry records (demo reset)
+- `/api/kyc/reset` revokes on-chain verification and clears local inquiry + verification records (demo reset)
 - `/api/creator-vault/resolve` verifies creator KYC and provisions or returns the creator boost vault
 - `/api/settings/openai-key` manages encrypted BYOK OpenAI keys stored in HTTP-only cookies
 - `/api/sora` creates Sora jobs and polls job status using the stored BYOK key

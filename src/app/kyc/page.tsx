@@ -172,6 +172,10 @@ export default function KycStartPage() {
     if (!address || !signMessageAsync) return;
     setResetStatus("resetting");
     setResetError(null);
+    setStatusInfo(null);
+    setStatusError(null);
+    setActionStatus("idle");
+    setActionError(null);
 
     const message = `ClipYield demo KYC reset for ${address} at ${new Date().toISOString()}`;
 

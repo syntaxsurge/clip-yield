@@ -115,6 +115,38 @@ export const setWalletVerified = mutation({
   },
 });
 
+export const deleteWalletVerification = mutation({
+  args: {
+    walletAddress: v.string(),
+    secret: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const expected = getEnv("KYC_SYNC_SECRET");
+    if (expected && args.secret !== expected) {
+      throw new Error("Invalid KYC sync secret.");
+    }
+
+    if (!isAddress(args.walletAddress)) {
+      throw new Error("Invalid wallet address.");
+    }
+
+    const walletAddress = getAddress(args.walletAddress);
+    const existing = await ctx.db
+      .query("walletVerifications")
+      .withIndex("by_walletAddress", (q) =>
+        q.eq("walletAddress", walletAddress),
+      )
+      .unique();
+
+    if (!existing) {
+      return { deleted: false };
+    }
+
+    await ctx.db.delete(existing._id);
+    return { deleted: true };
+  },
+});
+
 export const deleteInquiriesForWallet = mutation({
   args: {
     walletAddress: v.string(),

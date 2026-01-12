@@ -126,10 +126,8 @@ export async function POST(req: Request) {
   const syncSecret = getServerEnv("KYC_SYNC_SECRET");
 
   try {
-    await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
+    await convexHttpClient.mutation(anyApi.kyc.deleteWalletVerification, {
       walletAddress,
-      verified: false,
-      txHash,
       secret: syncSecret,
     });
 
