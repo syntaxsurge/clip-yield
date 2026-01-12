@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { usePrivy } from "@privy-io/react-auth";
 import { Button } from "@/components/ui/button";
 import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
@@ -14,6 +14,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
   const { ready, authenticated, login, logout } = usePrivy();
 
   const hasWallet = Boolean(isConnected && address);
@@ -23,6 +24,9 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     if (!ready) return;
     if (authenticated) {
       await logout();
+    }
+    if (isConnected) {
+      disconnect();
     }
     await login();
     router.refresh();

@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { PrivyProvider, type PrivyClientConfig } from "@privy-io/react-auth";
-import { WagmiProvider } from "@privy-io/wagmi";
+import { WagmiProvider, createConfig } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createConfig, http } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { http } from "wagmi";
 import { mantleSepolia } from "@/lib/web3/mantle";
 import { mantleConfig } from "@/lib/web3/mantleConfig";
 import { requirePublicEnv } from "@/lib/env/public";
@@ -13,13 +12,10 @@ import { requirePublicEnv } from "@/lib/env/public";
 const supportedChains = [mantleSepolia] as const;
 
 const wagmiConfig = createConfig({
-  ssr: true,
   chains: supportedChains,
   transports: {
     [mantleSepolia.id]: http(mantleConfig.rpcUrl),
   },
-  connectors: [injected({ shimDisconnect: true })],
-  multiInjectedProviderDiscovery: false,
 });
 
 const privyConfig = {
@@ -28,9 +24,10 @@ const privyConfig = {
       createOnLogin: "users-without-wallets",
     },
   },
-  loginMethods: ["email"],
+  loginMethods: ["email", "wallet"],
   appearance: {
-    loginGroupPriority: "web2-first",
+    showWalletLoginFirst: false,
+    walletChainType: "ethereum-only",
   },
   defaultChain: mantleSepolia,
   supportedChains,
