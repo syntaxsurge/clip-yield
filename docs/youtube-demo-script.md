@@ -113,13 +113,26 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   1. **Current page:** `/boost/[creatorId]`, confirm the Boost Vault UI is visible.
   2. **Navigate:** **Current page:** `/boost/[creatorId]`, click “Explore” → click “Feed” → lands on `/` → click a clip → lands on `/post/[postId]/[userId]`, confirm the clip and actions are visible.
   3. **Navigate:** **Current page:** `/post/[postId]/[userId]`, click “Sponsor” → lands on `/sponsor/[postId]`, confirm “Sponsor” heading and clip preview appear.
-  4. **Action:** **Current page:** `/sponsor/[postId]`, click input labeled “Amount (WMNT)”, confirm cursor is active.
-  5. **Enter values:**
-     - Amount (WMNT) = `[SPONSOR_WMNT=0.10]`
-  6. Click “Confirm Sponsorship”, wait for wallet prompt and “Transaction submitted” state.
-  7. **Verify on-screen:** **Current page:** `/sponsor/[postId]`, confirm a success state shows “Invoice Receipt NFT minted” (token ID visible) or a “View Receipt” button appears.
+  4. **Action:** **Current page:** `/sponsor/[postId]`, note that inputs live in “Campaign terms” and “Sponsor with invoice receipts”. The “Sponsor details”, “Sponsorship breakdown”, “Wallet balances”, and “Sponsor perks” cards are read only.
+  5. **Action:** **Current page:** `/sponsor/[postId]`, in “Campaign terms” fill Sponsor name, Objective, Deliverables, Start date, End date.
+  6. **Enter values:**
+     - Sponsor name = `[SPONSOR_NAME=Mantle Creators Fund]`
+     - Objective = `[SPONSOR_OBJECTIVE=Launch week push for the remix challenge]`
+     - Deliverables (one per line)
+       - `1x 15s clip featuring the campaign`
+       - `1x caption + link in bio`
+       - `1x behind the scenes remix`
+     - Start date = `[SPONSOR_START_DATE=2026-01-12]`
+     - End date = `[SPONSOR_END_DATE=2026-01-19]`
+  7. **Action:** **Current page:** `/sponsor/[postId]`, in “Sponsor with invoice receipts” click input labeled “Amount (WMNT)”, confirm cursor is active.
+  8. **Enter values:**
+     - Amount (WMNT) = `[SPONSOR_WMNT=1]`
+  9. **Action:** **Current page:** `/sponsor/[postId]`, click “Wrap MNT to WMNT” if needed.
+  10. **Action:** **Current page:** `/sponsor/[postId]`, click “Approve sponsor hub” if shown, wait for “Approved” state.
+  11. **Action:** **Current page:** `/sponsor/[postId]`, click “Sponsor clip”, wait for wallet prompt and “Transaction submitted” state.
+  12. **Verify on-screen:** **Current page:** `/sponsor/[postId]`, confirm a success state shows “Invoice Receipt NFT minted” (token ID visible) or a “View Receipt” button appears.
 - **Voiceover:**
-  > “This is the Real World Asset or RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 1 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details.”
+  > “This is the Real finance moment: Sponsorship becomes a tokenized invoice. We fill in campaign terms, set the WMNT amount in Sponsor with invoice receipts, then sponsor the clip. The app mints an Invoice Receipt NFT with the terms hash and receipt details.”
 
 ## 9. Campaign Receipt (RWA Proof + Terms Hash)
 - **URL:** /campaign/[campaignId]
