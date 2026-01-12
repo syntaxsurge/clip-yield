@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { Toaster } from "react-hot-toast";
 import AllOverlays from "@/app/components/AllOverlays";
@@ -33,9 +34,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <AppProviders>
-          <AllOverlays />
-          {children}
-          <Toaster position="bottom-right" />
+          <AllOverlays key="overlays" />
+          <Fragment key="page-content">{children}</Fragment>
+          <Toaster key="toaster" position="bottom-right" />
         </AppProviders>
       </body>
     </html>
