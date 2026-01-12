@@ -146,10 +146,32 @@ const sanitizeProjectForStorage = (project: any) => {
   return sanitized;
 };
 
+const normalizeWallet = (wallet?: string | null) => {
+  if (!wallet) return undefined;
+  const trimmed = wallet.trim();
+  return trimmed ? trimmed.toLowerCase() : undefined;
+};
+
+const ensureProjectOwner = (project: any, ownerWallet?: string | null) => {
+  if (!project || typeof project !== "object") return project;
+  const normalizedOwner = normalizeWallet(ownerWallet);
+  const existingOwner = normalizeWallet(project.ownerWallet);
+  const nextOwner = normalizedOwner ?? existingOwner;
+  if (!nextOwner) return project;
+  return { ...project, ownerWallet: nextOwner };
+};
+
+const matchesOwner = (project: any, ownerWallet?: string | null) => {
+  const normalizedOwner = normalizeWallet(ownerWallet);
+  if (!normalizedOwner) return true;
+  const projectOwner = normalizeWallet(project?.ownerWallet);
+  return projectOwner === normalizedOwner;
+};
+
 // Project storage functions
 export const storeProject = async (
   project: any,
-  _ownerWallet?: string | null,
+  ownerWallet?: string | null,
 ) => {
   if (typeof window === "undefined") return null;
   try {
@@ -160,9 +182,10 @@ export const storeProject = async (
       return null;
     }
 
-    await db.put("projects", sanitizeProjectForStorage(project));
+    const preparedProject = ensureProjectOwner(project, ownerWallet);
+    await db.put("projects", sanitizeProjectForStorage(preparedProject));
 
-    return project.id;
+    return preparedProject.id;
   } catch (error) {
     toast.error("Error storing project");
     console.error("Error storing project:", error);
@@ -172,7 +195,7 @@ export const storeProject = async (
 
 export const getProject = async (
   projectId: string,
-  _ownerWallet?: string | null,
+  ownerWallet?: string | null,
 ) => {
   if (typeof window === "undefined") return null;
   try {
@@ -180,7 +203,15 @@ export const getProject = async (
     if (!db) return null;
     const project = await db.get("projects", projectId);
     if (!project) return null;
-    return sanitizeProjectForStorage(project);
+    const sanitized = sanitizeProjectForStorage(project);
+    const normalizedOwner = normalizeWallet(ownerWallet);
+    if (normalizedOwner && !sanitized.ownerWallet) {
+      const claimed = { ...sanitized, ownerWallet: normalizedOwner };
+      await db.put("projects", claimed);
+      return claimed;
+    }
+    if (!matchesOwner(sanitized, ownerWallet)) return null;
+    return sanitized;
   } catch (error) {
     toast.error("Error retrieving project");
     console.error("Error retrieving project:", error);
@@ -206,9 +237,12 @@ export const listProjects = async (_ownerWallet?: string | null) => {
     const db = await setupDB();
     if (!db) return [];
     const projects = await db.getAll("projects");
-    return Array.isArray(projects)
+    const sanitized = Array.isArray(projects)
       ? projects.map((project) => sanitizeProjectForStorage(project))
       : [];
+    const normalizedOwner = normalizeWallet(_ownerWallet);
+    if (!normalizedOwner) return [];
+    return sanitized.filter((project) => matchesOwner(project, normalizedOwner));
   } catch (error) {
     console.error("Error listing projects:", error);
     return [];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { usePrivy } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
@@ -50,7 +50,6 @@ export default function ProjectClient({ projectId }: Props) {
   const dispatch = useAppDispatch();
   const projectState = useAppSelector((state) => state.projectState);
   const { currentProjectId } = useAppSelector((state) => state.projects);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { user } = usePrivy();
   const { address } = useAccount();
@@ -62,19 +61,15 @@ export default function ProjectClient({ projectId }: Props) {
     let cancelled = false;
 
     const loadProject = async () => {
-      if (projectId) {
-        setIsLoading(true);
-        const project = await getProject(projectId, ownerWallet);
-        if (cancelled) return;
-        if (project) {
-          dispatch(setCurrentProject(projectId));
-          setIsLoading(false);
-          return;
-        }
-        setIsLoading(false);
-        toast.error("Project not found or not accessible.");
-        router.push("/projects");
+      if (!projectId) return;
+      const project = await getProject(projectId, ownerWallet);
+      if (cancelled) return;
+      if (project) {
+        dispatch(setCurrentProject(projectId));
+        return;
       }
+      toast.error("Project not found or not accessible.");
+      router.push("/projects");
     };
     loadProject();
     return () => {
@@ -82,12 +77,7 @@ export default function ProjectClient({ projectId }: Props) {
     };
   }, [projectId, dispatch, ownerWallet, router]);
 
-  useEffect(() => {
-    if (!projectId) return;
-    if (projectState.id === projectId && currentProjectId === projectId) {
-      setIsLoading(false);
-    }
-  }, [projectId, projectState.id, currentProjectId]);
+  const showLoadingOverlay = projectState.id !== projectId;
 
   useEffect(() => {
     const loadProjectState = async () => {
@@ -152,7 +142,7 @@ export default function ProjectClient({ projectId }: Props) {
       <SoraJobManager />
       <div className="flex h-screen flex-col select-none bg-black">
         <EditorTopBar />
-        {isLoading ? (
+        {showLoadingOverlay ? (
           <div className="fixed inset-0 flex items-center bg-black bg-opacity-50 justify-center z-50">
             <div className="bg-black bg-opacity-70 p-6 rounded-lg flex flex-col items-center">
               <div className="w-16 h-16 border-4 border-t-white border-r-white border-opacity-30 border-t-opacity-100 rounded-full animate-spin"></div>

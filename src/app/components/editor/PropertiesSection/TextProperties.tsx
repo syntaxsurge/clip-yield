@@ -44,6 +44,14 @@ function NumberField(props: {
   );
 }
 
+const normalizeColorInput = (value: string | undefined, fallback: string) => {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.toLowerCase() === "transparent") return fallback;
+  const match = trimmed.match(/^#([0-9a-fA-F]{6})/);
+  return match ? `#${match[1]}` : fallback;
+};
+
 export default function TextProperties() {
   const { textElements, activeElementIndex } = useAppSelector(
     (state) => state.projectState,
@@ -98,6 +106,11 @@ export default function TextProperties() {
     if (raw.length === 0) return "Shape";
     return raw.length > 56 ? `${raw.slice(0, 56)}…` : raw;
   })();
+  const textColorValue = normalizeColorInput(textElement.color, "#ffffff");
+  const backgroundColorValue = normalizeColorInput(
+    textElement.backgroundColor,
+    "#000000",
+  );
 
   return (
     <div className="space-y-3">
@@ -252,7 +265,7 @@ export default function TextProperties() {
             <input
               id={ids.color}
               type="color"
-              value={textElement.color || "#ffffff"}
+              value={textColorValue}
               onChange={(e) => onUpdateText(textElement.id, { color: e.target.value })}
               className="h-10 w-full rounded-md border border-white/10 bg-black/30 p-1"
             />
@@ -265,7 +278,7 @@ export default function TextProperties() {
             <input
               id={ids.background}
               type="color"
-              value={textElement.backgroundColor || "#00000000"}
+              value={backgroundColorValue}
               onChange={(e) =>
                 onUpdateText(textElement.id, { backgroundColor: e.target.value })
               }
