@@ -176,29 +176,41 @@ export default function SettingsPage() {
     </Card>
   );
 
+  const allSections = [
+    { id: "account", node: accountCard },
+    { id: "playback", node: playbackCard },
+    { id: "appearance", node: appearanceCard },
+    { id: "openai", node: <OpenAIKeyCard /> },
+    { id: "ai-tips", node: aiTipsCard },
+  ];
+
   const settingsTabs = [
+    {
+      value: "all",
+      label: "All",
+      sections: allSections,
+    },
     {
       value: "account",
       label: "Account",
-      sections: [{ id: "account", node: accountCard }],
+      sections: allSections.filter((section) => section.id === "account"),
     },
     {
       value: "playback",
       label: "Playback",
-      sections: [{ id: "playback", node: playbackCard }],
+      sections: allSections.filter((section) => section.id === "playback"),
     },
     {
       value: "appearance",
       label: "Appearance",
-      sections: [{ id: "appearance", node: appearanceCard }],
+      sections: allSections.filter((section) => section.id === "appearance"),
     },
     {
       value: "ai",
       label: "AI Studio",
-      sections: [
-        { id: "openai", node: <OpenAIKeyCard /> },
-        { id: "ai-tips", node: aiTipsCard },
-      ],
+      sections: allSections.filter(
+        (section) => section.id === "openai" || section.id === "ai-tips",
+      ),
     },
   ];
 
