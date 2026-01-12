@@ -22,6 +22,7 @@ import { formatShortHash } from "@/lib/utils";
 import SponsorPanel from "@/features/sponsor/components/SponsorPanel";
 import { isSponsorCampaignActive } from "@/features/sponsor/utils";
 import { formatUnits } from "viem";
+import { Button } from "@/components/ui/button";
 
 type SponsorPageProps = {
   params: Promise<{ postId: string }>;
@@ -133,7 +134,7 @@ export default function SponsorPage({ params }: SponsorPageProps) {
                   <ClipVideoPlayer
                     src={useCreateBucketUrl(post.video_url, "")}
                     showLogo={false}
-                    className="aspect-[9/16] w-full"
+                    className="mb-12 aspect-[9/16] w-full"
                     videoClassName="object-cover"
                   />
 
