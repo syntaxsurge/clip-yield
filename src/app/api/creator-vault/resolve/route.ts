@@ -122,38 +122,46 @@ export async function POST(req: Request) {
   );
 
   let isVerified = Boolean(verification?.verified);
+  let onchainVerified: boolean;
+
+  try {
+    onchainVerified = (await publicClient.readContract({
+      address: registryAddress,
+      abi: kycRegistryAbi,
+      functionName: "isVerified",
+      args: [walletAddress],
+    })) as boolean;
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        walletAddress,
+        verified: false,
+        reason:
+          error instanceof Error ? error.message : "Unable to verify KYC.",
+      } satisfies ResolveResponse,
+      { status: 500 },
+    );
+  }
+
+  if (!onchainVerified) {
+    return NextResponse.json({
+      ok: false,
+      walletAddress,
+      verified: false,
+      reason: "kyc_required",
+    } satisfies ResolveResponse);
+  }
 
   if (!isVerified) {
-    try {
-      const onchainVerified = (await publicClient.readContract({
-        address: registryAddress,
-        abi: kycRegistryAbi,
-        functionName: "isVerified",
-        args: [walletAddress],
-      })) as boolean;
-
-      if (onchainVerified) {
-        const syncSecret = getServerEnv("KYC_SYNC_SECRET");
-        await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
-          walletAddress,
-          verified: true,
-          txHash: verification?.txHash ?? undefined,
-          secret: syncSecret,
-        });
-        isVerified = true;
-      }
-    } catch (error) {
-      return NextResponse.json(
-        {
-          ok: false,
-          walletAddress,
-          verified: false,
-          reason:
-            error instanceof Error ? error.message : "Unable to verify KYC.",
-        } satisfies ResolveResponse,
-        { status: 500 },
-      );
-    }
+    const syncSecret = getServerEnv("KYC_SYNC_SECRET");
+    await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
+      walletAddress,
+      verified: true,
+      txHash: verification?.txHash ?? undefined,
+      secret: syncSecret,
+    });
+    isVerified = true;
   }
 
   if (!isVerified) {

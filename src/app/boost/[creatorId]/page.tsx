@@ -2,7 +2,8 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { isAddress } from "viem";
+import { useAccount } from "wagmi";
+import { getAddress, isAddress } from "viem";
 import MainLayout from "@/app/layouts/MainLayout";
 import useGetCreatorVaultByWallet from "@/app/hooks/useGetCreatorVaultByWallet";
 import useGetProfileByUserId from "@/app/hooks/useGetProfileByUserId";
@@ -26,6 +27,7 @@ type BoostPageProps = {
 
 export default function BoostPage({ params }: BoostPageProps) {
   const { creatorId } = use(params);
+  const { address: connectedAddress } = useAccount();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [vaultRecord, setVaultRecord] = useState<CreatorVaultRecord | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -67,6 +69,13 @@ export default function BoostPage({ params }: BoostPageProps) {
   }, [creatorId]);
 
   const creatorLabel = profile?.name ?? formatShortHash(creatorId);
+  const connectedWallet =
+    connectedAddress && isAddress(connectedAddress)
+      ? getAddress(connectedAddress)
+      : null;
+  const creatorWallet = isAddress(creatorId) ? getAddress(creatorId) : null;
+  const isCreatorConnected =
+    Boolean(connectedWallet && creatorWallet) && connectedWallet === creatorWallet;
 
   return (
     <MainLayout>
@@ -101,9 +110,23 @@ export default function BoostPage({ params }: BoostPageProps) {
           {status === "ready" && !vaultRecord && (
             <Alert variant="warning">
               <AlertTitle>Vault not ready</AlertTitle>
-              <AlertDescription>
-                This creator hasn&apos;t completed KYC yet. Vaults are
-                auto-provisioned immediately after verification.
+              <AlertDescription className="space-y-2">
+                <p>
+                This creator needs on-chain KYC verification before a boost
+                vault can be created. Vaults are auto-provisioned immediately
+                after verification.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {connectedWallet
+                    ? isCreatorConnected
+                      ? "You are connected as the creator. Complete KYC for this wallet to provision the vault."
+                      : `You are connected as ${formatShortHash(connectedWallet)}. Switch to the creator wallet ${formatShortHash(
+                          creatorId,
+                        )} to complete KYC, or use the admin KYC console if you manage verification.`
+                    : `Connect the creator wallet ${formatShortHash(
+                        creatorId,
+                      )} to complete KYC.`}
+                </p>
               </AlertDescription>
               <div className="mt-3 flex flex-wrap gap-3">
                 <Button
@@ -116,7 +139,7 @@ export default function BoostPage({ params }: BoostPageProps) {
                       `/boost/${creatorId}`,
                     )}`}
                   >
-                    Start KYC
+                    Open KYC
                   </Link>
                 </Button>
                 <Button
