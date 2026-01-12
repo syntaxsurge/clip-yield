@@ -14,6 +14,12 @@ export default function Ffmpeg() {
   const loadFFmpegFunction = async () => {
     setLoadedFfmpeg(false);
     setLoadError(null);
+    if (typeof window !== "undefined" && !window.crossOriginIsolated) {
+      setLoadError(
+        "Export needs cross-origin isolation. Reload this project page to enable it.",
+      );
+      return;
+    }
     try {
       const ffmpeg = await createLoadedFfmpeg({
         onLog: (message) => setLogMessages(message),
