@@ -26,7 +26,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
   5. Click **Post** — wait for the comment to appear in the list.
   6. **Verify on-screen:** **Current page:** `/post/[postId]/[userId]` — confirm the new comment row appears with your identity.
 - **Voiceover:**
-  > “ClipYield keeps the social loop intact—comments and engagement drive discovery. I post ‘Sponsoring this clip as an on-chain invoice’ because that’s the RealFi story: sponsorships are not vague donations, they’re tokenized receipts with auditable terms. Next we’ll go to the creator profile and set up a boost vault.”
+  > “I comment ‘Sponsoring this clip as an on-chain invoice’ because that’s the RealFi story: sponsorships are not vague donations, they’re tokenized receipts with auditable terms.”
 
 ## 3. Creator Profile + Follow (Creator Surface)
 - **URL:** /profile/[id]
