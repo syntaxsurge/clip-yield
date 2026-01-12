@@ -24,6 +24,7 @@ import {
   toHex,
 } from "viem";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -50,7 +51,13 @@ import { buildSponsorPackMessage } from "@/features/sponsor/message";
 import { isSponsorCampaignActive } from "@/features/sponsor/utils";
 import { hashCampaignTerms, type CampaignTerms } from "@/features/sponsor/services/campaignTerms";
 
-type ActionId = "wrap" | "approve" | "sponsor" | "perks";
+type ActionId = "approve" | "sponsor" | "perks";
+type TxStatus = "idle" | "pending" | "confirmed" | "failed";
+type TxState = {
+  status: TxStatus;
+  hash?: `0x${string}`;
+  error?: string;
+};
 
 type SponsorPanelProps = {
   postId: string;
@@ -96,10 +103,10 @@ export default function SponsorPanel({
   });
   const [pendingAction, setPendingAction] = useState<ActionId | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [lastTx, setLastTx] = useState<{ action: ActionId; hash: string } | null>(
-    null,
-  );
+  const [approveTx, setApproveTx] = useState<TxState>({ status: "idle" });
+  const [sponsorTx, setSponsorTx] = useState<TxState>({ status: "idle" });
   const [perkMessage, setPerkMessage] = useState<string | null>(null);
+  const [perkError, setPerkError] = useState<string | null>(null);
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
   const [receiptDetails, setReceiptDetails] = useState<{
     campaignId: string;
@@ -180,7 +187,7 @@ export default function SponsorPanel({
     query: { enabled: isOnMantle },
   });
 
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: wmnt,
     abi: wmntAbi,
     functionName: "allowance",
@@ -209,7 +216,7 @@ export default function SponsorPanel({
     query: { enabled: isOnMantle },
   });
 
-  const { data: shareBalance } = useReadContract({
+  const { data: shareBalance, refetch: refetchShareBalance } = useReadContract({
     address: vault,
     abi: erc20Abi,
     functionName: "balanceOf",
@@ -217,12 +224,12 @@ export default function SponsorPanel({
     query: { enabled: Boolean(user) && isOnMantle },
   });
 
-  const { data: nativeBalance } = useBalance({
+  const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
     address: user,
     query: { enabled: Boolean(user) && isOnMantle },
   });
 
-  const { data: wmntBalance } = useBalance({
+  const { data: wmntBalance, refetch: refetchWmntBalance } = useBalance({
     address: user,
     token: wmnt,
     query: { enabled: Boolean(user) && isOnMantle },
@@ -269,6 +276,15 @@ export default function SponsorPanel({
   const hasBoosterShares = shareBalanceValue > 0n;
   const perksEligible = sponsorActive && hasBoosterShares;
   const termsReady = Boolean(previewTerms);
+
+  useEffect(() => {
+    setApproveTx({ status: "idle" });
+    setSponsorTx({ status: "idle" });
+    setActionError(null);
+    setPerkMessage(null);
+    setPerkError(null);
+    setReceiptDetails(null);
+  }, [postId, user]);
 
   useEffect(() => {
     let isActive = true;
@@ -343,20 +359,29 @@ export default function SponsorPanel({
     value?: bigint;
   };
 
-  const runTx = async (action: ActionId, request: WriteRequest) => {
+  const runTx = async (
+    action: ActionId,
+    request: WriteRequest,
+    setTxState?: (next: TxState) => void,
+  ) => {
     setPendingAction(action);
     setActionError(null);
+    setTxState?.({ status: "pending" });
     try {
       const hash = await writeContractAsync(
         request as Parameters<typeof writeContractAsync>[0],
       );
-      setLastTx({ action, hash });
+      setTxState?.({ status: "pending", hash });
       if (publicClient) {
         await publicClient.waitForTransactionReceipt({ hash });
       }
+      setTxState?.({ status: "confirmed", hash });
       return hash;
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Transaction failed.");
+      const message =
+        error instanceof Error ? error.message : "Transaction failed.";
+      setActionError(message);
+      setTxState?.({ status: "failed", error: message });
       return null;
     } finally {
       setPendingAction(null);
@@ -417,6 +442,7 @@ export default function SponsorPanel({
 
     setActionError(null);
     setReceiptDetails(null);
+    setSponsorTx({ status: "idle" });
 
     if (parsedAmount <= 0n) {
       setActionError("Enter a sponsor amount.");
@@ -433,17 +459,22 @@ export default function SponsorPanel({
 
     const termsHash = hashCampaignTerms(terms);
 
-    const txHash = await runTx("sponsor", {
-      address: sponsorHub,
-      abi: sponsorHubAbi,
-      functionName: "sponsorClip",
-      args: [getAddress(creatorId), vault, postIdHash, termsHash, parsedAmount],
-    });
+    const txHash = await runTx(
+      "sponsor",
+      {
+        address: sponsorHub,
+        abi: sponsorHubAbi,
+        functionName: "sponsorClip",
+        args: [getAddress(creatorId), vault, postIdHash, termsHash, parsedAmount],
+      },
+      setSponsorTx,
+    );
 
     if (!txHash) return;
 
     if (!publicClient) {
       setActionError("Missing chain client for receipt parsing.");
+      setSponsorTx({ status: "failed", hash: txHash });
       return;
     }
 
@@ -488,11 +519,13 @@ export default function SponsorPanel({
           ? error.message
           : "Failed to read on-chain receipt logs.",
       );
+      setSponsorTx({ status: "failed", hash: txHash });
       return;
     }
 
     if (!onchainReceipt) {
       setActionError("Unable to locate the invoice receipt event on-chain.");
+      setSponsorTx({ status: "failed", hash: txHash });
       return;
     }
 
@@ -564,20 +597,46 @@ export default function SponsorPanel({
     };
     onCampaignCreated?.(nextCampaign);
 
+    await Promise.all([
+      refetchShareBalance?.(),
+      refetchAllowance?.(),
+      refetchWmntBalance?.(),
+      refetchNativeBalance?.(),
+    ]);
+
     if (receiptId) {
       router.push(`/campaign/${receiptId}`);
     }
   };
 
+  const handleApprove = async () => {
+    if (!canTransact || !needsApproval) return;
+    setActionError(null);
+    const txHash = await runTx(
+      "approve",
+      {
+        address: wmnt,
+        abi: wmntAbi,
+        functionName: "approve",
+        args: [sponsorHub, parsedAmount],
+      },
+      setApproveTx,
+    );
+
+    if (txHash) {
+      await Promise.all([refetchAllowance?.(), refetchWmntBalance?.()]);
+    }
+  };
+
   const handleDownloadPack = async () => {
     if (!user) {
-      setActionError("Wallet not connected.");
+      setPerkError("Wallet not connected.");
       return;
     }
 
     setPendingAction("perks");
     setPerkMessage(null);
-    setActionError(null);
+    setPerkError(null);
 
     try {
       const message = buildSponsorPackMessage(postId);
@@ -607,11 +666,29 @@ export default function SponsorPanel({
 
       setPerkMessage("Sponsor pack downloaded.");
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : "Perk unlock failed.");
+      setPerkError(error instanceof Error ? error.message : "Perk unlock failed.");
     } finally {
       setPendingAction(null);
     }
   };
+
+  const approvalStatus: TxStatus = needsApproval ? approveTx.status : "confirmed";
+  const approvalLabel =
+    approvalStatus === "pending"
+      ? "Pending"
+      : approvalStatus === "failed"
+        ? "Failed"
+        : needsApproval
+          ? "Not approved"
+          : "Approved";
+  const sponsorLabel =
+    sponsorTx.status === "pending"
+      ? "Pending"
+      : sponsorTx.status === "failed"
+        ? "Failed"
+        : sponsorTx.status === "confirmed"
+          ? "Confirmed"
+          : "Not started";
 
   return (
     <div className="space-y-6">
@@ -630,54 +707,6 @@ export default function SponsorPanel({
           <AlertTitle>KYC required</AlertTitle>
           <AlertDescription>
             Only verified sponsors can mint compliant invoice receipts and fund creator vaults.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {actionError && (
-        <Alert variant="destructive">
-          <AlertTitle>Action failed</AlertTitle>
-          <AlertDescription className="break-all whitespace-pre-wrap">
-            {actionError}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {perkMessage && (
-        <Alert variant="success">
-          <AlertTitle>Perk unlocked</AlertTitle>
-          <AlertDescription>{perkMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      {lastTx && (
-        <Alert variant="success">
-          <AlertTitle>Transaction submitted</AlertTitle>
-          <AlertDescription>
-            {lastTx.action.toUpperCase()} TX: {formatShortHash(lastTx.hash)}{" "}
-            <a
-              className="underline underline-offset-2"
-              href={explorerTxUrl(lastTx.hash)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              View on MantleScan
-            </a>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {receiptDetails && (
-        <Alert variant="success">
-          <AlertTitle>Invoice receipt minted</AlertTitle>
-          <AlertDescription className="space-y-1">
-            <div>
-              Token ID: <span className="font-mono">{receiptDetails.receiptTokenId}</span>
-            </div>
-            <div className="break-all">
-              Campaign ID:{" "}
-              <span className="font-mono">{receiptDetails.campaignId}</span>
-            </div>
           </AlertDescription>
         </Alert>
       )}
@@ -719,36 +748,8 @@ export default function SponsorPanel({
 
       <Card>
         <CardHeader>
-          <CardTitle>Sponsorship breakdown</CardTitle>
-          <CardDescription>
-            Protocol fees donate to the yield vault; the net amount mints creator shares.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Sponsorship amount</span>
-            <span>{formattedAmount} WMNT</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">
-              Protocol fee ({protocolFeeLabel})
-            </span>
-            <span>{formattedProtocolFee} WMNT</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Net to creator vault</span>
-            <span>{formattedNetAmount} WMNT</span>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            Invoice Receipt NFT mints to your wallet after confirmation.
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Wallet balances</CardTitle>
-          <CardDescription>Wrap MNT to WMNT before sponsoring.</CardDescription>
+          <CardDescription>Check your balances before sponsoring.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
@@ -843,54 +844,66 @@ export default function SponsorPanel({
 
       <Card>
         <CardHeader>
-          <CardTitle>Sponsor with invoice receipts</CardTitle>
-          <CardDescription>
-            Protocol fees fund the yield vault and every sponsorship mints an on-chain receipt.
-          </CardDescription>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <CardTitle>Sponsor with invoice receipts</CardTitle>
+              <CardDescription>
+                Approve WMNT once, then sponsor the clip to mint an on-chain receipt.
+              </CardDescription>
+            </div>
+            <Badge variant={isVerified ? "success" : "warning"}>
+              {isVerified ? "KYC verified" : "KYC required"}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium" htmlFor="amount">
-              Amount (WMNT)
-            </label>
-            <Input
-              id="amount"
-              inputMode="decimal"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              placeholder="0.25"
-            />
-            <div className="text-xs text-muted-foreground">
-              Estimated network fee: {estimatedFee ? `${estimatedFee} MNT` : "—"}
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="space-y-3">
+              <label className="text-sm font-medium" htmlFor="amount">
+                Amount (WMNT)
+              </label>
+              <Input
+                id="amount"
+                inputMode="decimal"
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                placeholder="0.25"
+              />
+              <div className="text-xs text-muted-foreground">
+                Estimated network fee: {estimatedFee ? `${estimatedFee} MNT` : "—"}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/40 p-4 text-sm">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Sponsorship breakdown
+              </div>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Sponsorship amount</span>
+                  <span>{formattedAmount} WMNT</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">
+                    Protocol fee ({protocolFeeLabel})
+                  </span>
+                  <span>{formattedProtocolFee} WMNT</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Net to creator vault</span>
+                  <span>{formattedNetAmount} WMNT</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Invoice Receipt NFT mints to your wallet after confirmation.
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <Button
               variant="outline"
-              onClick={() =>
-                runTx("wrap", {
-                  address: wmnt,
-                  abi: wmntAbi,
-                  functionName: "deposit",
-                  value: parsedAmount,
-                })
-              }
-              disabled={!canTransact || pendingAction === "wrap"}
-            >
-              {pendingAction === "wrap" ? "Wrapping..." : "Wrap MNT to WMNT"}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() =>
-                runTx("approve", {
-                  address: wmnt,
-                  abi: wmntAbi,
-                  functionName: "approve",
-                  args: [sponsorHub, parsedAmount],
-                })
-              }
+              onClick={() => void handleApprove()}
               disabled={!canTransact || pendingAction === "approve" || !needsApproval}
             >
               {pendingAction === "approve" ? "Approving..." : "Approve sponsor hub"}
@@ -909,6 +922,100 @@ export default function SponsorPanel({
               {pendingAction === "sponsor" ? "Sponsoring..." : "Sponsor clip"}
             </Button>
           </div>
+
+          {actionError && (
+            <Alert variant="destructive">
+              <AlertTitle>Action failed</AlertTitle>
+              <AlertDescription className="break-all whitespace-pre-wrap">
+                {actionError}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Transaction status
+            </div>
+            <div className="mt-3 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span>Approval</span>
+                <Badge
+                  variant={
+                    approvalStatus === "confirmed"
+                      ? "success"
+                      : approvalStatus === "pending"
+                        ? "warning"
+                        : "outline"
+                  }
+                  className={
+                    approvalStatus === "failed"
+                      ? "border-destructive text-destructive"
+                      : undefined
+                  }
+                >
+                  {approvalLabel}
+                </Badge>
+              </div>
+              {approveTx.hash && (
+                <a
+                  className="block text-xs text-muted-foreground underline underline-offset-2"
+                  href={explorerTxUrl(approveTx.hash)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View approval tx: {formatShortHash(approveTx.hash)}
+                </a>
+              )}
+
+              <div className="flex items-center justify-between">
+                <span>Sponsorship</span>
+                <Badge
+                  variant={
+                    sponsorTx.status === "confirmed"
+                      ? "success"
+                      : sponsorTx.status === "pending"
+                        ? "warning"
+                        : "outline"
+                  }
+                  className={
+                    sponsorTx.status === "failed"
+                      ? "border-destructive text-destructive"
+                      : undefined
+                  }
+                >
+                  {sponsorLabel}
+                </Badge>
+              </div>
+              {sponsorTx.hash && (
+                <a
+                  className="block text-xs text-muted-foreground underline underline-offset-2"
+                  href={explorerTxUrl(sponsorTx.hash)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View sponsor tx: {formatShortHash(sponsorTx.hash)}
+                </a>
+              )}
+            </div>
+          </div>
+
+          {receiptDetails && (
+            <div className="rounded-xl border border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] p-4 text-sm">
+              <div className="font-semibold text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]">
+                Invoice receipt minted
+              </div>
+              <div className="mt-2 space-y-1 text-[color:var(--brand-success-dark)] dark:text-[color:var(--brand-success)]">
+                <div>
+                  Token ID:{" "}
+                  <span className="font-mono">{receiptDetails.receiptTokenId}</span>
+                </div>
+                <div className="break-all">
+                  Campaign ID:{" "}
+                  <span className="font-mono">{receiptDetails.campaignId}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -920,6 +1027,18 @@ export default function SponsorPanel({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
+          {perkMessage && (
+            <Alert variant="success">
+              <AlertTitle>Perk unlocked</AlertTitle>
+              <AlertDescription>{perkMessage}</AlertDescription>
+            </Alert>
+          )}
+          {perkError && (
+            <Alert variant="destructive">
+              <AlertTitle>Perk unlock failed</AlertTitle>
+              <AlertDescription>{perkError}</AlertDescription>
+            </Alert>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Campaign status</span>
             <span>{sponsorActive ? "Active" : "Inactive"}</span>
