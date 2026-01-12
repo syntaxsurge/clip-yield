@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
+import { usePrivy } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
 import {
   getFile,
@@ -50,8 +51,10 @@ export default function ProjectClient({ projectId }: Props) {
   const { currentProjectId } = useAppSelector((state) => state.projects);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { user } = usePrivy();
   const { address } = useAccount();
-  const ownerWallet = address ? address.toLowerCase() : undefined;
+  const walletAddress = address ?? user?.wallet?.address ?? null;
+  const ownerWallet = walletAddress ? walletAddress.toLowerCase() : undefined;
   const { activeSection, activeElement } = projectState;
 
   useEffect(() => {

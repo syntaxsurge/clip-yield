@@ -147,33 +147,25 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer, nothing is hidden.”
 
-## 10. Projects List (Creator Workspace)
+## 10. Projects + Editor + Export (Creator Workspace)
 - **URL:** /projects
-- **Shot:** Projects list with a saved draft project row and Open action.
+- **Shot:** Projects list with a new project flow, then the editor with timeline, preview, and export UI.
 - **Steps:**
   1. **Current page:** `/settings`, confirm settings heading is visible.
   2. **Navigate:** **Current page:** `/settings`, click "Projects" in the sidebar/nav → lands on `/projects`, confirm project list heading appears.
-  3. **Action:** **Current page:** `/projects`, click "Open" on "Creator draft", confirm navigation to `/projects/[id]`.
-  4. **Action:** **Current page:** `/projects/[id]`, pause on the editor UI, confirm timeline and preview are visible.
-  5. **Action:** **Current page:** `/projects/[id]`, click "Back to Projects", confirm return to `/projects`.
-  6. **Verify on-screen:** **Current page:** `/projects`, confirm the saved project row remains visible.
+  3. **Action:** **Current page:** `/projects`, click "New project", confirm the create dialog appears.
+  4. **Enter values:**
+     - Project name = `[PROJECT_NAME="Creator draft"]`
+  5. **Action:** **Current page:** `/projects`, click "Create", confirm the new project row appears.
+  6. **Action:** **Current page:** `/projects`, click "Open" on "Creator draft", confirm navigation to `/projects/[id]`.
+  7. **Action:** **Current page:** `/projects/[id]`, drag a clip block slightly, confirm clip block position changes.
+  8. **Action:** **Current page:** `/projects/[id]`, click "Preview", confirm playback starts and playhead moves.
+  9. **Action:** **Current page:** `/projects/[id]`, click "Export" then "Start Export", wait for "Export complete" state.
+  10. **Verify on-screen:** **Current page:** `/projects/[id]`, confirm "Export complete" and "Download MP4" are visible.
 - **Voiceover:**
-  > "This is the creator workspace. Projects are saved drafts tied to the connected wallet. Opening a project drops you into the timeline and preview so you can keep editing."
+  > "This is the creator workspace. We create a new draft called Creator draft, open it in the editor, then preview and export a finished MP4 with clear progress feedback."
 
-## 11. Timeline Editor + Export (Production Step)
-- **URL:** /projects/[id]
-- **Shot:** Editor with timeline, preview playback, and export progress UI.
-- **Steps:**
-  1. **Current page:** `/projects`, confirm project list is visible.
-  2. **Navigate:** **Current page:** `/projects`, click “Open” on the remix project → lands on `/projects/[id]`, confirm timeline editor loads.
-  3. **Action:** **Current page:** `/projects/[id]`, drag a clip block slightly, confirm clip block position changes.
-  4. **Action:** **Current page:** `/projects/[id]`, click “Preview”, confirm playback starts and playhead moves.
-  5. Click “Export” → click “Start Export”, wait for “Export complete” state.
-  6. **Verify on-screen:** **Current page:** `/projects/[id]`, confirm “Export complete” and “Download MP4” are visible.
-- **Voiceover:**
-  > “Now we convert incentives into output. We edit the timeline, preview, then export with a clear render progress and a downloadable MP4. This is how ClipYield turns on-chain actions into real creator production.”
-
-## 12. Upload (Publish Remix Back to Feed)
+## 11. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**

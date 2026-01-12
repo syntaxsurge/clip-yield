@@ -201,6 +201,12 @@ export const getProject = async (
     const project = await db.get("projects", projectId);
     if (!project) return null;
     const sanitized = sanitizeProjectForStorage(project);
+    const normalizedOwner = normalizeWallet(ownerWallet);
+    if (normalizedOwner && !sanitized.ownerWallet) {
+      const claimed = { ...sanitized, ownerWallet: normalizedOwner };
+      await db.put("projects", claimed);
+      return claimed;
+    }
     if (!matchesOwner(sanitized, ownerWallet)) return null;
     return sanitized;
   } catch (error) {
@@ -231,8 +237,17 @@ export const listProjects = async (ownerWallet?: string | null) => {
     const sanitized = Array.isArray(projects)
       ? projects.map((project) => sanitizeProjectForStorage(project))
       : [];
-    if (!ownerWallet) return sanitized;
-    return sanitized.filter((project) => matchesOwner(project, ownerWallet));
+    const normalizedOwner = normalizeWallet(ownerWallet);
+    if (!normalizedOwner) return sanitized;
+    const claimed = await Promise.all(
+      sanitized.map(async (project) => {
+        if (project?.ownerWallet) return project;
+        const next = { ...project, ownerWallet: normalizedOwner };
+        await db.put("projects", next);
+        return next;
+      }),
+    );
+    return claimed.filter((project) => matchesOwner(project, normalizedOwner));
   } catch (error) {
     console.error("Error listing projects:", error);
     return [];

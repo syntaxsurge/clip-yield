@@ -20,6 +20,7 @@ import {
 import type { ProjectState } from "@/app/types";
 import { toast } from "react-hot-toast";
 import { createConvexProject } from "@/lib/api/convex";
+import { usePrivy } from "@privy-io/react-auth";
 import { useAccount } from "wagmi";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -87,8 +88,10 @@ function formatLocalDate(iso: string) {
 }
 
 export default function Projects() {
+  const { authenticated, user } = usePrivy();
   const { address } = useAccount();
-  const ownerWallet = address ? address.toLowerCase() : undefined;
+  const walletAddress = address ?? user?.wallet?.address ?? null;
+  const ownerWallet = walletAddress ? walletAddress.toLowerCase() : undefined;
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { projects, currentProjectId } = useAppSelector(
@@ -113,7 +116,7 @@ export default function Projects() {
   const handleCreateProject = useCallback(async () => {
     const title = newProjectName.trim();
     if (!title) return;
-    if (!address) {
+    if (!walletAddress) {
       toast.error("Connect a wallet to create a project.");
       return;
     }
@@ -131,7 +134,7 @@ export default function Projects() {
 
       try {
         await createConvexProject({
-          wallet: address,
+          wallet: walletAddress,
           title,
           localId: newProject.id,
         });
@@ -145,7 +148,7 @@ export default function Projects() {
     } finally {
       setIsCreatingProject(false);
     }
-  }, [address, dispatch, isCreatingProject, newProjectName, ownerWallet]);
+  }, [dispatch, isCreatingProject, newProjectName, ownerWallet, walletAddress]);
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -476,16 +479,18 @@ export default function Projects() {
             <Card className="border-gray-200 dark:border-white/10">
               <CardHeader className="space-y-2">
                 <CardTitle>
-                  {ownerWallet ? "No projects yet" : "Connect a wallet"}
+                  {authenticated || walletAddress
+                    ? "No projects yet"
+                    : "Connect a wallet"}
                 </CardTitle>
                 <CardDescription>
-                  {ownerWallet
+                  {authenticated || walletAddress
                     ? "Create your first timeline to start editing."
                     : "Projects are scoped to the connected wallet. Connect to view or create projects."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {ownerWallet ? (
+                {authenticated || walletAddress ? (
                   <Button type="button" onClick={() => setIsCreating(true)}>
                     <Plus className="h-4 w-4" />
                     New project
