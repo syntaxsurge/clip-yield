@@ -96,8 +96,41 @@ export default function YieldPanel({
   const vault = getAddress(
     (vaultAddress ?? mantleSepoliaContracts.clipYieldVault) as Address,
   );
-  const kycRegistry = getAddress(mantleSepoliaContracts.kycRegistry as Address);
+  const defaultKycRegistry = getAddress(
+    mantleSepoliaContracts.kycRegistry as Address,
+  );
   const kycReturnTo = returnTo ?? "/yield";
+
+  const { data: vaultAsset } = useReadContract({
+    address: vault,
+    abi: vaultAbi,
+    functionName: "asset",
+    query: { enabled: isOnMantle },
+  });
+
+  const { data: vaultKycRegistry } = useReadContract({
+    address: vault,
+    abi: vaultAbi,
+    functionName: "kyc",
+    query: { enabled: isOnMantle },
+  });
+
+  const assetToken = useMemo(
+    () => (vaultAsset ? getAddress(vaultAsset as Address) : wmnt),
+    [vaultAsset, wmnt],
+  );
+  const kycRegistry = useMemo(
+    () =>
+      vaultKycRegistry
+        ? getAddress(vaultKycRegistry as Address)
+        : defaultKycRegistry,
+    [defaultKycRegistry, vaultKycRegistry],
+  );
+  const isVaultAssetWmnt = assetToken.toLowerCase() === wmnt.toLowerCase();
+  const registryMismatch =
+    vaultKycRegistry &&
+    getAddress(vaultKycRegistry as Address) !== defaultKycRegistry;
+  const assetLabel = isVaultAssetWmnt ? "WMNT" : "vault asset";
 
   useEffect(() => {
     setLastDepositTxHash(null);
@@ -140,6 +173,13 @@ export default function YieldPanel({
     query: { enabled: isOnMantle },
   });
 
+  const { data: assetDecimals } = useReadContract({
+    address: assetToken,
+    abi: wmntAbi,
+    functionName: "decimals",
+    query: { enabled: isOnMantle },
+  });
+
   const { data: totalAssets, refetch: refetchTotalAssets } = useReadContract({
     address: vault,
     abi: vaultAbi,
@@ -177,7 +217,7 @@ export default function YieldPanel({
   });
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
-    address: wmnt,
+    address: assetToken,
     abi: wmntAbi,
     functionName: "allowance",
     args: user ? [user, vault] : undefined,
@@ -195,14 +235,14 @@ export default function YieldPanel({
   }, [wrapAmount, wmntDecimals]);
 
   const parsedVaultAmount = useMemo(() => {
-    const decimals = typeof wmntDecimals === "number" ? wmntDecimals : 18;
+    const decimals = typeof assetDecimals === "number" ? assetDecimals : 18;
     if (!vaultAmount) return 0n;
     try {
       return parseUnits(vaultAmount, decimals);
     } catch {
       return 0n;
     }
-  }, [vaultAmount, wmntDecimals]);
+  }, [assetDecimals, vaultAmount]);
 
   const { data: previewShares, refetch: refetchPreviewShares } = useReadContract({
     address: vault,
@@ -230,12 +270,12 @@ export default function YieldPanel({
   });
 
   const {
-    data: wmntBalanceRaw,
-    isLoading: isWmntBalanceLoading,
-    isError: isWmntBalanceError,
-    refetch: refetchWmntBalance,
+    data: assetBalanceRaw,
+    isLoading: isAssetBalanceLoading,
+    isError: isAssetBalanceError,
+    refetch: refetchAssetBalance,
   } = useReadContract({
-    address: wmnt,
+    address: assetToken,
     abi: wmntAbi,
     functionName: "balanceOf",
     args: user ? [user] : undefined,
@@ -244,11 +284,12 @@ export default function YieldPanel({
   });
 
   const isVerified = Boolean(kycStatus);
-  const wmntDecimalsValue = typeof wmntDecimals === "number" ? wmntDecimals : 18;
+  const assetDecimalsValue =
+    typeof assetDecimals === "number" ? assetDecimals : 18;
   const allowanceValue = typeof allowance === "bigint" ? allowance : 0n;
   const nativeBalanceValue = nativeBalance?.value ?? 0n;
-  const wmntBalanceValue =
-    typeof wmntBalanceRaw === "bigint" ? wmntBalanceRaw : 0n;
+  const assetBalanceValue =
+    typeof assetBalanceRaw === "bigint" ? assetBalanceRaw : 0n;
   const shareBalanceValue = typeof shareBalance === "bigint" ? shareBalance : 0n;
   const maxWithdrawValue =
     typeof previewAssetsFromShares === "bigint" ? previewAssetsFromShares : 0n;
@@ -256,28 +297,30 @@ export default function YieldPanel({
   const canWrap =
     isConnected &&
     isOnMantle &&
+    isVaultAssetWmnt &&
     parsedWrapAmount > 0n &&
     nativeBalanceValue >= parsedWrapAmount;
   const canUnwrap =
     isConnected &&
     isOnMantle &&
+    isVaultAssetWmnt &&
     parsedWrapAmount > 0n &&
-    wmntBalanceValue >= parsedWrapAmount;
+    assetBalanceValue >= parsedWrapAmount;
   const needsApproval =
     parsedVaultAmount > 0n && allowanceValue < parsedVaultAmount;
-  const hasWmntForVault = wmntBalanceValue >= parsedVaultAmount;
+  const hasAssetForVault = assetBalanceValue >= parsedVaultAmount;
   const canApprove =
     isConnected &&
     isOnMantle &&
     parsedVaultAmount > 0n &&
-    hasWmntForVault &&
+    hasAssetForVault &&
     needsApproval;
   const canDeposit =
     isConnected &&
     isOnMantle &&
     parsedVaultAmount > 0n &&
     isVerified &&
-    hasWmntForVault &&
+    hasAssetForVault &&
     !needsApproval;
   const canWithdraw =
     isConnected &&
@@ -289,32 +332,32 @@ export default function YieldPanel({
 
   const walletReady = isConnected && isOnMantle;
   const formattedTotalAssets = totalAssets
-    ? formatUnits(totalAssets, wmntDecimalsValue)
+    ? formatUnits(totalAssets, assetDecimalsValue)
     : "0";
   const formattedTotalSupply = totalSupply
     ? formatUnits(totalSupply, shareDecimalsValue)
     : "0";
   const formattedSharePrice =
     typeof assetsPerShare === "bigint"
-      ? formatUnits(assetsPerShare, wmntDecimalsValue)
+      ? formatUnits(assetsPerShare, assetDecimalsValue)
       : "—";
   const formattedShareBalance = walletReady
     ? formatUnits(shareBalanceValue, shareDecimalsValue)
     : "—";
   const formattedVaultClaim = walletReady
-    ? formatUnits(maxWithdrawValue, wmntDecimalsValue)
+    ? formatUnits(maxWithdrawValue, assetDecimalsValue)
     : "—";
   const formattedPreviewShares = previewShares
     ? formatUnits(previewShares, shareDecimalsValue)
     : "0";
   const formattedNativeBalance = walletReady ? nativeBalance?.formatted ?? "0" : "—";
-  const formattedWmntBalance = !walletReady
+  const formattedAssetBalance = !walletReady
     ? "—"
-    : isWmntBalanceLoading
+    : isAssetBalanceLoading
       ? "Loading..."
-      : isWmntBalanceError
+      : isAssetBalanceError
         ? "Unavailable"
-        : formatUnits(wmntBalanceValue, wmntDecimalsValue);
+        : formatUnits(assetBalanceValue, assetDecimalsValue);
   const yieldSourceLabel =
     yieldSourceCopy ??
     "Sponsorship invoice fees are donated into the vault, increasing share value.";
@@ -367,7 +410,7 @@ export default function YieldPanel({
     setIsRefreshing(true);
     const tasks: Promise<unknown>[] = [
       refetchNativeBalance(),
-      refetchWmntBalance(),
+      refetchAssetBalance(),
       refetchAllowance(),
       refetchShareBalance(),
       refetchTotalAssets(),
@@ -394,7 +437,7 @@ export default function YieldPanel({
     refetchTotalAssets,
     refetchTotalSupply,
     refetchVaultReceipt,
-    refetchWmntBalance,
+    refetchAssetBalance,
     shareBalanceValue,
     walletReady,
   ]);
@@ -549,6 +592,21 @@ export default function YieldPanel({
         </Alert>
       )}
 
+      {registryMismatch && (
+        <Alert variant="warning">
+          <AlertTitle>KYC registry mismatch</AlertTitle>
+          <AlertDescription>
+            This vault checks verification on{" "}
+            <span className="font-mono">{formatShortHash(kycRegistry)}</span>, which
+            differs from the app registry{" "}
+            <span className="font-mono">
+              {formatShortHash(defaultKycRegistry)}
+            </span>
+            . Deposits will fail until the registry addresses match.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -557,7 +615,7 @@ export default function YieldPanel({
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">TVL (WMNT)</span>
+              <span className="text-muted-foreground">TVL ({assetLabel})</span>
               <span>{formattedTotalAssets}</span>
             </div>
             <div className="flex items-center justify-between">
@@ -568,7 +626,9 @@ export default function YieldPanel({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Share price</span>
-              <span>{formattedSharePrice} WMNT</span>
+              <span>
+                {formattedSharePrice} {assetLabel}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">KYC registry</span>
@@ -612,18 +672,20 @@ export default function YieldPanel({
               <span>{formattedNativeBalance}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">WMNT balance</span>
-              <span>{formattedWmntBalance}</span>
+              <span className="text-muted-foreground">
+                Asset balance ({assetLabel})
+              </span>
+              <span>{formattedAssetBalance}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">WMNT contract</span>
+              <span className="text-muted-foreground">Asset contract</span>
               <Link
                 className="font-mono text-xs underline underline-offset-2"
-                href={explorerAddressUrl(wmnt)}
+                href={explorerAddressUrl(assetToken)}
                 target="_blank"
                 rel="noreferrer"
               >
-                {formatShortHash(wmnt)}
+                {formatShortHash(assetToken)}
               </Link>
             </div>
             <div className="flex items-center justify-between">
@@ -633,7 +695,9 @@ export default function YieldPanel({
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Vault claim (WMNT)</span>
+              <span className="text-muted-foreground">
+                Vault claim ({assetLabel})
+              </span>
               <span>{formattedVaultClaim}</span>
             </div>
           </CardContent>
@@ -650,15 +714,15 @@ export default function YieldPanel({
         <CardContent className="space-y-4 text-sm">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-              <p className="font-semibold">TVL (WMNT)</p>
+              <p className="font-semibold">TVL ({assetLabel})</p>
               <p className="text-xs text-muted-foreground">
-                Total WMNT locked in the vault. Deposits increase TVL and yield grows it over time.
+                Total assets locked in the vault. Deposits increase TVL and yield grows it over time.
               </p>
             </div>
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
               <p className="font-semibold">cySHARE</p>
               <p className="text-xs text-muted-foreground">
-                Vault share tokens minted to depositors. Your cySHARE balance tracks your claim on WMNT + yield.
+                Vault share tokens minted to depositors. Your cySHARE balance tracks your claim on assets + yield.
               </p>
             </div>
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
@@ -713,6 +777,15 @@ export default function YieldPanel({
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
+          {!isVaultAssetWmnt && (
+            <Alert variant="warning">
+              <AlertTitle>Vault asset is not WMNT</AlertTitle>
+              <AlertDescription>
+                This vault uses a different asset than WMNT, so wrap and unwrap are
+                disabled. Deposits and approvals use the vault asset address above.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
               <div className="space-y-1">
@@ -736,7 +809,7 @@ export default function YieldPanel({
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
               <div className="space-y-1">
                 <label className="text-sm font-medium" htmlFor="vault-amount">
-                  Vault amount (WMNT)
+                  Vault amount ({assetLabel})
                 </label>
                 <p className="text-xs text-muted-foreground">
                   Used for approval, deposit, and withdraw actions.
