@@ -310,7 +310,7 @@ export async function POST(req: Request) {
     });
   }
 
-  let txHash: `0x${string}`;
+  let txHash: `0x${string}` | null = null;
   let vaultAddress: Address | null = null;
   let vaultError: string | null = null;
 
@@ -321,6 +321,62 @@ export async function POST(req: Request) {
     );
 
     const { publicClient, walletClient } = createMantleClients();
+    const syncSecret = getServerEnv("KYC_SYNC_SECRET");
+
+    const onchainVerified = (await publicClient.readContract({
+      address: registryAddress,
+      abi: kycRegistryAbi,
+      functionName: "isVerified",
+      args: [getAddress(walletAddress)],
+    })) as boolean;
+
+    if (onchainVerified) {
+      await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
+        walletAddress,
+        verified: true,
+        txHash: existingVerification?.txHash ?? undefined,
+        secret: syncSecret,
+      });
+
+      try {
+        const result = await provisionCreatorVault({
+          publicClient,
+          walletClient,
+          creatorWallet: getAddress(walletAddress),
+          syncSecret,
+        });
+        vaultAddress = result.vault;
+      } catch (error) {
+        vaultError =
+          error instanceof Error ? error.message : "Vault provisioning failed.";
+      }
+
+      return NextResponse.json({
+        ok: true,
+        inquiryId,
+        status,
+        walletAddress,
+        verified: true,
+        txHash: existingVerification?.txHash ?? null,
+        vaultAddress,
+        vaultError,
+      });
+    }
+
+    if (existingVerification?.txHash && existingVerification.updatedAt) {
+      const pendingWindowMs = 60_000;
+      if (Date.now() - existingVerification.updatedAt < pendingWindowMs) {
+        return NextResponse.json({
+          ok: true,
+          inquiryId,
+          status,
+          walletAddress,
+          verified: false,
+          txHash: existingVerification.txHash ?? null,
+          pending: true,
+        });
+      }
+    }
 
     txHash = await walletClient.writeContract({
       address: registryAddress,
@@ -329,9 +385,29 @@ export async function POST(req: Request) {
       args: [getAddress(walletAddress), true],
     });
 
-    await publicClient.waitForTransactionReceipt({ hash: txHash });
+    await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
+      walletAddress,
+      verified: false,
+      txHash,
+      secret: syncSecret,
+    });
 
-    const syncSecret = getServerEnv("KYC_SYNC_SECRET");
+    try {
+      await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+        timeout: 15_000,
+      });
+    } catch {
+      return NextResponse.json({
+        ok: true,
+        inquiryId,
+        status,
+        walletAddress,
+        verified: false,
+        txHash,
+        pending: true,
+      });
+    }
 
     await convexHttpClient.mutation(anyApi.kyc.setWalletVerified, {
       walletAddress,

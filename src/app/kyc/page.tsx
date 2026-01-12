@@ -208,6 +208,7 @@ export default function KycStartPage() {
   const inquiry = statusInfo?.inquiry ?? null;
   const inquiryStatus = inquiry?.status ?? "not started";
   const isVerified = Boolean(verification?.verified);
+  const hasPendingTx = Boolean(verification?.txHash) && !isVerified;
   const canRestart =
     !statusLoading &&
     (!inquiry ||
@@ -228,6 +229,7 @@ export default function KycStartPage() {
     ? new Date(verification.updatedAt).toLocaleString()
     : "Not synced";
   const showRedactionHint = isVerified && !inquiry?.inquiryId;
+  const syncLabel = hasPendingTx ? "Refresh status" : "Sync status";
 
   if (!isConnected) {
     return (
@@ -289,7 +291,7 @@ export default function KycStartPage() {
                 {verification?.txHash && (
                   <>
                     <br />
-                    On-chain tx:{" "}
+                    On-chain tx{hasPendingTx ? " (pending)" : ""}:{" "}
                     <a
                       className="font-mono underline underline-offset-2"
                       href={explorerTxUrl(verification.txHash)}
@@ -311,13 +313,27 @@ export default function KycStartPage() {
                 Persona verification is complete, but the wallet has not been
                 verified on-chain yet. Sync to write verification to the registry
                 and surface the transaction hash.
+                {verification?.txHash && (
+                  <>
+                    <br />
+                    Pending tx:{" "}
+                    <a
+                      className="font-mono underline underline-offset-2"
+                      href={explorerTxUrl(verification.txHash)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {formatShortHash(verification.txHash)}
+                    </a>
+                  </>
+                )}
               </AlertDescription>
               <div className="mt-3">
                 <Button
                   onClick={() => void handleSync()}
                   disabled={actionStatus === "syncing"}
                 >
-                  {actionStatus === "syncing" ? "Syncing..." : "Sync status"}
+                  {actionStatus === "syncing" ? "Syncing..." : syncLabel}
                 </Button>
               </div>
             </Alert>

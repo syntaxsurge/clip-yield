@@ -101,7 +101,6 @@ export async function GET(req: Request) {
           ? {
               ...verification,
               verified: false,
-              txHash: null,
             }
           : null;
 
