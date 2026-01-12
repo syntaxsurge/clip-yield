@@ -89,34 +89,24 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This is the custody layer: a KYC-gated ERC-4626 vault holding WMNT on Mantle Sepolia. In the action center we wrap MNT, approve spending, deposit into the vault, and withdraw to show the full lifecycle. The Yield Engine shows real-time streaming yield on testnet, and we can sync it on-chain to lift share value. In production, this simulator is replaced by audited yield strategies and protocol-fee donations.”
 
-## 7. Creator Directory (Discovery for Cash-Flow Assets)
-- **URL:** /creators
-- **Shot:** Creator directory with suggested list and a clear “Boost” action per creator.
+## 7. Creator Directory + Boost Vault (Discovery to Capital)
+- **URL:** /creators → /boost/[creatorId]
+- **Shot:** Creator directory with Boost actions, then the boost vault UI with approval and deposit flow.
 - **Steps:**
   1. **Current page:** `/yield`, confirm the vault UI is visible.
   2. **Navigate:** **Current page:** `/yield`, click “Explore” → click “Creators” → lands on `/creators`, confirm “Creators” heading is visible.
   3. **Action:** **Current page:** `/creators`, click a creator row labeled “@creator”, confirm it navigates to their profile.
   4. **Action:** **Current page:** `/profile/[id]`, click “Boost”, confirm it navigates to the creator boost vault page.
-  5. **Action:** **Current page:** `/boost/[creatorId]`, pause on the vault panel, confirm creator identity is visible on the page.
-  6. **Verify on-screen:** **Current page:** `/boost/[creatorId]`, confirm the Boost Vault UI is loaded for that creator.
-- **Voiceover:**
-  > “Creators are the destination for value. The directory makes discovery easy, and every creator has a boost vault, this is how users route funds into creator-specific custody.”
-
-## 8. Boost Vault (Creator-Directed Capital)
-- **URL:** /boost/[creatorId]
-- **Shot:** Boost vault UI with amount input, approval state, and deposit action.
-- **Steps:**
-  1. **Current page:** `/boost/[creatorId]`, confirm the creator handle and “Boost Vault” are visible.
-  2. **Action:** **Current page:** `/boost/[creatorId]`, click the amount field labeled “Amount (WMNT)”, confirm cursor is active.
-  3. **Enter values:**
+  5. **Action:** **Current page:** `/boost/[creatorId]`, click the amount field labeled “Amount (WMNT)”, confirm cursor is active.
+  6. **Enter values:**
      - Amount (WMNT) = `[BOOST_WMNT=0.05]`
-  4. Click “Approve” (if shown), wait for wallet prompt and “Approved” state.
-  5. Click “Deposit”, wait for “Transaction submitted” toast with explorer link.
-  6. **Verify on-screen:** **Current page:** `/boost/[creatorId]`, confirm your boost position/shares update and a tx link is visible.
+  7. **Action:** **Current page:** `/boost/[creatorId]`, click “Approve” (if shown), wait for wallet prompt and “Approved” state.
+  8. **Action:** **Current page:** `/boost/[creatorId]`, click “Deposit”, wait for “Transaction submitted” toast with explorer link.
+  9. **Verify on-screen:** **Current page:** `/boost/[creatorId]`, confirm your boost position updates and a tx link is visible.
 - **Voiceover:**
-  > “Boosting is creator-directed capital: you deposit WMNT into a creator-specific vault. It’s custody-first, assets are on-chain, and your position is tracked transparently.”
+  > “Creators are the destination for value. The directory makes discovery easy, then we enter a creator boost vault, approve, and deposit WMNT so custody and positions are on-chain.”
 
-## 9. Sponsor a Clip (Tokenized Invoice Creation)
+## 8. Sponsor a Clip (Tokenized Invoice Creation)
 - **URL:** /sponsor/[postId]
 - **Shot:** Sponsorship page with clip preview, sponsorship breakdown panel, and “Confirm Sponsorship” CTA that mentions Invoice Receipt NFT.
 - **Steps:**
@@ -130,7 +120,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This is the RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 0.10 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details.”
 
-## 10. Campaign Receipt (RWA Proof + Terms Hash)
+## 9. Campaign Receipt (RWA Proof + Terms Hash)
 - **URL:** /campaign/[campaignId]
 - **Shot:** Campaign receipt with terms hash, tx status, MantleScan link, and Invoice Receipt NFT section (contract + token ID).
 - **Steps:**
@@ -143,7 +133,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This receipt is the compliance-friendly proof: a terms hash, on-chain tx status, and an Invoice Receipt NFT that tokenizes the sponsorship invoice. Judges can click straight to MantleScan and verify everything.”
 
-## 11. Activity Feed (Auditable Ledger)
+## 10. Activity Feed (Auditable Ledger)
 - **URL:** /activity
 - **Shot:** Activity list with event rows (Boost deposit, Sponsorship invoice, Vault events) and MantleScan links.
 - **Steps:**
@@ -156,7 +146,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer, nothing is hidden.”
 
-## 12. Leaderboard (Incentives + Growth)
+## 11. Leaderboard (Incentives + Growth)
 - **URL:** /leaderboard
 - **Shot:** Ranked creators table with totals, and clickable rows to drill into profiles.
 - **Steps:**
@@ -169,7 +159,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Leaderboards turn financial actions into social status. Because rankings are computed from confirmed on-chain events, incentives are auditable.”
 
-## 13. Admin Access Gate (Only Allowlisted Wallet)
+## 12. Admin Access Gate (Only Allowlisted Wallet)
 - **URL:** /admin/kyc
 - **Shot:** Attempted admin navigation showing “Access denied” (non-admin wallet), with a clear switch-wallet prompt.
 - **Steps:**
@@ -182,7 +172,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Admin routes are gated: if you’re not on the allowlist, you see an explicit access-denied screen instead of a silent failure. We switch to the admin wallet and immediately unlock the console. This keeps UX clean for normal users and secure for operations.”
 
-## 14. Admin Boost Pass (Publish On-Chain Incentive Epoch)
+## 13. Admin Boost Pass (Publish On-Chain Incentive Epoch)
 - **URL:** /admin/boost-pass
 - **Shot:** Admin Boost Pass screen showing snapshot rows and a “Publish Epoch” action.
 - **Steps:**
@@ -195,7 +185,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Now incentives become real: we publish a Boost Pass epoch on-chain from leaderboard snapshots. The tx hash is visible, so eligibility is verifiable.”
 
-## 15. Boost Pass Perks (Remix Pack Unlock)
+## 14. Boost Pass Perks (Remix Pack Unlock)
 - **URL:** /perks/boost-pass
 - **Shot:** Perks page showing ownership status and “Download Remix Pack” + “Import to Projects”.
 - **Steps:**
@@ -208,7 +198,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Perks complete the loop: on-chain incentives unlock creator tools. We download a Remix Pack and import it into the editor in one click.”
 
-## 16. Settings (Wallet + Playback + AI BYOK)
+## 15. Settings (Wallet + Playback + AI BYOK)
 - **URL:** /settings
 - **Shot:** Settings page showing wallet status, playback preferences, and AI BYOK key controls.
 - **Steps:**
@@ -221,7 +211,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Settings keeps the UX polished: wallet state, playback controls, and optional AI BYOK keys for creator tooling. This shows ClipYield is more than a contract demo, it’s a product.”
 
-## 17. Projects List (Creator Workspace)
+## 16. Projects List (Creator Workspace)
 - **URL:** /projects
 - **Shot:** Projects list with an imported Remix Pack project row and Open action.
 - **Steps:**
@@ -234,7 +224,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This is the creator workspace: Remix Packs turn into editable projects, not just collectibles. Opening a project drops you straight into the timeline and preview so you can start working immediately.”
 
-## 18. Timeline Editor + Export (Production Step)
+## 17. Timeline Editor + Export (Production Step)
 - **URL:** /projects/[id]
 - **Shot:** Editor with timeline, preview playback, and export progress UI.
 - **Steps:**
@@ -247,7 +237,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Now we convert incentives into output. We edit the timeline, preview, then export with a clear render progress and a downloadable MP4. This is how ClipYield turns on-chain actions into real creator production.”
 
-## 19. Upload (Publish Remix Back to Feed)
+## 18. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**
