@@ -55,7 +55,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
   5. **Action:** **Current page:** `/start` — click “Open Faucet” — confirm a new tab opens to the Mantle Sepolia faucet.
   6. **Verify on-screen:** **Current page:** `/start` — confirm Mantle Sepolia chain readiness is shown and wallet is connected.
 - **Voiceover:**
-  > “Onboarding is Web2.5: Privy embedded wallets remove key-management friction, then the wizard ensures you’re ready on Mantle Sepolia. This is crucial for judges—users can sign transactions securely without wrestling with wallet UX. Next we’ll run KYC, because we’re tokenizing invoices and distributing yield.”
+  > “Onboarding is Web2.5: Privy embedded wallets remove key-management friction, then the wizard ensures you’re ready on Mantle Sepolia.”
 
 ## 5. KYC Start (Compliant Gate)
 - **URL:** /kyc
