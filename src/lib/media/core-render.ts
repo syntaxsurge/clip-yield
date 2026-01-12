@@ -299,10 +299,8 @@ export async function renderWithDiffusionCore({
         const duration = safeDuration(file.positionStart, file.positionEnd);
         if (duration <= 0) continue;
 
-        const effects: DiffusionEffect[] | undefined =
-          file.blur && file.blur > 0
-            ? [{ type: "blur", value: file.blur }]
-            : undefined;
+        const effects: DiffusionEffect[] =
+          file.blur && file.blur > 0 ? [{ type: "blur", value: file.blur }] : [];
 
         const widthPx = safeNumber(file.width, composition.width);
         const heightPx = safeNumber(file.height, composition.height);
@@ -374,10 +372,8 @@ export async function renderWithDiffusionCore({
         const fadeOut = clampNumber(safeNumber(text.fadeOutDuration, 0.4), 0, duration);
         const baseOpacity = normalizeOpacity(text.opacity);
         const rotation = text.rotation ?? 0;
-        const effects: DiffusionEffect[] | undefined =
-          text.blur && text.blur > 0
-            ? [{ type: "blur", value: text.blur }]
-            : undefined;
+        const effects: DiffusionEffect[] =
+          text.blur && text.blur > 0 ? [{ type: "blur", value: text.blur }] : [];
 
         const boxWidth = safeNumber(text.width, 800);
         const boxHeight = safeNumber(text.height, 200);

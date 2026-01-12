@@ -58,6 +58,16 @@ export default function ProjectClient({ projectId }: Props) {
   const { activeSection, activeElement } = projectState;
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.crossOriginIsolated) return;
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("_isolation") === "1") return;
+    url.searchParams.set("_isolation", "1");
+    window.location.replace(url.toString());
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     const loadProject = async () => {

@@ -359,6 +359,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/kyc` Persona-hosted KYC entrypoint for wallet verification
 - `/kyc/complete` KYC completion status + return to vault
 - `/settings` global settings for wallet status, playback preferences, and AI BYOK keys
+- `/contract-addresses` catalog of smart contracts with addresses, descriptions, and MantleScan links
 - `/admin/kyc` on-chain KYC manager console for Mantle Sepolia
 - `/admin/boost-pass` monitor and manually publish Boost Pass epochs from leaderboard snapshots
 - `/perks/boost-pass` Boost Pass remix pack downloads + project import

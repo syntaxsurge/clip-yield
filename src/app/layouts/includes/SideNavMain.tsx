@@ -191,6 +191,14 @@ export default function SideNavMain() {
                         <p className="pt-4 px-2">
                             Help Safety Terms Privacy Creator Portal Community Guidelines
                         </p>
+                        <p className="pt-4 px-2">
+                            <Link
+                                href="/contract-addresses"
+                                className="text-[color:var(--brand-accent-text)] hover:underline"
+                            >
+                                Contract addresses
+                            </Link>
+                        </p>
                         <p className="pt-4 px-2">© 2025 ClipYield</p>
                     </div>
 
