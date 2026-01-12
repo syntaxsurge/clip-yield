@@ -134,20 +134,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This is the Real finance moment: Sponsorship becomes a tokenized invoice. We fill in campaign terms, set the WMNT amount in Sponsor with invoice receipts, then sponsor the clip. The app mints an Invoice Receipt NFT with the terms hash and receipt details.”
 
-## 9. Campaign Receipt (RWA Proof + Terms Hash)
-- **URL:** /campaign/[campaignId]
-- **Shot:** Campaign receipt with terms hash, tx status, MantleScan link, and Invoice Receipt NFT section (contract + token ID).
-- **Steps:**
-  1. **Current page:** `/sponsor/[postId]`, confirm sponsorship success state is visible.
-  2. **Navigate:** **Current page:** `/sponsor/[postId]`, click “View Receipt” → lands on `/campaign/[campaignId]`, confirm “Campaign Receipt” heading is visible.
-  3. **Action:** **Current page:** `/campaign/[campaignId]`, click “Copy Terms Hash”, wait for a “Copied” toast.
-  4. **Action:** **Current page:** `/campaign/[campaignId]`, click “View Transaction on MantleScan”, confirm new tab opens to MantleScan tx.
-  5. **Action:** **Current page:** `/campaign/[campaignId]`, click “View Invoice Receipt NFT” (or the NFT link), confirm MantleScan opens on the NFT/token view.
-  6. **Verify on-screen:** **Current page:** `/campaign/[campaignId]`, confirm terms hash, tx status, and invoice token ID are all visible.
-- **Voiceover:**
-  > “This receipt is the compliance-friendly proof: a terms hash, on-chain tx status, and an Invoice Receipt NFT that tokenizes the sponsorship invoice. Judges can click straight to MantleScan and verify everything.”
-
-## 10. Activity Feed (Auditable Ledger)
+## 9. Activity Feed (Auditable Ledger)
 - **URL:** /activity
 - **Shot:** Activity list with event rows (Boost deposit, Sponsorship invoice, Vault events) and MantleScan links.
 - **Steps:**
@@ -160,7 +147,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer, nothing is hidden.”
 
-## 11. Leaderboard (Incentives + Growth)
+## 10. Leaderboard (Incentives + Growth)
 - **URL:** /leaderboard
 - **Shot:** Ranked creators table with totals, and clickable rows to drill into profiles.
 - **Steps:**
@@ -173,7 +160,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Leaderboards turn financial actions into social status. Because rankings are computed from confirmed on-chain events, incentives are auditable.”
 
-## 12. Admin Access Gate (Only Allowlisted Wallet)
+## 11. Admin Access Gate (Only Allowlisted Wallet)
 - **URL:** /admin/kyc
 - **Shot:** Attempted admin navigation showing “Access denied” (non-admin wallet), with a clear switch-wallet prompt.
 - **Steps:**
@@ -186,7 +173,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Admin routes are gated: if you’re not on the allowlist, you see an explicit access-denied screen instead of a silent failure. We switch to the admin wallet and immediately unlock the console. This keeps UX clean for normal users and secure for operations.”
 
-## 13. Admin Boost Pass (Publish On-Chain Incentive Epoch)
+## 12. Admin Boost Pass (Publish On-Chain Incentive Epoch)
 - **URL:** /admin/boost-pass
 - **Shot:** Admin Boost Pass screen showing snapshot rows and a “Publish Epoch” action.
 - **Steps:**
@@ -199,7 +186,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Now incentives become real: we publish a Boost Pass epoch on-chain from leaderboard snapshots. The tx hash is visible, so eligibility is verifiable.”
 
-## 14. Boost Pass Perks (Remix Pack Unlock)
+## 13. Boost Pass Perks (Remix Pack Unlock)
 - **URL:** /perks/boost-pass
 - **Shot:** Perks page showing ownership status and “Download Remix Pack” + “Import to Projects”.
 - **Steps:**
@@ -212,7 +199,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Perks complete the loop: on-chain incentives unlock creator tools. We download a Remix Pack and import it into the editor in one click.”
 
-## 15. Settings (Wallet + Playback + AI BYOK)
+## 14. Settings (Wallet + Playback + AI BYOK)
 - **URL:** /settings
 - **Shot:** Settings page showing wallet status, playback preferences, and AI BYOK key controls.
 - **Steps:**
@@ -225,7 +212,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Settings keeps the UX polished: wallet state, playback controls, and optional AI BYOK keys for creator tooling. This shows ClipYield is more than a contract demo, it’s a product.”
 
-## 16. Projects List (Creator Workspace)
+## 15. Projects List (Creator Workspace)
 - **URL:** /projects
 - **Shot:** Projects list with an imported Remix Pack project row and Open action.
 - **Steps:**
@@ -238,7 +225,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This is the creator workspace: Remix Packs turn into editable projects, not just collectibles. Opening a project drops you straight into the timeline and preview so you can start working immediately.”
 
-## 17. Timeline Editor + Export (Production Step)
+## 16. Timeline Editor + Export (Production Step)
 - **URL:** /projects/[id]
 - **Shot:** Editor with timeline, preview playback, and export progress UI.
 - **Steps:**
@@ -251,7 +238,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Now we convert incentives into output. We edit the timeline, preview, then export with a clear render progress and a downloadable MP4. This is how ClipYield turns on-chain actions into real creator production.”
 
-## 18. Upload (Publish Remix Back to Feed)
+## 17. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**
