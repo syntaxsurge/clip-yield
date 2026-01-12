@@ -62,15 +62,16 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Shot:** KYC landing page with a “Start Verification” CTA, Persona hosted flow, and completion screen with inquiry ID, status, wallet address, and sync indicator.
 - **Steps:**
   1. **Current page:** `/start`, confirm wallet is connected.
-  2. **Navigate:** **Current page:** `/start`, click “Explore” → click “KYC verification” → lands on `/kyc`, confirm “KYC Verification” heading is visible.
-  3. **Action:** **Current page:** `/kyc`, click “Start Verification”, confirm redirect to Persona hosted flow and Persona branding is visible.
-  4. **Action:** **Current page:** Persona hosted flow, click “Continue”, confirm next step loads.
-  5. **Action:** **Current page:** Persona hosted flow, complete the sandbox verification steps, confirm it reaches completion.
-  6. **Navigate:** **Current page:** Persona hosted flow, click the completion button → lands on `/kyc/complete`, confirm “KYC status” heading is visible.
-  7. **Action:** **Current page:** `/kyc/complete`, click “Sync now” (or “Refresh Status”), confirm a loading state appears.
-  8. **Verify on-screen:** **Current page:** `/kyc/complete`, confirm a “Verified” badge and the connected wallet address are shown.
+  2. **Navigate:** **Current page:** `/start`, click “Go to yield vault” → lands on `/yield`, confirm a KYC required message and “Start KYC” button are visible.
+  3. **Action:** **Current page:** `/yield`, click “Start KYC” → lands on `/kyc`, confirm “KYC Verification” heading is visible.
+  4. **Action:** **Current page:** `/kyc`, click “Start Verification”, confirm redirect to Persona hosted flow and Persona branding is visible.
+  5. **Action:** **Current page:** Persona hosted flow, click “Continue”, confirm next step loads.
+  6. **Action:** **Current page:** Persona hosted flow, complete the sandbox verification steps, confirm it reaches completion.
+  7. **Navigate:** **Current page:** Persona hosted flow, click the completion button → lands on `/kyc/complete`, confirm “KYC status” heading is visible.
+  8. **Action:** **Current page:** `/kyc/complete`, click “Sync now” (or “Refresh Status”), confirm a loading state appears.
+  9. **Verify on-screen:** **Current page:** `/kyc/complete`, confirm a “Verified” badge and the connected wallet address are shown.
 - **Voiceover:**
-  > “KYC is the compliance layer: we launch a Persona hosted flow from /kyc, complete the sandbox steps, then sync on /kyc/complete so the wallet flips to Verified. The user never handles keys, Privy manages the wallet and Persona verifies identity.”
+  > “From onboarding we open the yield vault, see the KYC required gate, and use Start KYC to begin verification. KYC is required because the yield vault is funded by real world cash flows from tokenized sponsorship invoices, and compliant custody and yield access depend on verified identity. The flow redirects to /kyc and then to Persona to verify identity, then we sync on /kyc/complete so the wallet flips to Verified.”
 
 ## 6. Yield Vault (Custody + Real-Time Yield)
 - **URL:** /yield
