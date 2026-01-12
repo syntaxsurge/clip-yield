@@ -147,72 +147,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer, nothing is hidden.”
 
-## 10. Leaderboard (Incentives + Growth)
-- **URL:** /leaderboard
-- **Shot:** Ranked creators table with totals, and clickable rows to drill into profiles.
-- **Steps:**
-  1. **Current page:** `/activity`, confirm event list is visible.
-  2. **Navigate:** **Current page:** `/activity`, click “Explore” → click “Leaderboard” → lands on `/leaderboard`, confirm “Leaderboard” heading and ranked rows appear.
-  3. **Action:** **Current page:** `/leaderboard`, click the boosted creator row, confirm a detail view or profile navigation occurs.
-  4. **Action:** **Current page:** `/profile/[id]`, confirm creator identity matches.
-  5. **Action:** **Current page:** `/profile/[id]`, click Back, confirm return to `/leaderboard`.
-  6. **Verify on-screen:** **Current page:** `/leaderboard`, confirm rankings reflect on-chain activity totals.
-- **Voiceover:**
-  > “Leaderboards turn financial actions into social status. Because rankings are computed from confirmed on-chain events, incentives are auditable.”
-
-## 11. Admin Access Gate (Only Allowlisted Wallet)
-- **URL:** /admin/kyc
-- **Shot:** Attempted admin navigation showing “Access denied” (non-admin wallet), with a clear switch-wallet prompt.
-- **Steps:**
-  1. **Current page:** `/leaderboard`, confirm leaderboard is visible.
-  2. **Navigate:** **Current page:** `/leaderboard`, open URL directly: `/admin/kyc` → lands on `/admin/kyc`, confirm an “Access denied” or “Not authorized” message appears.
-  3. **Action:** **Current page:** `/admin/kyc`, click “Switch wallet” (or “Sign out”), confirm Privy account modal opens.
-  4. **Action:** **Current page:** Privy modal, select the allowlisted admin wallet account, confirm connected wallet address changes.
-  5. **Action:** **Current page:** `/admin/kyc`, click “Retry” (or reload page), confirm the admin console loads.
-  6. **Verify on-screen:** **Current page:** `/admin/kyc`, confirm “KYC Admin” heading and table of records appear.
-- **Voiceover:**
-  > “Admin routes are gated: if you’re not on the allowlist, you see an explicit access-denied screen instead of a silent failure. We switch to the admin wallet and immediately unlock the console. This keeps UX clean for normal users and secure for operations.”
-
-## 12. Admin Boost Pass (Publish On-Chain Incentive Epoch)
-- **URL:** /admin/boost-pass
-- **Shot:** Admin Boost Pass screen showing snapshot rows and a “Publish Epoch” action.
-- **Steps:**
-  1. **Current page:** `/admin/kyc`, confirm KYC table is visible.
-  2. **Navigate:** **Current page:** `/admin/kyc`, click “Explore” → click “Boost Pass admin” → lands on `/admin/boost-pass`, confirm “Boost Pass Admin” heading is visible.
-  3. **Action:** **Current page:** `/admin/boost-pass`, select latest snapshot row, confirm it highlights/expands.
-  4. **Action:** **Current page:** `/admin/boost-pass`, click “Publish Epoch”, confirm wallet prompt appears.
-  5. Click “Confirm” in wallet, wait for “Epoch published” toast/state.
-  6. **Verify on-screen:** **Current page:** `/admin/boost-pass`, confirm epoch status updates and a tx hash link is visible.
-- **Voiceover:**
-  > “Now incentives become real: we publish a Boost Pass epoch on-chain from leaderboard snapshots. The tx hash is visible, so eligibility is verifiable.”
-
-## 13. Boost Pass Perks (Remix Pack Unlock)
-- **URL:** /perks/boost-pass
-- **Shot:** Perks page showing ownership status and “Download Remix Pack” + “Import to Projects”.
-- **Steps:**
-  1. **Current page:** `/admin/boost-pass`, confirm epoch is published.
-  2. **Navigate:** **Current page:** `/admin/boost-pass`, click “Sign out” (or “Switch wallet”), confirm wallet returns to a normal user account.
-  3. **Navigate:** **Current page:** Any app page, click “Explore” → click “Boost Pass perks” → lands on `/perks/boost-pass`, confirm Boost Pass heading and ownership status appear.
-  4. **Action:** **Current page:** `/perks/boost-pass`, click “Download Remix Pack”, confirm browser download or “Download started” toast.
-  5. Click “Import to Projects”, wait for redirect, confirm you land on `/projects`.
-  6. **Verify on-screen:** **Current page:** `/projects`, confirm a new project row appears or “Remix Pack imported” toast is shown.
-- **Voiceover:**
-  > “Perks complete the loop: on-chain incentives unlock creator tools. We download a Remix Pack and import it into the editor in one click.”
-
-## 14. Settings (Wallet + Playback + AI BYOK)
-- **URL:** /settings
-- **Shot:** Settings page showing wallet status, playback preferences, and AI BYOK key controls.
-- **Steps:**
-  1. **Current page:** `/projects`, confirm project list is visible.
-  2. **Navigate:** **Current page:** `/projects`, click “Explore” → click “Settings” → lands on `/settings`, confirm “Settings” heading is visible.
-  3. **Action:** **Current page:** `/settings`, confirm wallet status section shows connected address.
-  4. **Action:** **Current page:** `/settings`, toggle a playback preference (e.g., “Autoplay”), confirm the toggle state changes.
-  5. **Action:** **Current page:** `/settings`, locate AI BYOK key section, confirm an input or “Set key” control is visible.
-  6. **Verify on-screen:** **Current page:** `/settings`, confirm settings sections for wallet, playback, and AI keys are visible.
-- **Voiceover:**
-  > “Settings keeps the UX polished: wallet state, playback controls, and optional AI BYOK keys for creator tooling. This shows ClipYield is more than a contract demo, it’s a product.”
-
-## 15. Projects List (Creator Workspace)
+## 10. Projects List (Creator Workspace)
 - **URL:** /projects
 - **Shot:** Projects list with an imported Remix Pack project row and Open action.
 - **Steps:**
@@ -225,7 +160,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “This is the creator workspace: Remix Packs turn into editable projects, not just collectibles. Opening a project drops you straight into the timeline and preview so you can start working immediately.”
 
-## 16. Timeline Editor + Export (Production Step)
+## 11. Timeline Editor + Export (Production Step)
 - **URL:** /projects/[id]
 - **Shot:** Editor with timeline, preview playback, and export progress UI.
 - **Steps:**
@@ -238,7 +173,7 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 - **Voiceover:**
   > “Now we convert incentives into output. We edit the timeline, preview, then export with a clear render progress and a downloadable MP4. This is how ClipYield turns on-chain actions into real creator production.”
 
-## 17. Upload (Publish Remix Back to Feed)
+## 12. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**
@@ -252,12 +187,3 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   6. **Verify on-screen:** **Current page:** `/`, confirm the new clip appears in the feed with the caption visible.
 - **Voiceover:**
   > “We close the loop by uploading the exported remix: ‘Tokenized invoice sponsorship → Remix Pack → Exported edit’. After publishing, the new post is live in the feed.”
-
-## Final Wrap-Up
-- **URL:** /campaign/[campaignId]
-- **Shot:** Campaign receipt showing terms hash, MantleScan tx link, and Invoice Receipt NFT token ID + contract.
-- **Steps:**
-  1. **Current page:** `/`, confirm the newly uploaded clip is visible.
-  2. **Verify final state:** Open URL directly: `/campaign/[campaignId]`, confirm the receipt shows terms hash, tx status, and the Invoice Receipt NFT details.
-- **Voiceover:**
-  > “We proved an end-to-end RealFi product on Mantle Sepolia: consumer video UX, Privy wallet onboarding, Persona KYC, custody via ERC-4626 vaults, sponsorships tokenized as invoice receipt NFTs, and compliant yield funded by real protocol cash-flow. It’s auditable, demoable, and user-friendly. Try it at [DEMO_URL].”
