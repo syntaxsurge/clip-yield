@@ -3,7 +3,8 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
 
-const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+const localBaseURL = "/ffmpeg";
+const remoteBaseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
 
 export async function createLoadedFfmpeg(options?: {
   onLog?: (message: string) => void;
@@ -16,10 +17,24 @@ export async function createLoadedFfmpeg(options?: {
     });
   }
 
-  await ffmpeg.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
-  });
+  const loadFromBase = async (baseURL: string) => {
+    const coreURL = await toBlobURL(
+      `${baseURL}/ffmpeg-core.js`,
+      "text/javascript",
+    );
+    const wasmURL = await toBlobURL(
+      `${baseURL}/ffmpeg-core.wasm`,
+      "application/wasm",
+    );
+    await ffmpeg.load({ coreURL, wasmURL });
+  };
+
+  try {
+    await loadFromBase(localBaseURL);
+  } catch (error) {
+    console.warn("Failed to load local FFmpeg core, falling back to CDN.", error);
+    await loadFromBase(remoteBaseURL);
+  }
 
   return ffmpeg;
 }

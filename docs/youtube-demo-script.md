@@ -187,4 +187,4 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
   5. Click “Publish”, wait for “Uploaded” toast and redirect to `/`.
   6. **Verify on-screen:** **Current page:** `/`, confirm the new clip appears in the feed with the caption visible.
 - **Voiceover:**
-  > “We close the loop by uploading the exported remix: ‘Tokenized invoice sponsorship → Remix Pack → Exported edit’. After publishing, the new post is live in the feed.”
+  > “We close the loop by uploading the exported video: ‘Tokenized invoice sponsorship → Remix Pack → Exported edit’. After publishing, the new post is live in the feed.”

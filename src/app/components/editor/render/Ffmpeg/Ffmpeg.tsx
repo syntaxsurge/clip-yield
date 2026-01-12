@@ -7,16 +7,25 @@ import FfmpegRender from "./FfmpegRender";
 import RenderOptions from "./RenderOptions";
 export default function Ffmpeg() {
   const [loadFfmpeg, setLoadedFfmpeg] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const ffmpegRef = useRef<FFmpeg>(new FFmpeg());
   const [logMessages, setLogMessages] = useState<string>("");
 
   const loadFFmpegFunction = async () => {
     setLoadedFfmpeg(false);
-    const ffmpeg = await createLoadedFfmpeg({
-      onLog: (message) => setLogMessages(message),
-    });
-    ffmpegRef.current = ffmpeg;
-    setLoadedFfmpeg(true);
+    setLoadError(null);
+    try {
+      const ffmpeg = await createLoadedFfmpeg({
+        onLog: (message) => setLogMessages(message),
+      });
+      ffmpegRef.current = ffmpeg;
+      setLoadedFfmpeg(true);
+    } catch (error) {
+      console.error("Failed to load FFmpeg:", error);
+      setLoadError(
+        error instanceof Error ? error.message : "Failed to load FFmpeg.",
+      );
+    }
   };
 
   useEffect(() => {
@@ -29,6 +38,7 @@ export default function Ffmpeg() {
       <FfmpegRender
         loadFunction={loadFFmpegFunction}
         loadFfmpeg={loadFfmpeg}
+        loadError={loadError}
         logMessages={logMessages}
         ffmpeg={ffmpegRef.current}
       />

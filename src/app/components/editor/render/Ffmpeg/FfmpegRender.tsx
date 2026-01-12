@@ -13,12 +13,14 @@ import { addExport } from "@/app/store/slices/projectSlice";
 interface FileUploaderProps {
   loadFunction: () => Promise<void>;
   loadFfmpeg: boolean;
+  loadError?: string | null;
   ffmpeg: FFmpeg;
   logMessages: string;
 }
 export default function FfmpegRender({
   loadFunction,
   loadFfmpeg,
+  loadError,
   ffmpeg,
   logMessages,
   }: FileUploaderProps) {
@@ -590,6 +592,18 @@ export default function FfmpegRender({
               : "Loading FFmpeg..."}
         </p>
       </button>
+      {!loadFfmpeg && loadError ? (
+        <div className="mt-3 text-center text-xs text-destructive">
+          <p>{loadError}</p>
+          <button
+            type="button"
+            onClick={loadFunction}
+            className="mt-2 text-xs font-semibold text-white underline underline-offset-4"
+          >
+            Retry loading FFmpeg
+          </button>
+        </div>
+      ) : null}
 
       {/* Render Modal */}
       {showModal && (
