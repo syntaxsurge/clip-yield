@@ -45,6 +45,163 @@ export default function SettingsPage() {
   const networkLabel = isConnected ? (isOnMantle ? "Mantle Sepolia" : "Wrong network") : "-";
   const kycLabel = isConnected && isOnMantle ? (isVerified ? "Verified" : "Not verified") : "-";
 
+  const accountCard = !isConnected ? (
+    <Card>
+      <CardHeader className="space-y-2">
+        <Skeleton className="h-5 w-44" />
+        <Skeleton className="h-4 w-64" />
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-9 w-36" />
+      </CardContent>
+    </Card>
+  ) : (
+    <Card>
+      <CardHeader className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-base">Wallet and verification</CardTitle>
+          <Badge variant="success">Connected</Badge>
+        </div>
+        <CardDescription>
+          Your wallet powers KYC, yield vaults, and invoice sponsorship receipts.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Wallet</span>
+          <span className="font-mono text-xs">{walletLabel}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">Network</span>
+          <span>{networkLabel}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">KYC status</span>
+          <span>{kycLabel}</span>
+        </div>
+        {!isVerified ? (
+          <Button asChild variant="outline">
+            <Link href="/kyc?returnTo=/settings">Start KYC</Link>
+          </Button>
+        ) : (
+          <Button asChild variant="outline">
+            <Link href="/yield">Open yield vault</Link>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const playbackCard = (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Playback</CardTitle>
+        <CardDescription>
+          Control how clips behave across the feed.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4 text-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="font-medium">Mute clips by default</div>
+            <p className="text-xs text-muted-foreground">
+              Start For You and Following feeds muted.
+            </p>
+          </div>
+          <Switch
+            checked={isFeedMuted}
+            onCheckedChange={setIsFeedMuted}
+            ariaLabel="Mute clips by default"
+          />
+        </div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <div className="font-medium">Auto-advance clips</div>
+            <p className="text-xs text-muted-foreground">
+              Scroll to the next clip after the current one finishes.
+            </p>
+          </div>
+          <Switch
+            checked={isAutoScrollEnabled}
+            onCheckedChange={setIsAutoScrollEnabled}
+            ariaLabel="Auto-advance clips"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const appearanceCard = (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Appearance</CardTitle>
+        <CardDescription>
+          Adjust how ClipYield looks on this device.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex items-center justify-between text-sm">
+        <div className="space-y-1">
+          <div className="font-medium">Theme</div>
+          <p className="text-xs text-muted-foreground">
+            Toggle between light and dark mode.
+          </p>
+        </div>
+        <ThemeToggle className="h-9 w-9" />
+      </CardContent>
+    </Card>
+  );
+
+  const aiTipsCard = (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">AI workflow tips</CardTitle>
+        <CardDescription>
+          Keep your Sora generations organized and ready for remixing.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm text-muted-foreground">
+        <p>
+          Generate clips from the editor&apos;s AI Studio, then drag them from
+          History into your timeline. Generations stay synced to the current
+          project in local storage.
+        </p>
+        <p>
+          Use short prompts for rapid iteration, then increase duration and size
+          once you land on a final look.
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  const settingsTabs = [
+    {
+      value: "account",
+      label: "Account",
+      sections: [{ id: "account", node: accountCard }],
+    },
+    {
+      value: "playback",
+      label: "Playback",
+      sections: [{ id: "playback", node: playbackCard }],
+    },
+    {
+      value: "appearance",
+      label: "Appearance",
+      sections: [{ id: "appearance", node: appearanceCard }],
+    },
+    {
+      value: "ai",
+      label: "AI Studio",
+      sections: [
+        { id: "openai", node: <OpenAIKeyCard /> },
+        { id: "ai-tips", node: aiTipsCard },
+      ],
+    },
+  ];
+
   return (
     <MainLayout>
       <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
@@ -56,139 +213,27 @@ export default function SettingsPage() {
             </p>
           </header>
 
-          <Tabs defaultValue="general" className="space-y-6">
+          <Tabs defaultValue={settingsTabs[0].value} className="space-y-6">
             <TabsList
               aria-label="Settings sections"
-              className="w-full justify-start gap-2 overflow-x-auto"
+              className="mx-auto flex h-auto w-full max-w-3xl flex-wrap items-center justify-center gap-2 rounded-2xl bg-muted/40 p-2 text-muted-foreground"
             >
-              <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="ai">AI Studio</TabsTrigger>
+              {settingsTabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="rounded-xl">
+                  {tab.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
-            <TabsContent value="general">
-              <div className="grid gap-6 lg:grid-cols-2">
-                {!isConnected ? (
-                  <Card>
-                    <CardHeader className="space-y-2">
-                      <Skeleton className="h-5 w-44" />
-                      <Skeleton className="h-4 w-64" />
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-9 w-36" />
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Card>
-                    <CardHeader className="space-y-2">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <CardTitle className="text-base">Wallet & verification</CardTitle>
-                        <Badge variant="success">Connected</Badge>
-                      </div>
-                      <CardDescription>
-                        Your wallet powers KYC, yield vaults, and invoice sponsorship receipts.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Wallet</span>
-                        <span className="font-mono text-xs">{walletLabel}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Network</span>
-                        <span>{networkLabel}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">KYC status</span>
-                        <span>{kycLabel}</span>
-                      </div>
-                      {!isVerified ? (
-                        <Button asChild variant="outline">
-                          <Link href="/kyc?returnTo=/settings">Start KYC</Link>
-                        </Button>
-                      ) : (
-                        <Button asChild variant="outline">
-                          <Link href="/yield">Open yield vault</Link>
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Preferences</CardTitle>
-                    <CardDescription>
-                      Personalize playback and appearance across the app.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 text-sm">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <div className="font-medium">Mute clips by default</div>
-                        <p className="text-xs text-muted-foreground">
-                          Start For You and Following feeds muted.
-                        </p>
-                      </div>
-                    <Switch
-                      checked={isFeedMuted}
-                      onCheckedChange={setIsFeedMuted}
-                      ariaLabel="Mute clips by default"
-                    />
-                  </div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="font-medium">Auto-advance clips</div>
-                      <p className="text-xs text-muted-foreground">
-                        Scroll to the next clip after the current one finishes.
-                      </p>
-                    </div>
-                    <Switch
-                      checked={isAutoScrollEnabled}
-                      onCheckedChange={setIsAutoScrollEnabled}
-                      ariaLabel="Auto-advance clips"
-                    />
-                  </div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="font-medium">Theme</div>
-                      <p className="text-xs text-muted-foreground">
-                          Toggle between light and dark mode.
-                        </p>
-                      </div>
-                      <ThemeToggle className="h-9 w-9" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="ai">
-              <div className="grid gap-6 lg:grid-cols-2">
-                <OpenAIKeyCard />
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">AI workflow tips</CardTitle>
-                    <CardDescription>
-                      Keep your Sora generations organized and ready for remixing.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>
-                      Generate clips from the editor&apos;s AI Studio, then drag them from
-                      History into your timeline. Generations stay synced to the current
-                      project in local storage.
-                    </p>
-                    <p>
-                      Use short prompts for rapid iteration, then increase duration and
-                      size once you land on a final look.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+            {settingsTabs.map((tab) => (
+              <TabsContent key={tab.value} value={tab.value}>
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {tab.sections.map((section) => (
+                    <div key={section.id}>{section.node}</div>
+                  ))}
+                </div>
+              </TabsContent>
+            ))}
           </Tabs>
         </div>
       </div>
