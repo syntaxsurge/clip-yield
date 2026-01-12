@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { formatShortHash } from "@/lib/utils";
 import { explorerAddressUrl, explorerTxUrl, mantleConfig } from "@/lib/web3/mantleConfig";
 import { wmntAbi } from "@/lib/web3/wmnt";
@@ -25,7 +26,7 @@ const DEFAULT_WRAP_AMOUNT = "0.1";
 
 export default function StartWizard() {
   const { address } = useAccount();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync, isPending } = useWriteContract();
@@ -121,6 +122,10 @@ export default function StartWizard() {
     }
   };
 
+  if (!isConnected || !isMounted) {
+    return <WalletGateSkeleton cards={3} />;
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -147,11 +152,6 @@ export default function StartWizard() {
               <span className="text-muted-foreground">Wallet</span>
               <span>{isConnectedReady && address ? formatShortHash(address) : "—"}</span>
             </div>
-            {(!isMounted || !isConnected) && (
-              <Button onClick={() => void login()} disabled={!ready}>
-                {ready ? "Connect wallet" : "Checking..."}
-              </Button>
-            )}
           </CardContent>
         </Card>
 
@@ -170,13 +170,6 @@ export default function StartWizard() {
               <Button variant="outline" onClick={handleSwitchChain}>
                 Switch network
               </Button>
-            )}
-            {!isConnectedReady && (
-              <div className="text-sm text-muted-foreground">
-                {isMounted
-                  ? "Connect a wallet to switch networks."
-                  : "Checking wallet connection..."}
-              </div>
             )}
           </CardContent>
         </Card>

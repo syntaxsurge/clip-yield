@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { formatShortHash } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
 import MainLayout from "@/app/layouts/MainLayout";
@@ -39,7 +40,7 @@ const FINAL_INQUIRY_STATUSES = new Set([
 export default function KycStartPage() {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") ?? "/yield";
@@ -209,14 +210,8 @@ export default function KycStartPage() {
     return (
       <MainLayout>
         <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
-          <div className="mx-auto max-w-xl space-y-4">
-            <h1 className="text-2xl font-semibold">Verify your identity</h1>
-            <p className="text-sm text-muted-foreground">
-              Connect a wallet to begin the KYC flow.
-            </p>
-            <Button onClick={() => void login()} disabled={!ready}>
-              {ready ? "Connect wallet" : "Checking..."}
-            </Button>
+          <div className="mx-auto max-w-xl">
+            <WalletGateSkeleton cards={2} />
           </div>
         </div>
       </MainLayout>

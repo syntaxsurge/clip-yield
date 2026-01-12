@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { VaultTxReceiptCard } from "@/components/data-display/VaultTxReceiptCard";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import useCreateVaultTx from "@/app/hooks/useCreateVaultTx";
 import useGetLatestVaultTx from "@/app/hooks/useGetLatestVaultTx";
 import useGetVaultTxByHash from "@/app/hooks/useGetVaultTxByHash";
@@ -73,7 +74,7 @@ export default function YieldPanel({
   onDeposit,
 }: YieldPanelProps) {
   const { address } = useAccount();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
@@ -321,6 +322,10 @@ export default function YieldPanel({
     yieldSourceCopy ??
     "Sponsorship invoice fees are donated into the vault, increasing share value.";
 
+  if (!isConnected) {
+    return <WalletGateSkeleton cards={3} />;
+  }
+
   const {
     data: vaultReceipt,
     isLoading: receiptLoading,
@@ -516,20 +521,6 @@ export default function YieldPanel({
             "KYC-gated ERC-4626 vault holding WMNT on Mantle Sepolia. Yield is funded by sponsorship invoice fees donated into the vault."}
         </p>
       </div>
-
-      {!isConnected && (
-        <Alert variant="info">
-          <AlertTitle>Connect a wallet</AlertTitle>
-          <AlertDescription>
-            Connect to view balances and interact with the vault.
-          </AlertDescription>
-          <div className="mt-3">
-            <Button onClick={() => void login()} disabled={!ready}>
-              {ready ? "Connect wallet" : "Checking..."}
-            </Button>
-          </div>
-        </Alert>
-      )}
 
       {isConnected && !isOnMantle && (
         <Alert variant="warning">

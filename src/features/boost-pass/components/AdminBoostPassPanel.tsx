@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import boostPassAbi from "@/lib/contracts/abi/ClipYieldBoostPass.json";
 import { formatShortHash } from "@/lib/utils";
@@ -189,6 +190,10 @@ export default function AdminBoostPassPanel() {
   const canPublish =
     isConnected && isOnMantle && hasManagerRole && topWallets.length > 0 && !isPending;
 
+  if (!isConnected) {
+    return <WalletGateSkeleton cards={2} />;
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -213,14 +218,6 @@ export default function AdminBoostPassPanel() {
             </div>
           </div>
           <Separator />
-          {!isConnected && (
-            <Alert variant="info">
-              <AlertTitle>Connect a wallet</AlertTitle>
-              <AlertDescription>
-                Connect the admin wallet to publish boost pass epochs.
-              </AlertDescription>
-            </Alert>
-          )}
           {isConnected && !isOnMantle && (
             <Alert variant="warning">
               <AlertTitle>Wrong network</AlertTitle>

@@ -8,6 +8,7 @@ import useGetFollowingProfiles from "@/app/hooks/useGetFollowingProfiles";
 import type { RandomUsers } from "@/app/types";
 import MenuItemFollow from "@/app/layouts/includes/MenuItemFollow";
 import EmptyState from "@/components/feedback/EmptyState";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 
 const SUGGESTED_LIMIT = 24;
 const FOLLOWING_LIMIT = 24;
@@ -133,14 +134,7 @@ export default function CreatorsPage() {
             </div>
 
             {!contextUser?.user?.id ? (
-              <EmptyState
-                title="Connect to see your following list"
-                description="Connect a wallet to load the creators you follow."
-                primaryAction={{
-                  label: "Connect wallet",
-                  onClick: () => void contextUser?.openConnect(),
-                }}
-              />
+              <WalletGateSkeleton cards={2} className="max-w-xl" />
             ) : followingStatus === "loading" ? (
               <EmptyState
                 title="Loading followed creators..."

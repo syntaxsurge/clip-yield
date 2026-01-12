@@ -37,6 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatShortHash } from "@/lib/utils";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import sponsorHubAbi from "@/lib/contracts/abi/ClipYieldSponsorHub.json";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
@@ -75,7 +76,7 @@ export default function SponsorPanel({
   onCampaignCreated,
 }: SponsorPanelProps) {
   const { address } = useAccount();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const publicClient = usePublicClient({ chainId: mantleSepoliaContracts.chainId });
@@ -337,6 +338,10 @@ export default function SponsorPanel({
     ? formatUnits(shareBalanceValue, vaultDecimalsValue)
     : "0";
 
+  if (!isConnected) {
+    return <WalletGateSkeleton cards={2} />;
+  }
+
   const runTx = async (
     action: ActionId,
     request: Parameters<typeof writeContractAsync>[0],
@@ -406,7 +411,7 @@ export default function SponsorPanel({
 
   const handleSponsor = async () => {
     if (!user) {
-      await login();
+      setActionError("Wallet not connected.");
       return;
     }
 
@@ -566,7 +571,7 @@ export default function SponsorPanel({
 
   const handleDownloadPack = async () => {
     if (!user) {
-      await login();
+      setActionError("Wallet not connected.");
       return;
     }
 
@@ -610,20 +615,6 @@ export default function SponsorPanel({
 
   return (
     <div className="space-y-6">
-      {!isConnected && (
-        <Alert variant="info">
-          <AlertTitle>Connect a wallet</AlertTitle>
-          <AlertDescription>
-            Connect to sponsor and unlock boosters-only perks.
-          </AlertDescription>
-          <div className="mt-3">
-            <Button onClick={() => void login()} disabled={!ready}>
-              {ready ? "Connect wallet" : "Checking..."}
-            </Button>
-          </div>
-        </Alert>
-      )}
-
       {isConnected && !isOnMantle && (
         <Alert variant="warning">
           <AlertTitle>Wrong network</AlertTitle>

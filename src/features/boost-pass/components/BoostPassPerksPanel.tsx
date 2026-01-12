@@ -12,6 +12,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import { buildBoostPassPackMessage } from "@/features/boost-pass/message";
 import { useBoostPass } from "@/features/boost-pass/hooks/useBoostPass";
@@ -27,7 +28,7 @@ type ActionId = "download" | "create";
 
 export default function BoostPassPerksPanel() {
   const { address } = useAccount();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const isConnected = authenticated && Boolean(address);
   const chainId = useChainId();
   const { signMessageAsync } = useSignMessage();
@@ -64,10 +65,7 @@ export default function BoostPassPerksPanel() {
   };
 
   const handleDownload = async () => {
-    if (!isConnected) {
-      await login();
-      return;
-    }
+    if (!isConnected) return;
     if (!isOnMantle) {
       setActionError("Switch to Mantle Sepolia to continue.");
       return;
@@ -100,10 +98,7 @@ export default function BoostPassPerksPanel() {
   };
 
   const handleCreateProject = async () => {
-    if (!isConnected) {
-      await login();
-      return;
-    }
+    if (!isConnected) return;
     if (!isOnMantle) {
       setActionError("Switch to Mantle Sepolia to continue.");
       return;
@@ -138,6 +133,10 @@ export default function BoostPassPerksPanel() {
     await switchChainAsync({ chainId: mantleSepoliaContracts.chainId });
   };
 
+  if (!isConnected) {
+    return <WalletGateSkeleton cards={2} />;
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -159,20 +158,6 @@ export default function BoostPassPerksPanel() {
           </div>
         </CardContent>
       </Card>
-
-      {!isConnected && (
-        <Alert variant="info">
-          <AlertTitle>Connect a wallet</AlertTitle>
-          <AlertDescription>
-            Connect a wallet to unlock your Boost Pass perks.
-          </AlertDescription>
-          <div className="mt-3">
-            <Button onClick={() => void login()} disabled={!ready}>
-              {ready ? "Connect wallet" : "Checking..."}
-            </Button>
-          </div>
-        </Alert>
-      )}
 
       {isConnected && chainId !== mantleSepoliaContracts.chainId && (
         <Alert variant="warning">

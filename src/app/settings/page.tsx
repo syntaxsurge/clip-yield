@@ -10,6 +10,7 @@ import { useGeneralStore } from "@/app/stores/general";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThemeToggle from "@/components/ui/theme-toggle";
@@ -21,7 +22,7 @@ import { OpenAIKeyCard } from "./OpenAIKeyCard";
 export default function SettingsPage() {
   const { address } = useAccount();
   const chainId = useChainId();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const { isFeedMuted, setIsFeedMuted, isAutoScrollEnabled, setIsAutoScrollEnabled } =
     useGeneralStore();
 
@@ -69,46 +70,55 @@ export default function SettingsPage() {
 
             <TabsContent value="general">
               <div className="grid gap-6 lg:grid-cols-2">
-                <Card>
-                  <CardHeader className="space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <CardTitle className="text-base">Wallet & verification</CardTitle>
-                      <Badge variant={isConnected ? "success" : "warning"}>
-                        {isConnected ? "Connected" : "Not connected"}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      Your wallet powers KYC, yield vaults, and invoice sponsorship receipts.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Wallet</span>
-                      <span className="font-mono text-xs">{walletLabel}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Network</span>
-                      <span>{networkLabel}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">KYC status</span>
-                      <span>{kycLabel}</span>
-                    </div>
-                    {!isConnected ? (
-                      <Button onClick={() => void login()} disabled={!ready}>
-                        {ready ? "Connect wallet" : "Checking..."}
-                      </Button>
-                    ) : !isVerified ? (
-                      <Button asChild variant="outline">
-                        <Link href="/kyc?returnTo=/settings">Start KYC</Link>
-                      </Button>
-                    ) : (
-                      <Button asChild variant="outline">
-                        <Link href="/yield">Open yield vault</Link>
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                {!isConnected ? (
+                  <Card>
+                    <CardHeader className="space-y-2">
+                      <Skeleton className="h-5 w-44" />
+                      <Skeleton className="h-4 w-64" />
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-9 w-36" />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader className="space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <CardTitle className="text-base">Wallet & verification</CardTitle>
+                        <Badge variant="success">Connected</Badge>
+                      </div>
+                      <CardDescription>
+                        Your wallet powers KYC, yield vaults, and invoice sponsorship receipts.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Wallet</span>
+                        <span className="font-mono text-xs">{walletLabel}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Network</span>
+                        <span>{networkLabel}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">KYC status</span>
+                        <span>{kycLabel}</span>
+                      </div>
+                      {!isVerified ? (
+                        <Button asChild variant="outline">
+                          <Link href="/kyc?returnTo=/settings">Start KYC</Link>
+                        </Button>
+                      ) : (
+                        <Button asChild variant="outline">
+                          <Link href="/yield">Open yield vault</Link>
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 <Card>
                   <CardHeader>

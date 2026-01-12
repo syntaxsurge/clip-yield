@@ -387,6 +387,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Mantle Quick Access network constants live in `src/lib/web3/mantleConstants.ts` and feed client config, RPC calls, and onboarding links
 - RealFi contracts in `blockchain/contracts/realfi` (KycRegistry, ClipYieldVault, per-creator ClipYieldBoostVault + ClipYieldBoostVaultFactory, ClipYieldSponsorHub, ClipYieldInvoiceReceipts, ClipYieldBoostPass, SimulatedYieldStreamer) with Ignition modules under `blockchain/hardhat/ignition`, ABI sync in `src/lib/contracts/abi`, and address sync into `.env.local` via `scripts/sync-contracts.ts`
 - SimulatedYieldStreamer streams testnet WMNT into the yield vault to surface real-time pending yield, synced on-chain via a drip transaction
+- Wallet-gated views render skeleton placeholders while connection state resolves; wallet connect happens via the global nav
 - SponsorHub mints invoice receipt NFTs and donates protocol fees to the yield vault, while net WMNT mints boost vault shares for creators
 - Persona hosted-flow KYC uses redirect + `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles

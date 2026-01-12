@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
 import { formatShortHash } from "@/lib/utils";
@@ -81,6 +82,10 @@ export default function AdminKycPanel() {
 
   const canSubmit =
     isConnected && isOnMantle && Boolean(isManager.data) && targetAddress && !isPending;
+
+  if (!isConnected) {
+    return <WalletGateSkeleton cards={2} />;
+  }
 
   const handleSwitchChain = async () => {
     if (!switchChainAsync) return;
@@ -144,14 +149,6 @@ export default function AdminKycPanel() {
             </div>
           </div>
           <Separator />
-          {!isConnected && (
-            <Alert variant="info">
-              <AlertTitle>Connect a wallet</AlertTitle>
-              <AlertDescription>
-                Connect the admin wallet to manage KYC status on-chain.
-              </AlertDescription>
-            </Alert>
-          )}
           {isConnected && !isOnMantle && (
             <Alert variant="warning">
               <AlertTitle>Wrong network</AlertTitle>

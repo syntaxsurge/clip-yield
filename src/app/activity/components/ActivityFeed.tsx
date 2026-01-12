@@ -11,6 +11,7 @@ import ActivityFilters, { type ActivityFilter } from "@/app/activity/components/
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
 
 import { api } from "../../../../convex/_generated/api";
@@ -36,7 +37,7 @@ function formatAmount(value?: string) {
 
 export default function ActivityFeed() {
   const { address } = useAccount();
-  const { ready, authenticated, login } = usePrivy();
+  const { authenticated } = usePrivy();
   const [filter, setFilter] = useState<ActivityFilter>("all");
 
   const normalizedWallet = useMemo(() => {
@@ -59,19 +60,7 @@ export default function ActivityFeed() {
   );
 
   if (!normalizedWallet) {
-    return (
-      <Alert variant="info">
-        <AlertTitle>Connect your wallet</AlertTitle>
-        <AlertDescription>
-          Connect to view every boost, sponsorship, and yield action you have taken.
-        </AlertDescription>
-        <div className="mt-3">
-          <Button onClick={() => void login()} disabled={!ready}>
-            {ready ? "Connect wallet" : "Checking..."}
-          </Button>
-        </div>
-      </Alert>
-    );
+    return <WalletGateSkeleton cards={2} />;
   }
 
   return (

@@ -7,6 +7,7 @@ import type { PostWithProfile } from "@/app/types";
 import ClientOnly from "@/app/components/ClientOnly";
 import PostMain from "@/app/components/PostMain";
 import EmptyState from "@/components/feedback/EmptyState";
+import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import FeedNavButtons from "@/components/layout/FeedNavButtons";
 import { useScrollSnapNavigation } from "@/hooks/useScrollSnapNavigation";
 import useGetFollowingPostsPage from "@/app/hooks/useGetFollowingPostsPage";
@@ -105,14 +106,7 @@ export default function FollowingPage() {
         <ClientOnly>
           {!contextUser?.user?.id ? (
             <div className="flex h-full items-center justify-center">
-              <EmptyState
-                title="Follow creators"
-                description="Connect your wallet to see clips from creators you follow."
-                primaryAction={{
-                  label: "Connect wallet",
-                  onClick: () => void contextUser?.openConnect(),
-                }}
-              />
+              <WalletGateSkeleton cards={2} className="w-full max-w-xl" />
             </div>
           ) : status === "loading" && posts.length === 0 ? (
             <div className="flex h-full items-center justify-center">
