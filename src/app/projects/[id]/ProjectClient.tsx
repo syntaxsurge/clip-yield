@@ -83,6 +83,13 @@ export default function ProjectClient({ projectId }: Props) {
   }, [projectId, dispatch, ownerWallet, router]);
 
   useEffect(() => {
+    if (!projectId) return;
+    if (projectState.id === projectId && currentProjectId === projectId) {
+      setIsLoading(false);
+    }
+  }, [projectId, projectState.id, currentProjectId]);
+
+  useEffect(() => {
     const loadProjectState = async () => {
       if (currentProjectId) {
         const project = await getProject(currentProjectId, ownerWallet);
