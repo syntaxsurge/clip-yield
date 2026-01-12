@@ -229,7 +229,6 @@ export default function KycStartPage() {
     ? new Date(verification.updatedAt).toLocaleString()
     : "Not synced";
   const showRedactionHint = isVerified && !inquiry?.inquiryId;
-  const syncLabel = hasPendingTx ? "Refresh status" : "Sync status";
 
   if (!isConnected) {
     return (
@@ -311,8 +310,8 @@ export default function KycStartPage() {
               <AlertTitle>On-chain verification pending</AlertTitle>
               <AlertDescription>
                 Persona verification is complete, but the wallet has not been
-                verified on-chain yet. Sync to write verification to the registry
-                and surface the transaction hash.
+                verified on-chain yet. Sync status rechecks the registry and
+                submits verification if needed.
                 {verification?.txHash && (
                   <>
                     <br />
@@ -333,7 +332,7 @@ export default function KycStartPage() {
                   onClick={() => void handleSync()}
                   disabled={actionStatus === "syncing"}
                 >
-                  {actionStatus === "syncing" ? "Syncing..." : syncLabel}
+                  {actionStatus === "syncing" ? "Syncing..." : "Sync status"}
                 </Button>
               </div>
             </Alert>
