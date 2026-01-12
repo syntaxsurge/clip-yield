@@ -9,6 +9,7 @@ import { useRouter } from "nextjs-toploader/app";
 import { useUser } from "@/app/context/user"
 import { UploadError } from "../types";
 import useCreatePost from "../hooks/useCreatePost";
+import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer";
 
 export default function Upload() {
     const contextUser = useUser()
@@ -187,12 +188,13 @@ export default function Upload() {
                                     src="/images/clip-yield-logo.png"
                                     alt="ClipYield"
                                 />
-                                <video 
-                                    autoPlay
+                                <ClipVideoPlayer
+                                    src={fileDisplay}
+                                    autoPlay={false}
                                     loop
-                                    muted
-                                    className="absolute rounded-xl object-cover z-10 p-[13px] w-full h-full" 
-                                    src={fileDisplay} 
+                                    showLogo={false}
+                                    className="absolute z-10 p-[13px] w-full h-full"
+                                    videoClassName="object-cover"
                                 />
 
                                 <div className="absolute -bottom-12 z-50 flex w-full items-center justify-between rounded-xl border border-gray-300 bg-white/90 p-2 text-gray-900 dark:border-white/10 dark:bg-black/80 dark:text-white">

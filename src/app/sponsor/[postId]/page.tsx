@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer";
 import FlowLegend from "@/components/data-display/FlowLegend";
 import { formatShortHash } from "@/lib/utils";
 import SponsorPanel from "@/features/sponsor/components/SponsorPanel";
@@ -121,22 +122,20 @@ export default function SponsorPage({ params }: SponsorPageProps) {
 
           {status === "ready" && post && (
             <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{post.profile.name}</CardTitle>
-                  <CardDescription>
-                    {post.text || "Sponsor this creator's latest clip."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="overflow-hidden rounded-xl bg-black">
-                    <video
-                      className="aspect-[9/16] w-full object-cover"
-                      controls
-                      playsInline
-                      src={useCreateBucketUrl(post.video_url)}
-                    />
-                  </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{post.profile.name}</CardTitle>
+                    <CardDescription>
+                      {post.text || "Sponsor this creator's latest clip."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                  <ClipVideoPlayer
+                    src={useCreateBucketUrl(post.video_url, "")}
+                    showLogo={false}
+                    className="aspect-[9/16] w-full"
+                    videoClassName="object-cover"
+                  />
 
                   {campaign ? (
                     <div className="rounded-xl border border-[color:var(--brand-success)] bg-[color:var(--brand-success-soft)] p-4 text-sm">

@@ -60,6 +60,7 @@ export function ClipVideoPlayer({
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [isVolumeDragging, setIsVolumeDragging] = useState(false);
 
   const safePlay = useCallback(() => {
     const video = videoRef.current;
@@ -117,6 +118,17 @@ export function ClipVideoPlayer({
     setCurrentTime(0);
   }, [src]);
 
+  useEffect(() => {
+    if (!isVolumeDragging) return;
+    const handlePointerUp = () => setIsVolumeDragging(false);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+    return () => {
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    };
+  }, [isVolumeDragging]);
+
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -171,6 +183,7 @@ export function ClipVideoPlayer({
 
   const handleVolumePointerDown = (event: PointerEvent<HTMLInputElement>) => {
     event.stopPropagation();
+    setIsVolumeDragging(true);
   };
 
   const showPausedOverlay = hasPlayed && isPaused;
@@ -249,37 +262,48 @@ export function ClipVideoPlayer({
         ) : null}
 
         <div
-          className="absolute left-3 top-3 z-20 flex items-center gap-2"
+          className="absolute left-3 top-3 z-20"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="group flex items-center gap-2 rounded-full bg-black/50 px-2 py-1.5 text-white">
-            <button
-              type="button"
-              aria-label="Adjust volume"
-              className="inline-flex h-8 w-8 items-center justify-center"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <VolumeIcon size={18} />
-            </button>
-            <div className="pointer-events-none w-24 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={1}
-                value={Math.round(feedVolume * 100)}
-                onChange={handleVolumeChange}
-                onPointerDown={handleVolumePointerDown}
+          <div className="group/volume relative">
+            <div className="flex items-center justify-center rounded-full bg-black/50 p-1.5 text-white">
+              <button
+                type="button"
+                aria-label="Adjust volume"
+                className="inline-flex h-8 w-8 items-center justify-center"
                 onClick={(event) => event.stopPropagation()}
-                onKeyDown={(event) => event.stopPropagation()}
-                aria-label="Volume"
-                className="clip-slider h-1 w-full cursor-pointer rounded-full"
-                style={{
-                  background: `linear-gradient(to right, #ffffff ${
-                    feedVolume * 100
-                  }%, rgba(255,255,255,0.2) ${feedVolume * 100}%)`,
-                }}
-              />
+              >
+                <VolumeIcon size={18} />
+              </button>
+            </div>
+            <div
+              className={cn(
+                "pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 opacity-0 transition",
+                "group-hover/volume:pointer-events-auto group-hover/volume:opacity-100",
+                "group-focus-within/volume:pointer-events-auto group-focus-within/volume:opacity-100",
+                isVolumeDragging && "pointer-events-auto opacity-100",
+              )}
+            >
+              <div className="flex h-8 items-center rounded-full bg-black/70 px-3 text-white shadow-lg">
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={Math.round(feedVolume * 100)}
+                  onChange={handleVolumeChange}
+                  onPointerDown={handleVolumePointerDown}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                  aria-label="Volume"
+                  className="clip-slider h-1 w-24 cursor-pointer rounded-full"
+                  style={{
+                    background: `linear-gradient(to right, #ffffff ${
+                      feedVolume * 100
+                    }%, rgba(255,255,255,0.2) ${feedVolume * 100}%)`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
