@@ -70,7 +70,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
   7. **Action:** **Current page:** `/kyc/complete` — click “Sync now” (or “Refresh Status”) — confirm a loading state appears.
   8. **Verify on-screen:** **Current page:** `/kyc/complete` — confirm a “Verified” badge and the connected wallet address are shown.
 - **Voiceover:**
-  > “KYC is the compliance layer: we launch a Persona hosted flow from /kyc, complete the sandbox steps, then sync on /kyc/complete so the wallet flips to Verified. The user never handles key material—Privy signs, Persona verifies identity.”
+  > “KYC is the compliance layer: we launch a Persona hosted flow from /kyc, complete the sandbox steps, then sync on /kyc/complete so the wallet flips to Verified. The user never handles keys—Privy manages the wallet and Persona verifies identity.”
 
 ## 6. Yield Vault (Custody + Real-Time Yield)
 - **URL:** /yield
