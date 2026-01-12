@@ -322,10 +322,6 @@ export default function YieldPanel({
     yieldSourceCopy ??
     "Sponsorship invoice fees are donated into the vault, increasing share value.";
 
-  if (!isConnected) {
-    return <WalletGateSkeleton cards={3} />;
-  }
-
   const {
     data: vaultReceipt,
     isLoading: receiptLoading,
@@ -512,8 +508,14 @@ export default function YieldPanel({
     }
   };
 
+  const showWalletGate = !isConnected;
+
   return (
     <div className="space-y-6">
+      {showWalletGate ? (
+        <WalletGateSkeleton cards={3} />
+      ) : (
+        <>
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">{title ?? "ClipYield Vault"}</h1>
         <p className="text-sm text-muted-foreground">
@@ -959,6 +961,8 @@ export default function YieldPanel({
           )}
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }
