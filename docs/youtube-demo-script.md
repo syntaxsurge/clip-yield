@@ -28,33 +28,23 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “I comment ‘Sponsoring this clip as an on-chain invoice’ because that’s the RealFi story: sponsorships are not vague donations, they’re tokenized receipts with auditable terms.”
 
-## 3. Creator Profile + Follow (Creator Surface)
-- **URL:** /profile/[id]
-- **Shot:** Creator header with Follow button, posts grid/list, and clear “Boost” CTA for the creator.
+## 3. Creator Profile + Following Feed (Creator Surface + Retention)
+- **URL:** /profile/[id] → /following
+- **Shot:** Creator header with Follow button, posts grid/list, Boost CTA, and a Following feed filtered to followed creators with “Following” selected.
 - **Steps:**
   1. **Current page:** `/post/[postId]/[userId]` — confirm comments are visible.
   2. **Navigate:** **Current page:** `/post/[postId]/[userId]` — click the creator handle → lands on `/profile/[id]` — confirm profile header loads with a “Follow” button.
   3. **Action:** **Current page:** `/profile/[id]` — click **Follow** — confirm it changes to “Following” (or “Unfollow”).
-  4. **Action:** **Current page:** `/profile/[id]` — scroll the creator posts — confirm multiple posts render.
-  5. **Action:** **Current page:** `/profile/[id]` — point at the “Boost” call-to-action — confirm Boost CTA is visible.
-  6. **Verify on-screen:** **Current page:** `/profile/[id]` — confirm Following state and Boost CTA are visible.
+  4. **Action:** **Current page:** `/profile/[id]` — scroll the creator posts and point at the “Boost” call-to-action — confirm multiple posts render and the Boost CTA is visible.
+  5. **Navigate:** **Current page:** `/profile/[id]` — click “Following” in the nav → lands on `/following` — confirm the heading/tab shows “Following”.
+  6. **Action:** **Current page:** `/following` — scroll one clip down — confirm next clip autoplays from a followed creator.
+  7. **Action:** **Current page:** `/following` — click the creator handle on a clip — confirm it matches the creator you followed.
+  8. **Action:** **Current page:** `/following` — click browser Back — confirm you return to `/following`.
+  9. **Verify on-screen:** **Current page:** `/following` — confirm “Following” tab is active and filtered content is visible.
 - **Voiceover:**
-  > “Profiles are where creators become investable businesses. I follow this creator so they show up in my social graph, and you can see the Boost action that routes value into a creator-specific vault. Next, I’ll prove the social feed works by switching to Following.”
+  > “I jump from a post to the creator profile, follow them, and then verify their clips show up in the Following feed.”
 
-## 4. Following Feed (Retention Engine)
-- **URL:** /following
-- **Shot:** Following feed with clips filtered to followed creators; “Following” selected.
-- **Steps:**
-  1. **Current page:** `/profile/[id]` — confirm “Following” state is visible on the button.
-  2. **Navigate:** **Current page:** `/profile/[id]` — click “Following” in the nav → lands on `/following` — confirm the heading/tab shows “Following”.
-  3. **Action:** **Current page:** `/following` — scroll one clip down — confirm next clip autoplays from a followed creator.
-  4. **Action:** **Current page:** `/following` — click the creator handle on a clip — confirm it matches the creator you followed.
-  5. **Action:** **Current page:** `/following` — click browser Back — confirm you return to `/following`.
-  6. **Verify on-screen:** **Current page:** `/following` — confirm “Following” tab is active and filtered content is visible.
-- **Voiceover:**
-  > “This is the retention layer: a real social graph. That matters because RealFi mechanics only work if users come back daily. Next, we’ll connect with Privy embedded wallets and onboard to Mantle Sepolia so we can demonstrate KYC, custody, and compliant yield.”
-
-## 5. Onboarding Wizard (Privy Wallet + Mantle Sepolia)
+## 4. Onboarding Wizard (Privy Wallet + Mantle Sepolia)
 - **URL:** /start
 - **Shot:** Onboarding wizard with steps for embedded wallet sign-in, chain readiness, and links to faucet/bridge.
 - **Steps:**
@@ -67,7 +57,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Onboarding is Web2.5: Privy embedded wallets remove key-management friction, then the wizard ensures you’re ready on Mantle Sepolia. This is crucial for judges—users can sign transactions securely without wrestling with wallet UX. Next we’ll run KYC, because we’re tokenizing invoices and distributing yield.”
 
-## 6. KYC Start (Compliant Gate)
+## 5. KYC Start (Compliant Gate)
 - **URL:** /kyc
 - **Shot:** KYC landing page explaining compliance and showing a single “Start Verification” CTA.
 - **Steps:**
@@ -80,7 +70,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “KYC is not decorative here—it’s the compliance layer for tokenized invoices and yield distribution. We launch a Persona hosted flow from /kyc and complete verification. The user doesn’t touch key material; Privy handles signing, Persona handles identity. Next we return to ClipYield and sync the verified status.”
 
-## 7. KYC Completion + Sync (No Webhooks Needed)
+## 6. KYC Completion + Sync (No Webhooks Needed)
 - **URL:** /kyc/complete
 - **Shot:** KYC completion screen with inquiry ID, status, wallet address, and a visible syncing/confirmed indicator.
 - **Steps:**
@@ -93,7 +83,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Instead of webhook dependency, we sync on demand from /kyc/complete. The UI shows the inquiry details, then we press Sync and the wallet flips to Verified. This is a demo-friendly, locally testable workflow that still writes verification into the on-chain registry. Next we’ll open the yield vault and show custody and balances.”
 
-## 8. Yield Vault (Custody + Real-Time Yield)
+## 7. Yield Vault (Custody + Real-Time Yield)
 - **URL:** /yield
 - **Shot:** Yield vault overview panels (TVL, shares), wallet status card, and the Yield Engine panel showing streaming yield + sync.
 - **Steps:**
@@ -106,7 +96,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “This is the custody layer: a KYC-gated ERC‑4626 vault holding WMNT on Mantle Sepolia. The Yield Engine shows real-time streaming yield on testnet, and we can sync it on-chain to lift share value. In production, this simulator is replaced by audited yield strategies and protocol-fee donations. Next we’ll boost a creator and then sponsor a clip to mint an invoice receipt.”
 
-## 9. Creator Directory (Discovery for Cash-Flow Assets)
+## 8. Creator Directory (Discovery for Cash-Flow Assets)
 - **URL:** /creators
 - **Shot:** Creator directory with suggested list and a clear “Boost” action per creator.
 - **Steps:**
@@ -119,7 +109,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Creators are the destination for value. The directory makes discovery easy, and every creator has a boost vault—this is how users route funds into creator-specific custody. Next we’ll deposit into the boost vault, then sponsor a clip to tokenize the invoice and generate revenue-funded yield.”
 
-## 10. Boost Vault (Creator-Directed Capital)
+## 9. Boost Vault (Creator-Directed Capital)
 - **URL:** /boost/[creatorId]
 - **Shot:** Boost vault UI with amount input, approval state, and deposit action.
 - **Steps:**
@@ -133,7 +123,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Boosting is creator-directed capital: you deposit WMNT into a creator-specific vault. It’s custody-first—assets are on-chain, and your position is tracked transparently. Now we’ll sponsor a specific clip, which mints a tokenized invoice receipt and funds yield through protocol revenue.”
 
-## 11. Sponsor a Clip (Tokenized Invoice Creation)
+## 10. Sponsor a Clip (Tokenized Invoice Creation)
 - **URL:** /sponsor/[postId]
 - **Shot:** Sponsorship page with clip preview, sponsorship breakdown panel, and “Confirm Sponsorship” CTA that mentions Invoice Receipt NFT.
 - **Steps:**
@@ -147,7 +137,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “This is the RWA moment: sponsorship becomes a tokenized invoice. I sponsor with 0.10 WMNT, confirm the transaction, and the app mints an Invoice Receipt NFT that encodes the terms hash and cash-flow details. Next we open the campaign receipt page where the invoice token and transaction are auditable.”
 
-## 12. Campaign Receipt (RWA Proof + Terms Hash)
+## 11. Campaign Receipt (RWA Proof + Terms Hash)
 - **URL:** /campaign/[campaignId]
 - **Shot:** Campaign receipt with terms hash, tx status, MantleScan link, and Invoice Receipt NFT section (contract + token ID).
 - **Steps:**
@@ -160,7 +150,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “This receipt is the compliance-friendly proof: a terms hash, on-chain tx status, and an Invoice Receipt NFT that tokenizes the sponsorship invoice. Judges can click straight to MantleScan and verify everything. Next, we’ll show how those sponsorship fees create yield by flowing into the yield vault, and we’ll surface it in the Activity feed and leaderboard.”
 
-## 13. Activity Feed (Auditable Ledger)
+## 12. Activity Feed (Auditable Ledger)
 - **URL:** /activity
 - **Shot:** Activity list with event rows (Boost deposit, Sponsorship invoice, Vault events) and MantleScan links.
 - **Steps:**
@@ -173,7 +163,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Activity is the transparent ledger: boost deposits, tokenized sponsorship invoices, and vault actions are all visible with explorer links. This is the RealFi credibility layer—nothing is hidden. Next we convert that verified activity into a leaderboard to drive incentives and repeat usage.”
 
-## 14. Leaderboard (Incentives + Growth)
+## 13. Leaderboard (Incentives + Growth)
 - **URL:** /leaderboard
 - **Shot:** Ranked creators table with totals, and clickable rows to drill into profiles.
 - **Steps:**
@@ -186,7 +176,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Leaderboards turn financial actions into social status. Because rankings are computed from confirmed on-chain events, incentives are auditable. Next we’ll show Boost Pass publication and perks—the reward layer that turns cash-flow into creator tools.”
 
-## 15. Admin Access Gate (Only Allowlisted Wallet)
+## 14. Admin Access Gate (Only Allowlisted Wallet)
 - **URL:** /admin/kyc
 - **Shot:** Attempted admin navigation showing “Access denied” (non-admin wallet), with a clear switch-wallet prompt.
 - **Steps:**
@@ -199,7 +189,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Admin routes are gated: if you’re not on the allowlist, you see an explicit access-denied screen instead of a silent failure. We switch to the admin wallet and immediately unlock the console. This keeps UX clean for normal users and secure for operations. Next we’ll publish a Boost Pass epoch.”
 
-## 16. Admin Boost Pass (Publish On-Chain Incentive Epoch)
+## 15. Admin Boost Pass (Publish On-Chain Incentive Epoch)
 - **URL:** /admin/boost-pass
 - **Shot:** Admin Boost Pass screen showing snapshot rows and a “Publish Epoch” action.
 - **Steps:**
@@ -212,7 +202,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Now incentives become real: we publish a Boost Pass epoch on-chain from leaderboard snapshots. The tx hash is visible, so eligibility is verifiable. Next we switch back to a normal user wallet and claim perks—downloading a remix pack tied to these on-chain incentives.”
 
-## 17. Boost Pass Perks (Remix Pack Unlock)
+## 16. Boost Pass Perks (Remix Pack Unlock)
 - **URL:** /perks/boost-pass
 - **Shot:** Perks page showing ownership status and “Download Remix Pack” + “Import to Projects”.
 - **Steps:**
@@ -225,7 +215,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Perks complete the loop: on-chain incentives unlock creator tools. We download a Remix Pack and import it into the editor in one click. Next we’ll open the project, generate or edit content, export, and upload back into the feed—so the RealFi layer drives real creation.”
 
-## 18. Settings (Wallet + Playback + AI BYOK)
+## 17. Settings (Wallet + Playback + AI BYOK)
 - **URL:** /settings
 - **Shot:** Settings page showing wallet status, playback preferences, and AI BYOK key controls.
 - **Steps:**
@@ -238,7 +228,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Settings keeps the UX polished: wallet state, playback controls, and optional AI BYOK keys for creator tooling. This shows ClipYield is more than a contract demo—it’s a product. Next we’ll jump into the editor and export a remix.”
 
-## 19. Projects List (Creator Workspace)
+## 18. Projects List (Creator Workspace)
 - **URL:** /projects
 - **Shot:** Projects list with an imported Remix Pack project row and Open action.
 - **Steps:**
@@ -251,7 +241,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “This is the creator workspace: Remix Packs turn into editable projects, not just collectibles. You open instantly, edit, and export. Now we’ll stay in the editor, render a final MP4, and upload it to complete the on-chain-to-content loop.”
 
-## 20. Timeline Editor + Export (Production Step)
+## 19. Timeline Editor + Export (Production Step)
 - **URL:** /projects/[id]
 - **Shot:** Editor with timeline, preview playback, and export progress UI.
 - **Steps:**
@@ -264,7 +254,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
 - **Voiceover:**
   > “Now we convert incentives into output. We edit the timeline, preview, then export with a clear render progress and a downloadable MP4. This is how ClipYield turns on-chain actions into real creator production. Next we upload the finished remix back into the feed.”
 
-## 21. Upload (Publish Remix Back to Feed)
+## 20. Upload (Publish Remix Back to Feed)
 - **URL:** /upload
 - **Shot:** Upload page with file picker, caption input, and Publish button; success redirect to feed.
 - **Steps:**
