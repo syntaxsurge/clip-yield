@@ -857,7 +857,7 @@ export default function SponsorPanel({
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-4">
             <div className="space-y-3">
               <label className="text-sm font-medium" htmlFor="amount">
                 Amount (WMNT)
