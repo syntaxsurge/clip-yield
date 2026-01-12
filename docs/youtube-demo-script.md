@@ -12,7 +12,7 @@ One-liner: A creator-first short‑video platform where sponsorships are tokeniz
   5. **Action:** **Current page:** `/` — pause on the clip CTA area — confirm “Sponsor” and “Boost” actions are visible on the clip UI.
   6. **Verify on-screen:** **Current page:** `/` — confirm autoplay, creator handle, and “For You” selected are visible.
 - **Voiceover:**
-  > “This is ClipYield’s consumer-first feed. Monetization isn’t off-platform. Each clip can be boosted or sponsored as an on-chain cash-flow action on Mantle Sepolia.”
+  > "The first step is connecting a Privy embedded wallet from the nav so on-chain actions are ready. Then you're in ClipYield's consumer-first feed. Each clip can be boosted or sponsored as an on-chain cash-flow action on Mantle Sepolia."
 
 ## 2. Post Detail + Comments (Social Proof Loop)
 - **URL:** /post/[postId]/[userId]
