@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAccount, useChainId, useReadContract, useSwitchChain, useWaitForTransactionReceipt } from "wagmi";
 import { getAddress, isAddress, type Address } from "viem";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
@@ -12,15 +13,25 @@ import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
 import { formatShortHash } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
-import type { LeaderboardSnapshot } from "@/app/types";
+import type { BoostPassEpoch, LeaderboardSnapshot } from "@/app/types";
 import { useBoostPass } from "@/features/boost-pass/hooks/useBoostPass";
 import useLogBoostPassClaim from "@/app/hooks/useLogBoostPassClaim";
 
 type BoostPassClaimCardProps = {
   snapshot: LeaderboardSnapshot | null;
+  latestEpoch: BoostPassEpoch | null;
 };
 
-export default function BoostPassClaimCard({ snapshot }: BoostPassClaimCardProps) {
+const resolvePublishIntervalHours = () => {
+  const raw = process.env.NEXT_PUBLIC_BOOST_PASS_EPOCH_INTERVAL_HOURS;
+  const parsed = raw ? Number(raw) : 24;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 24;
+};
+
+export default function BoostPassClaimCard({
+  snapshot,
+  latestEpoch,
+}: BoostPassClaimCardProps) {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
@@ -51,6 +62,10 @@ export default function BoostPassClaimCard({ snapshot }: BoostPassClaimCardProps
   });
 
   const isVerified = Boolean(kycStatus);
+
+  const epochNumber = currentEpoch !== null ? Number(currentEpoch) : null;
+  const epochPublished = typeof epochNumber === "number" && epochNumber > 0;
+  const publishIntervalHours = resolvePublishIntervalHours();
 
   const inSnapshot = useMemo(() => {
     if (!snapshot?.topBoosters?.length || !address || !isAddress(address)) return false;
@@ -109,18 +124,54 @@ export default function BoostPassClaimCard({ snapshot }: BoostPassClaimCardProps
     return <WalletGateSkeleton cards={1} />;
   }
 
+  const statusLabel = hasPass
+    ? "Boost Pass active"
+    : eligible
+      ? "Eligible to claim"
+      : inSnapshot
+        ? "Pending publish"
+        : "Not eligible";
+
+  const statusVariant: "success" | "warning" | "outline" =
+    hasPass || eligible ? "success" : inSnapshot ? "warning" : "outline";
+
+  const lastPublishedAt = latestEpoch?.publishedAt
+    ? new Date(latestEpoch.publishedAt)
+    : null;
+
   return (
-    <Card>
+    <Card className="border-border/60 bg-card/80">
       <CardHeader>
-        <CardTitle>Boost Pass claim</CardTitle>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="space-y-1">
+            <CardTitle>Boost Pass claim</CardTitle>
+            <CardDescription>
+              A non-transferable badge for top boosters. Claiming unlocks exclusive remix packs.
+            </CardDescription>
+          </div>
+          <Badge variant={statusVariant}>{statusLabel}</Badge>
+        </div>
         <CardDescription>
-          Top boosters can claim a soulbound Boost Pass to unlock exclusive remix packs.
+          Epochs publish automatically. Claim opens after the latest leaderboard snapshot is
+          anchored on-chain.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">Current epoch</span>
-          <span>{currentEpoch !== null ? Number(currentEpoch) : "Loading..."}</span>
+        <div className="grid gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Current epoch</span>
+            <span>{epochNumber !== null ? epochNumber : "Loading..."}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Publish cadence</span>
+            <span>Every {publishIntervalHours}h</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Last publish</span>
+            <span>
+              {lastPublishedAt ? lastPublishedAt.toLocaleString() : "Not published yet"}
+            </span>
+          </div>
         </div>
 
         {isConnected && !isOnMantle && (
@@ -154,9 +205,10 @@ export default function BoostPassClaimCard({ snapshot }: BoostPassClaimCardProps
 
         {isConnected && isOnMantle && !eligible && inSnapshot && (
           <Alert variant="info">
-            <AlertTitle>Epoch not published</AlertTitle>
+            <AlertTitle>Eligibility pending publish</AlertTitle>
             <AlertDescription>
-              You&apos;re on the latest top boosters list. Wait for admin publish.
+              You&apos;re on the latest top boosters list. The claim unlocks after the next
+              epoch publish.
             </AlertDescription>
           </Alert>
         )}
@@ -180,6 +232,38 @@ export default function BoostPassClaimCard({ snapshot }: BoostPassClaimCardProps
             <AlertDescription>{actionError}</AlertDescription>
           </Alert>
         )}
+
+        <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Claim status
+          </div>
+          <div className="mt-3 space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Leaderboard snapshot</span>
+              <Badge variant={snapshot ? "success" : "outline"}>
+                {snapshot ? "Ready" : "Waiting"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Epoch published</span>
+              <Badge variant={epochPublished ? "success" : "warning"}>
+                {epochPublished ? "Published" : "Publishing soon"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>Eligibility</span>
+              <Badge variant={eligible ? "success" : inSnapshot ? "warning" : "outline"}>
+                {eligible ? "Eligible" : inSnapshot ? "Queued" : "Not eligible"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span>KYC</span>
+              <Badge variant={isVerified ? "success" : "warning"}>
+                {isVerified ? "Verified" : "Required"}
+              </Badge>
+            </div>
+          </div>
+        </div>
 
         {isConnected && isOnMantle && isVerified && eligible && !claimed && !hasPass && (
           <Button onClick={handleClaim} disabled={isClaimPending}>

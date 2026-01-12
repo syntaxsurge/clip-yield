@@ -12,12 +12,13 @@ export function useBoostPass() {
 
   const boostPassAddress = mantleSepoliaContracts.boostPass as Address;
   const isOnMantle = chainId === mantleSepoliaContracts.chainId;
+  const refetchInterval = 15_000;
 
   const { data: currentEpoch } = useReadContract({
     address: boostPassAddress,
     abi: boostPassAbi,
     functionName: "currentEpoch",
-    query: { enabled: isOnMantle },
+    query: { enabled: isOnMantle, refetchInterval },
   });
 
   const epochValue = typeof currentEpoch === "bigint" ? currentEpoch : null;
@@ -28,7 +29,7 @@ export function useBoostPass() {
     abi: boostPassAbi,
     functionName: "eligible",
     args: address && epochValue !== null ? [epochValue, address] : undefined,
-    query: { enabled: canQuery },
+    query: { enabled: canQuery, refetchInterval },
   });
 
   const { data: claimed } = useReadContract({
@@ -36,7 +37,7 @@ export function useBoostPass() {
     abi: boostPassAbi,
     functionName: "claimed",
     args: address && epochValue !== null ? [epochValue, address] : undefined,
-    query: { enabled: canQuery },
+    query: { enabled: canQuery, refetchInterval },
   });
 
   const { data: balance } = useReadContract({
@@ -44,7 +45,7 @@ export function useBoostPass() {
     abi: boostPassAbi,
     functionName: "balanceOf",
     args: address && epochValue !== null ? [address, epochValue] : undefined,
-    query: { enabled: canQuery },
+    query: { enabled: canQuery, refetchInterval },
   });
 
   const claim = async (epoch: bigint) => {

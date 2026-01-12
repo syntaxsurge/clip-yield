@@ -11,6 +11,7 @@
 import type * as activity from "../activity.js";
 import type * as admin from "../admin.js";
 import type * as boostPass from "../boostPass.js";
+import type * as boostPassPublisher from "../boostPassPublisher.js";
 import type * as campaignReceipts from "../campaignReceipts.js";
 import type * as chain_confirmCampaign from "../chain/confirmCampaign.js";
 import type * as chain_confirmVaultTx from "../chain/confirmVaultTx.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   activity: typeof activity;
   admin: typeof admin;
   boostPass: typeof boostPass;
+  boostPassPublisher: typeof boostPassPublisher;
   campaignReceipts: typeof campaignReceipts;
   "chain/confirmCampaign": typeof chain_confirmCampaign;
   "chain/confirmVaultTx": typeof chain_confirmVaultTx;

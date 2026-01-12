@@ -21,5 +21,11 @@ crons.interval(
   internal.campaignReceipts.retryPending,
   {},
 );
+crons.interval(
+  "auto publish boost pass epoch",
+  { minutes: 30 },
+  internal.boostPassPublisher.autoPublishEpoch,
+  {},
+);
 
 export default crons;

@@ -39,6 +39,11 @@ export default function BoostPassPerksPanel() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const epochNumber = currentEpoch ? Number(currentEpoch) : null;
+  const publishIntervalHoursRaw =
+    process.env.NEXT_PUBLIC_BOOST_PASS_EPOCH_INTERVAL_HOURS ?? "24";
+  const publishIntervalHours = Number.isFinite(Number(publishIntervalHoursRaw))
+    ? Number(publishIntervalHoursRaw)
+    : 24;
 
   const fetchPack = async (): Promise<BoostPassPack> => {
     if (!address || !epochNumber) {
@@ -172,7 +177,8 @@ export default function BoostPassPerksPanel() {
         <Alert variant="info">
           <AlertTitle>No epoch published</AlertTitle>
           <AlertDescription>
-            Boost Pass perks unlock after the first epoch is published.
+            Boost Pass perks unlock after the first epoch is published. Epochs
+            auto-publish every {publishIntervalHours} hours.
           </AlertDescription>
         </Alert>
       )}

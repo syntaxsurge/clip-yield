@@ -360,7 +360,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/kyc/complete` KYC completion status + return to vault
 - `/settings` global settings for wallet status, playback preferences, and AI BYOK keys
 - `/admin/kyc` on-chain KYC manager console for Mantle Sepolia
-- `/admin/boost-pass` publish on-chain Boost Pass epochs from leaderboard snapshots
+- `/admin/boost-pass` monitor and manually publish Boost Pass epochs from leaderboard snapshots
 - `/perks/boost-pass` Boost Pass remix pack downloads + project import
 - `/projects` editor project list + import/export
 - `/projects/[id]` timeline editor + preview/export
@@ -379,7 +379,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 ## Architecture Overview
 - Next.js 15 App Router under `src/app` with short-form feed routes plus editor routes
 - Convex backend in `convex/` with `profiles`, `posts` (Convex file storage), `comments`, `likes`, `follows`, `projects`, creator vaults (`creatorVaults`), sponsor campaigns (`sponsorCampaigns` with invoice receipt + protocol fee metadata), campaign receipts (`campaignReceipts` with L2 inclusion metadata and invoice receipt fields), vault tx logs (`vaultTx` with L2 inclusion metadata), activity events (`activityEvents`), leaderboard snapshots (`leaderboardSnapshots`), boost pass epochs/claims (`boostPassEpochs`, `boostPassClaims`), KYC tables (`kycInquiries`, `walletVerifications`), plus `admin.truncateAll` for `convex:reset`
-- Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with a cron recompute of leaderboards
+- Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with cron jobs for leaderboard recompute and Boost Pass epoch auto-publish
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence (`src/app/store`)
 - AI generation uses Sora BYOK keys stored via encrypted cookies (`OPENAI_BYOK_COOKIE_SECRET`) and `/api/sora` routes, surfaced in the editor library AI Studio
 - Mantle Sepolia wallet stack uses Privy UI for email + external wallet connections with wagmi for on-chain interactions (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`, `src/components/ui/PrivyConnectButton.tsx`)
@@ -392,6 +392,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - SponsorHub mints invoice receipt NFTs and donates protocol fees to the yield vault, while net WMNT mints boost vault shares for creators
 - Persona hosted-flow KYC uses `/api/kyc/start` for hosted flow links and `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles
+- Boost Pass epochs publish on-chain automatically on a fixed cadence via a Convex cron using `BOOST_PASS_MANAGER_PRIVATE_KEY` and `BOOST_PASS_EPOCH_INTERVAL_HOURS`
 
 ## Core Commands
 - `pnpm dev`

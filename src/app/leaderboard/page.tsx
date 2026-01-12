@@ -3,38 +3,53 @@
 import { useEffect, useMemo, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
 import useGetLatestLeaderboard from "@/app/hooks/useGetLatestLeaderboard";
-import type { LeaderboardSnapshot } from "@/app/types";
+import useGetLatestBoostPassEpoch from "@/app/hooks/useGetLatestBoostPassEpoch";
+import type { BoostPassEpoch, LeaderboardSnapshot } from "@/app/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatShortHash } from "@/lib/utils";
 import BoostPassClaimCard from "@/features/boost-pass/components/BoostPassClaimCard";
+import BoostPassExplainerCard from "@/features/boost-pass/components/BoostPassExplainerCard";
 import { formatUnits } from "viem";
 
 export default function LeaderboardPage() {
   const [snapshot, setSnapshot] = useState<LeaderboardSnapshot | null>(null);
+  const [latestEpoch, setLatestEpoch] = useState<BoostPassEpoch | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
-    setStatus("loading");
-    setError(null);
 
-    (async () => {
+    const load = async (refresh = false) => {
+      if (!refresh) {
+        setStatus("loading");
+      }
+      setError(null);
       try {
-        const result = await useGetLatestLeaderboard();
+        const [leaderboardResult, epochResult] = await Promise.all([
+          useGetLatestLeaderboard(),
+          useGetLatestBoostPassEpoch(),
+        ]);
         if (!isMounted) return;
-        setSnapshot(result);
+        setSnapshot(leaderboardResult);
+        setLatestEpoch(epochResult);
         setStatus("ready");
       } catch (err) {
         if (!isMounted) return;
         setError(err instanceof Error ? err.message : "Failed to load leaderboard.");
         setStatus("error");
       }
-    })();
+    };
+
+    void load(false);
+    const interval = setInterval(() => {
+      void load(true);
+    }, 60_000);
 
     return () => {
       isMounted = false;
+      clearInterval(interval);
     };
   }, []);
 
@@ -79,7 +94,10 @@ export default function LeaderboardPage() {
             </p>
           </div>
 
-          <BoostPassClaimCard snapshot={snapshot} />
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <BoostPassClaimCard snapshot={snapshot} latestEpoch={latestEpoch} />
+            <BoostPassExplainerCard latestEpoch={latestEpoch} />
+          </div>
 
           {status === "error" && (
             <Alert variant="destructive">
@@ -106,7 +124,7 @@ export default function LeaderboardPage() {
 
           {status === "ready" && snapshot && (
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
+              <Card className="border-border/60 bg-card/80">
                 <CardHeader>
                   <CardTitle>Top creators</CardTitle>
                   <p className="text-xs text-muted-foreground">
@@ -114,10 +132,11 @@ export default function LeaderboardPage() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-hidden rounded-lg border">
+                  <div className="overflow-hidden rounded-lg border border-border/60">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                      <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
                         <tr>
+                          <th className="px-3 py-2">Rank</th>
                           <th className="px-3 py-2">Creator</th>
                           <th className="px-3 py-2">Sponsored (WMNT)</th>
                           <th className="px-3 py-2">Boosted (WMNT)</th>
@@ -125,8 +144,14 @@ export default function LeaderboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {formattedCreators.map((entry) => (
-                          <tr key={entry.creatorId} className="border-t">
+                        {formattedCreators.map((entry, index) => (
+                          <tr
+                            key={entry.creatorId}
+                            className="border-t border-border/60 odd:bg-muted/20"
+                          >
+                            <td className="px-3 py-2 text-xs text-muted-foreground">
+                              #{index + 1}
+                            </td>
                             <td className="px-3 py-2 font-mono text-xs">
                               {formatShortHash(entry.creatorId)}
                             </td>
@@ -141,7 +166,7 @@ export default function LeaderboardPage() {
                           <tr>
                             <td
                               className="px-3 py-4 text-center text-muted-foreground"
-                              colSpan={4}
+                              colSpan={5}
                             >
                               No confirmed boosts yet.
                             </td>
@@ -153,7 +178,7 @@ export default function LeaderboardPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-border/60 bg-card/80">
                 <CardHeader>
                   <CardTitle>Top boosters</CardTitle>
                   <p className="text-xs text-muted-foreground">
@@ -161,17 +186,24 @@ export default function LeaderboardPage() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-hidden rounded-lg border">
+                  <div className="overflow-hidden rounded-lg border border-border/60">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                      <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
                         <tr>
+                          <th className="px-3 py-2">Rank</th>
                           <th className="px-3 py-2">Wallet</th>
                           <th className="px-3 py-2">Total boosted (WMNT)</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {formattedBoosters.map((entry) => (
-                          <tr key={entry.wallet} className="border-t">
+                        {formattedBoosters.map((entry, index) => (
+                          <tr
+                            key={entry.wallet}
+                            className="border-t border-border/60 odd:bg-muted/20"
+                          >
+                            <td className="px-3 py-2 text-xs text-muted-foreground">
+                              #{index + 1}
+                            </td>
                             <td className="px-3 py-2 font-mono text-xs">
                               {formatShortHash(entry.wallet)}
                             </td>
@@ -184,7 +216,7 @@ export default function LeaderboardPage() {
                           <tr>
                             <td
                               className="px-3 py-4 text-center text-muted-foreground"
-                              colSpan={2}
+                              colSpan={3}
                             >
                               No confirmed boosters yet.
                             </td>

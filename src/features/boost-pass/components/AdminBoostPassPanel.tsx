@@ -33,6 +33,11 @@ import useLogBoostPassEpoch from "@/app/hooks/useLogBoostPassEpoch";
 import type { LeaderboardSnapshot } from "@/app/types";
 
 const boostPassAddress = mantleSepoliaContracts.boostPass as Address;
+const publishIntervalHoursRaw =
+  process.env.NEXT_PUBLIC_BOOST_PASS_EPOCH_INTERVAL_HOURS ?? "24";
+const publishIntervalHours = Number.isFinite(Number(publishIntervalHoursRaw))
+  ? Number(publishIntervalHoursRaw)
+  : 24;
 
 export default function AdminBoostPassPanel() {
   const { address, isConnected } = useAccount();
@@ -198,7 +203,8 @@ export default function AdminBoostPassPanel() {
           <div className="space-y-1">
             <CardTitle className="text-xl">Boost Pass Admin</CardTitle>
             <CardDescription>
-              Publish on-chain epochs for top boosters and unlock Boost Pass claims.
+              Epochs auto-publish every {publishIntervalHours} hours. Use this panel for
+              manual overrides.
             </CardDescription>
           </div>
           <PrivyConnectButton showDisconnect />
