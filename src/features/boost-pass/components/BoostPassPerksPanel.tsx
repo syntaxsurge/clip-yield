@@ -27,6 +27,7 @@ type ActionId = "download" | "create";
 
 export default function BoostPassPerksPanel() {
   const { address, isConnected } = useAccount();
+  const ownerWallet = address ? address.toLowerCase() : undefined;
   const chainId = useChainId();
   const { signMessageAsync } = useSignMessage();
   const { switchChainAsync } = useSwitchChain();
@@ -117,9 +118,10 @@ export default function BoostPassPerksPanel() {
       const pack = await fetchPack();
       const baseProject = createProjectState({
         projectName: "Boost Pass Remix",
+        ownerWallet,
       });
       const nextProject = applyBoostPassPack(baseProject, pack);
-      await storeProject(nextProject);
+      await storeProject(nextProject, ownerWallet);
       setSuccessMessage("Boost Pass pack imported into a new project.");
       router.push(`/projects/${nextProject.id}`);
     } catch (err) {

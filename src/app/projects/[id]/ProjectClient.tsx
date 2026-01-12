@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
+import { useAccount } from "wagmi";
 import {
   getFile,
   getProject,
@@ -49,35 +50,37 @@ export default function ProjectClient({ projectId }: Props) {
   const { currentProjectId } = useAppSelector((state) => state.projects);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { address } = useAccount();
+  const ownerWallet = address ? address.toLowerCase() : undefined;
   const { activeSection, activeElement } = projectState;
 
   useEffect(() => {
     const loadProject = async () => {
       if (projectId) {
         setIsLoading(true);
-        const project = await getProject(projectId);
+        const project = await getProject(projectId, ownerWallet);
         if (project) {
           dispatch(setCurrentProject(projectId));
           setIsLoading(false);
         } else {
-          router.push("/404");
+          router.push("/projects");
         }
       }
     };
     loadProject();
-  }, [projectId, dispatch, router]);
+  }, [projectId, dispatch, ownerWallet, router]);
 
   useEffect(() => {
     const loadProjectState = async () => {
       if (currentProjectId) {
-        const project = await getProject(currentProjectId);
+        const project = await getProject(currentProjectId, ownerWallet);
         if (project) {
           dispatch(rehydrate(project));
         }
       }
     };
     loadProjectState();
-  }, [dispatch, currentProjectId]);
+  }, [dispatch, currentProjectId, ownerWallet]);
 
   useEffect(() => {
     let cancelled = false;
@@ -111,11 +114,15 @@ export default function ProjectClient({ projectId }: Props) {
   useEffect(() => {
     const saveProject = async () => {
       if (!projectState || projectState.id !== currentProjectId) return;
-      await storeProject(projectState);
-      dispatch(updateProject(projectState));
+      const projectToSave =
+        ownerWallet && projectState.ownerWallet !== ownerWallet
+          ? { ...projectState, ownerWallet }
+          : projectState;
+      await storeProject(projectToSave, ownerWallet);
+      dispatch(updateProject(projectToSave));
     };
     saveProject();
-  }, [projectState, dispatch, currentProjectId]);
+  }, [projectState, dispatch, currentProjectId, ownerWallet]);
 
   const handleFocus = (section: "media" | "text" | "export") => {
     dispatch(setActiveSection(section));

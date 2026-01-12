@@ -149,6 +149,7 @@ export interface ProjectExport {
 
 export interface ProjectState {
   id: string;
+  ownerWallet?: string;
   mediaFiles: MediaFile[];
   textElements: TextElement[];
   tracks: TimelineTrack[];

@@ -149,16 +149,16 @@ One-liner: A creator-first short-video platform where sponsorships are tokenized
 
 ## 10. Projects List (Creator Workspace)
 - **URL:** /projects
-- **Shot:** Projects list with an imported Remix Pack project row and Open action.
+- **Shot:** Projects list with a saved draft project row and Open action.
 - **Steps:**
   1. **Current page:** `/settings`, confirm settings heading is visible.
-  2. **Navigate:** **Current page:** `/settings`, click “Projects” in the sidebar/nav → lands on `/projects`, confirm project list heading appears.
-  3. **Action:** **Current page:** `/projects`, click “Open” on “Boost Pass Remix Pack”, confirm navigation to `/projects/[id]`.
+  2. **Navigate:** **Current page:** `/settings`, click "Projects" in the sidebar/nav → lands on `/projects`, confirm project list heading appears.
+  3. **Action:** **Current page:** `/projects`, click "Open" on "Creator draft", confirm navigation to `/projects/[id]`.
   4. **Action:** **Current page:** `/projects/[id]`, pause on the editor UI, confirm timeline and preview are visible.
-  5. **Action:** **Current page:** `/projects/[id]`, click “Back to Projects”, confirm return to `/projects`.
-  6. **Verify on-screen:** **Current page:** `/projects`, confirm the imported project row remains visible.
+  5. **Action:** **Current page:** `/projects/[id]`, click "Back to Projects", confirm return to `/projects`.
+  6. **Verify on-screen:** **Current page:** `/projects`, confirm the saved project row remains visible.
 - **Voiceover:**
-  > “This is the creator workspace: Remix Packs turn into editable projects, not just collectibles. Opening a project drops you straight into the timeline and preview so you can start working immediately.”
+  > "This is the creator workspace. Projects are saved drafts tied to the connected wallet. Opening a project drops you into the timeline and preview so you can keep editing."
 
 ## 11. Timeline Editor + Export (Production Step)
 - **URL:** /projects/[id]

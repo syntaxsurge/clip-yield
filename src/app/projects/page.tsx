@@ -88,6 +88,7 @@ function formatLocalDate(iso: string) {
 
 export default function Projects() {
   const { address } = useAccount();
+  const ownerWallet = address ? address.toLowerCase() : undefined;
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { projects, currentProjectId } = useAppSelector(
@@ -122,9 +123,10 @@ export default function Projects() {
     try {
       const newProject: ProjectState = createProjectState({
         projectName: title,
+        ownerWallet,
       });
 
-      await storeProject(newProject);
+      await storeProject(newProject, ownerWallet);
       dispatch(addProject(newProject));
 
       try {
@@ -143,14 +145,18 @@ export default function Projects() {
     } finally {
       setIsCreatingProject(false);
     }
-  }, [address, dispatch, isCreatingProject, newProjectName]);
+  }, [address, dispatch, isCreatingProject, newProjectName, ownerWallet]);
 
   useEffect(() => {
     const loadProjects = async () => {
       setIsLoading(true);
       try {
-        const storedProjects = await listProjects();
-        dispatch(rehydrateProjects(storedProjects));
+        if (!ownerWallet) {
+          dispatch(rehydrateProjects([]));
+        } else {
+          const storedProjects = await listProjects(ownerWallet);
+          dispatch(rehydrateProjects(storedProjects));
+        }
       } catch (error) {
         toast.error("Failed to load projects");
       } finally {
@@ -158,7 +164,7 @@ export default function Projects() {
       }
     };
     loadProjects();
-  }, [dispatch]);
+  }, [dispatch, ownerWallet]);
 
   useEffect(() => {
     const parentIp = searchParams.get("parentIp");
@@ -203,7 +209,7 @@ export default function Projects() {
 
   const handleExportProject = async (projectId: string, name: string) => {
     try {
-      const bundle = await exportProjectBundle(projectId);
+      const bundle = await exportProjectBundle(projectId, ownerWallet);
       if (!bundle) {
         toast.error("Could not export project");
         return;
@@ -229,13 +235,18 @@ export default function Projects() {
   const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    if (!ownerWallet) {
+      toast.error("Connect a wallet to import a project.");
+      event.target.value = "";
+      return;
+    }
     setIsImporting(true);
     try {
       const text = await file.text();
       const bundle = JSON.parse(text);
-      const imported = await importProjectBundle(bundle);
+      const imported = await importProjectBundle(bundle, ownerWallet);
       if (!imported) throw new Error("Invalid project bundle");
-      const refreshed = await listProjects();
+      const refreshed = await listProjects(ownerWallet);
       dispatch(rehydrateProjects(refreshed));
       toast.success(`Imported project "${imported.projectName}"`);
     } catch (error) {
@@ -251,7 +262,7 @@ export default function Projects() {
     try {
       await deleteProjectFromDB(projectId);
       dispatch(deleteProject(projectId));
-      const storedProjects = await listProjects();
+      const storedProjects = await listProjects(ownerWallet);
       dispatch(rehydrateProjects(storedProjects));
       toast.success("Project deleted");
     } catch (error) {
@@ -312,8 +323,9 @@ export default function Projects() {
                 </Badge>
               </div>
               <p className="max-w-2xl text-gray-500 dark:text-white/60">
-                Start a new timeline, remix an IP asset, or continue a draft. Projects save locally
-                in your browser and sync to the cloud when possible.
+                Start a new timeline, remix an IP asset, or continue a draft. Projects are scoped
+                to your connected wallet and save locally in your browser with best effort cloud
+                sync.
               </p>
             </div>
 
@@ -461,18 +473,24 @@ export default function Projects() {
               ))}
             </div>
           ) : projects.length === 0 ? (
-          <Card className="border-gray-200 dark:border-white/10">
-            <CardHeader className="space-y-2">
-              <CardTitle>No projects yet</CardTitle>
-              <CardDescription>
-                Create your first timeline to start editing.
-              </CardDescription>
-            </CardHeader>
+            <Card className="border-gray-200 dark:border-white/10">
+              <CardHeader className="space-y-2">
+                <CardTitle>
+                  {ownerWallet ? "No projects yet" : "Connect a wallet"}
+                </CardTitle>
+                <CardDescription>
+                  {ownerWallet
+                    ? "Create your first timeline to start editing."
+                    : "Projects are scoped to the connected wallet. Connect to view or create projects."}
+                </CardDescription>
+              </CardHeader>
               <CardContent>
-                <Button type="button" onClick={() => setIsCreating(true)}>
-                  <Plus className="h-4 w-4" />
-                  New project
-                </Button>
+                {ownerWallet ? (
+                  <Button type="button" onClick={() => setIsCreating(true)}>
+                    <Plus className="h-4 w-4" />
+                    New project
+                  </Button>
+                ) : null}
               </CardContent>
             </Card>
           ) : visibleProjects.length === 0 ? (
