@@ -8,6 +8,17 @@ const remoteBaseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
 const loadTimeoutMs = 60000;
 const classWorkerURL = "/ffmpeg/ffmpeg-worker.js";
 
+const resolveClassWorkerURL = () => {
+  if (typeof window === "undefined") {
+    return classWorkerURL;
+  }
+  try {
+    return new URL(classWorkerURL, window.location.origin).toString();
+  } catch {
+    return classWorkerURL;
+  }
+};
+
 export async function createLoadedFfmpeg(options?: {
   onLog?: (message: string) => void;
   onLoadProgress?: (event: {
@@ -63,7 +74,11 @@ export async function createLoadedFfmpeg(options?: {
         }),
     );
 
-    await ffmpeg.load({ classWorkerURL, coreURL, wasmURL }, { signal });
+    const resolvedClassWorkerURL = resolveClassWorkerURL();
+    await ffmpeg.load(
+      { classWorkerURL: resolvedClassWorkerURL, coreURL, wasmURL },
+      { signal },
+    );
   };
 
   const loadWithTimeout = async (label: string, baseURL: string) => {
