@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { AiOutlineClose, AiOutlineCloudUpload, AiOutlineDelete } from "react-icons/ai";
 import { BiLoaderCircle } from "react-icons/bi";
+import Image from "next/image";
 import TextInput from "../TextInput";
 import { useUser } from "@/app/context/user";
 import { useProfileStore } from "@/app/stores/profile";
 import { useGeneralStore } from "@/app/stores/general";
-import useUpdateProfile from "@/app/hooks/useUpdateProfile";
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
+import updateProfile from "@/app/hooks/useUpdateProfile";
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import type { ShowErrorObject } from "@/app/types";
 
 export default function EditProfileOverlay() {
@@ -70,7 +71,7 @@ export default function EditProfileOverlay() {
 
     try {
       setIsUpdating(true);
-      await useUpdateProfile(
+      await updateProfile(
         contextUser.user.id,
         userName.trim(),
         userHandle.trim().toLowerCase(),
@@ -147,19 +148,24 @@ export default function EditProfileOverlay() {
         <div className="max-h-[calc(90vh-180px)] overflow-y-auto px-6 py-6">
           <div className="space-y-6">
             <div className="rounded-xl border border-gray-200 p-4 dark:border-white/10">
-              <h3 className="mb-4 text-[15px] font-semibold text-gray-900 dark:text-white">
-                Profile photo
-              </h3>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <img
-                  className="h-[96px] w-[96px] rounded-full object-cover"
-                  src={useCreateBucketUrl(userImage)}
-                  alt="Profile preview"
-                />
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      ref={fileInputRef}
+	              <h3 className="mb-4 text-[15px] font-semibold text-gray-900 dark:text-white">
+	                Profile photo
+	              </h3>
+	              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+	                <Image
+	                  className="h-[96px] w-[96px] rounded-full object-cover"
+	                  src={createBucketUrl(userImage)}
+	                  alt="Profile preview"
+	                  width={96}
+	                  height={96}
+	                  sizes="96px"
+	                  unoptimized
+	                  loader={({ src }) => src}
+	                />
+	                <div className="flex flex-1 flex-col gap-2">
+	                  <div className="flex flex-wrap items-center gap-2">
+	                    <input
+	                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}

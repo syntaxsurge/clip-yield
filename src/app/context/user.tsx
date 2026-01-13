@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { usePrivy } from "@privy-io/react-auth";
 import type { User, UserContextTypes } from "@/app/types";
@@ -23,7 +23,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!walletAddress) {
       setUser(null);
       return;
@@ -44,7 +44,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
       bio: profile.bio,
       image: profile.image,
     });
-  };
+  }, [walletAddress]);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,7 +80,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       isMounted = false;
     };
-  }, [authenticated, isConnected, ready, walletAddress]);
+  }, [authenticated, isConnected, ready, refreshProfile, walletAddress]);
 
   const openConnect = async () => {
     if (!ready) return;

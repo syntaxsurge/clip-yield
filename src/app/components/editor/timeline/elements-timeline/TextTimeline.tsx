@@ -10,7 +10,7 @@ import {
   setTextElements,
 } from "@/app/store/slices/projectSlice";
 import { useDispatch } from "react-redux";
-import { MediaFile, TextElement, TimelineTrack } from "@/app/types";
+import { TextElement, TimelineTrack } from "@/app/types";
 import { throttle } from "lodash";
 import { Type } from "lucide-react";
 import {
@@ -107,7 +107,7 @@ function TextTimeline({
 
   const handleClick = (element: string, index: number | string) => {
     if (element === "text") {
-      dispatch(setActiveElement("text") as any);
+      dispatch(setActiveElement("text"));
       // TODO: find better way to do this
       const actualIndex = textElements.findIndex(
         (clip) => clip.id === (index as unknown as string),
@@ -514,14 +514,14 @@ function TextTimeline({
                 dispatch(beginHistoryTransaction());
               }}
               onResize={({ target, width, delta, direction }: OnResize) => {
-                if (!isFiniteNumber(width)) return;
+                if (!isFiniteNumber(width) || !target) return;
                 if (direction[0] === 1) {
                   handleClick("text", clip.id);
-                  delta[0] && (target!.style.width = `${width}px`);
+                  if (delta[0]) target.style.width = `${width}px`;
                   handleResize(clip, target as HTMLElement, width);
                 } else if (direction[0] === -1) {
                   handleClick("text", clip.id);
-                  delta[0] && (target!.style.width = `${width}px`);
+                  if (delta[0]) target.style.width = `${width}px`;
                   handleLeftResize(clip, target as HTMLElement, width);
                 }
               }}

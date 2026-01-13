@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import PostUser from "@/app/components/profile/PostUser"
 import MainLayout from "@/app/layouts/MainLayout"
 import { use, useEffect, useState } from "react"
@@ -12,20 +13,20 @@ import { ProfilePageTypes, PostWithProfile } from "@/app/types"
 import { usePostStore } from "@/app/stores/post"
 import { useProfileStore } from "@/app/stores/profile"
 import { useGeneralStore } from "@/app/stores/general"
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
-import useGetFollowerCount from "@/app/hooks/useGetFollowerCount"
-import useGetFollowingCount from "@/app/hooks/useGetFollowingCount"
-import useGetLikedPostsByUserId from "@/app/hooks/useGetLikedPostsByUserId"
-import useIsFollowing from "@/app/hooks/useIsFollowing"
-import useToggleFollow from "@/app/hooks/useToggleFollow"
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import getFollowerCount from "@/app/hooks/useGetFollowerCount"
+import getFollowingCount from "@/app/hooks/useGetFollowingCount"
+import getLikedPostsByUserId from "@/app/hooks/useGetLikedPostsByUserId"
+import getIsFollowing from "@/app/hooks/useIsFollowing"
+import toggleFollow from "@/app/hooks/useToggleFollow"
 import { toast } from "react-hot-toast"
 import { copyToClipboard, formatShortHash } from "@/lib/utils"
 
 export default function Profile({ params }: ProfilePageTypes) {
     const contextUser = useUser()
-    let { postsByUser, setPostsByUser } = usePostStore()
-    let { setCurrentProfile, currentProfile } = useProfileStore()
-    let { isEditProfileOpen, setIsEditProfileOpen } = useGeneralStore()
+    const { postsByUser, setPostsByUser } = usePostStore()
+    const { setCurrentProfile, currentProfile } = useProfileStore()
+    const { isEditProfileOpen, setIsEditProfileOpen } = useGeneralStore()
     const { id } = use(params)
     const [followerCount, setFollowerCount] = useState(0)
     const [followingCount, setFollowingCount] = useState(0)
@@ -49,8 +50,8 @@ export default function Profile({ params }: ProfilePageTypes) {
         const loadCounts = async () => {
             try {
                 const [followers, following] = await Promise.all([
-                    useGetFollowerCount(id),
-                    useGetFollowingCount(id),
+                    getFollowerCount(id),
+                    getFollowingCount(id),
                 ])
                 if (!isMounted) return
                 setFollowerCount(followers)
@@ -78,7 +79,7 @@ export default function Profile({ params }: ProfilePageTypes) {
                 return
             }
             try {
-                const result = await useIsFollowing(contextUser.user.id, id)
+                const result = await getIsFollowing(contextUser.user.id, id)
                 if (!isMounted) return
                 setIsFollowing(result)
             } catch {
@@ -102,7 +103,7 @@ export default function Profile({ params }: ProfilePageTypes) {
 
         const loadLiked = async () => {
             try {
-                const results = await useGetLikedPostsByUserId(id)
+                const results = await getLikedPostsByUserId(id)
                 if (!isMounted) return
                 setLikedPosts(results)
             } catch {
@@ -146,7 +147,7 @@ export default function Profile({ params }: ProfilePageTypes) {
 
         try {
             setIsFollowLoading(true)
-            const nextState = await useToggleFollow(contextUser.user.id, id)
+            const nextState = await toggleFollow(contextUser.user.id, id)
             setIsFollowing(nextState)
             setFollowerCount((prev) => Math.max(0, prev + (nextState ? 1 : -1)))
         } catch (error) {
@@ -162,16 +163,22 @@ export default function Profile({ params }: ProfilePageTypes) {
                 <div className="mx-auto mt-[80px] w-full max-w-5xl px-3 pb-16">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
 
-                        <ClientOnly>
-                            {currentProfile?.image ? (
-                                <img
-                                    className="h-[120px] w-[120px] rounded-full object-cover"
-                                    src={useCreateBucketUrl(currentProfile?.image)}
-                                />
-                            ) : (
-                                <div className="h-[120px] w-[120px] rounded-full bg-gray-200 dark:bg-white/10" />
-                            )}
-                        </ClientOnly>
+	                        <ClientOnly>
+		                            {currentProfile?.image ? (
+		                                <Image
+		                                    className="h-[120px] w-[120px] rounded-full object-cover"
+		                                    src={createBucketUrl(currentProfile?.image)}
+		                                    alt={`${displayName || handle} avatar`}
+		                                    width={120}
+		                                    height={120}
+		                                    sizes="120px"
+		                                    unoptimized
+		                                    loader={({ src }) => src}
+		                                />
+		                            ) : (
+		                                <div className="h-[120px] w-[120px] rounded-full bg-gray-200 dark:bg-white/10" />
+		                            )}
+	                        </ClientOnly>
 
                         <div className="w-full sm:pl-5">
                             <ClientOnly>

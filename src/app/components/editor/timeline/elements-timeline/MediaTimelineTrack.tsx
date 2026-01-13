@@ -119,7 +119,7 @@ export function MediaTimelineTrack({
   );
 
   const handleClick = (id: string) => {
-    dispatch(setActiveElement("media") as any);
+    dispatch(setActiveElement("media"));
     const actualIndex = mediaFiles.findIndex((clip) => clip.id === id);
     dispatch(setActiveElementIndex(actualIndex));
   };
@@ -626,14 +626,14 @@ export function MediaTimelineTrack({
                   dispatch(beginHistoryTransaction());
                 }}
                 onResize={({ target, width, delta, direction }: OnResize) => {
-                  if (!isFiniteNumber(width)) return;
+                  if (!isFiniteNumber(width) || !target) return;
                   if (direction[0] === 1) {
                     handleClick(clip.id);
-                    delta[0] && (target!.style.width = `${width}px`);
+                    if (delta[0]) target.style.width = `${width}px`;
                     handleRightResize(clip, target as HTMLElement, width);
                   } else if (direction[0] === -1) {
                     handleClick(clip.id);
-                    delta[0] && (target!.style.width = `${width}px`);
+                    if (delta[0]) target.style.width = `${width}px`;
                     handleLeftResize(clip, target as HTMLElement, width);
                   }
                 }}

@@ -3,9 +3,9 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import PostMainLikes from "./PostMainLikes"
-import useCreateBucketUrl from "../hooks/useCreateBucketUrl"
+import createBucketUrl from "../hooks/useCreateBucketUrl"
 import { PostMainCompTypes } from "../types"
-import useGetSponsorCampaignByPostId from "../hooks/useGetSponsorCampaignByPostId"
+import getSponsorCampaignByPostId from "../hooks/useGetSponsorCampaignByPostId"
 import { isSponsorCampaignActive } from "@/features/sponsor/utils"
 import type { SponsorCampaign } from "@/app/types"
 import { formatShortHash } from "@/lib/utils"
@@ -26,7 +26,7 @@ export default function PostMain({ post, onAutoAdvance }: PostMainProps) {
         const loadSponsor = async () => {
             if (!post?.id) return
             try {
-                const campaign = await useGetSponsorCampaignByPostId(post.id)
+                const campaign = await getSponsorCampaignByPostId(post.id)
                 if (isMounted) {
                     setSponsorCampaign(campaign)
                 }
@@ -54,7 +54,7 @@ export default function PostMain({ post, onAutoAdvance }: PostMainProps) {
     }, [isAutoScrollEnabled, onAutoAdvance])
 
     const profileUrl = `/profile/${post.profile.user_id}`
-    const avatarUrl = useCreateBucketUrl(post?.profile?.image)
+    const avatarUrl = createBucketUrl(post?.profile?.image)
     const usernameLabel = post.profile.username
         ? `@${post.profile.username}`
         : `@${formatShortHash(post.profile.user_id)}`
@@ -69,7 +69,7 @@ export default function PostMain({ post, onAutoAdvance }: PostMainProps) {
                 <div className="mx-auto flex w-full max-w-[980px] flex-col items-center justify-center gap-6 py-6 lg:flex-row lg:items-end">
                     <div className="relative w-full max-w-[520px]">
                         <ClipVideoPlayer
-                            src={useCreateBucketUrl(post?.video_url, "")}
+                            src={createBucketUrl(post?.video_url, "")}
                             observeVisibility
                             loop={!isAutoScrollEnabled}
                             onEnded={handleAutoAdvance}

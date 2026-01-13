@@ -6,32 +6,32 @@ import { BsChatDots, BsTrash3 } from "react-icons/bs"
 import { FaBolt, FaBullhorn } from "react-icons/fa"
 import moment from "moment"
 import { useUser } from "@/app/context/user"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { BiLoaderCircle } from "react-icons/bi"
 import ClientOnly from "../ClientOnly"
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import Image from "next/image"
 import { useLikeStore } from "@/app/stores/like"
 import { useCommentStore } from "@/app/stores/comment"
 import { useRouter } from "nextjs-toploader/app"
-import useIsLiked from "@/app/hooks/useIsLiked"
-import useCreateLike from "@/app/hooks/useCreateLike"
-import useDeleteLike from "@/app/hooks/useDeleteLike"
-import useDeletePostById from "@/app/hooks/useDeletePostById"
-import useIsFollowing from "@/app/hooks/useIsFollowing"
-import useToggleFollow from "@/app/hooks/useToggleFollow"
+import isLiked from "@/app/hooks/useIsLiked"
+import createLike from "@/app/hooks/useCreateLike"
+import deleteLike from "@/app/hooks/useDeleteLike"
+import deletePostById from "@/app/hooks/useDeletePostById"
+import getIsFollowing from "@/app/hooks/useIsFollowing"
+import toggleFollow from "@/app/hooks/useToggleFollow"
 import { CommentsHeaderCompTypes } from "@/app/types"
 import { formatShortHash } from "@/lib/utils"
 
 export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes) {
 
-    let { setLikesByPost, likesByPost } = useLikeStore()
-    let { commentsByPost, setCommentsByPost } = useCommentStore()
+    const { setLikesByPost, likesByPost } = useLikeStore()
+    const { commentsByPost, setCommentsByPost } = useCommentStore()
 
     const contextUser = useUser()
     const router = useRouter()
     const [hasClickedLike, setHasClickedLike] = useState<boolean>(false)
     const [isDeleteing, setIsDeleteing] = useState<boolean>(false)
-    const [userLiked, setUserLiked] = useState<boolean>(false)
     const [isFollowing, setIsFollowing] = useState(false)
     const [isFollowLoading, setIsFollowLoading] = useState(false)
 
@@ -40,7 +40,13 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
         setCommentsByPost(params.postId) 
         setLikesByPost(params.postId)
     }, [params?.postId, setCommentsByPost, setLikesByPost])
-    useEffect(() => { hasUserLikedPost() }, [likesByPost])
+
+    const userLiked = useMemo(() => {
+        if (!contextUser?.user?.id) return false
+        if (!params?.postId) return false
+        if (likesByPost.length < 1) return false
+        return isLiked(contextUser.user.id, params.postId, likesByPost)
+    }, [contextUser?.user?.id, likesByPost, params?.postId])
     useEffect(() => {
         let isMounted = true
 
@@ -50,7 +56,7 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                 return
             }
             try {
-                const result = await useIsFollowing(contextUser.user.id, post.user_id)
+                const result = await getIsFollowing(contextUser.user.id, post.user_id)
                 if (!isMounted) return
                 setIsFollowing(result)
             } catch {
@@ -66,19 +72,10 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
         }
     }, [contextUser?.user?.id, post.user_id])
     
-    const hasUserLikedPost = () => {
-        if (likesByPost.length < 1 || !contextUser?.user?.id) {
-            setUserLiked(false)
-            return
-        }
-        let res = useIsLiked(contextUser.user.id, params.postId, likesByPost)
-        setUserLiked(res ? true : false)
-    }
-
     const like = async () => {
         try {
             setHasClickedLike(true)
-            await useCreateLike(contextUser?.user?.id || '', params.postId)
+            await createLike(contextUser?.user?.id || '', params.postId)
             setLikesByPost(params.postId)
             setHasClickedLike(false)
         } catch (error) {
@@ -91,7 +88,7 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
     const unlike = async (postId: string, userId: string) => {
         try {
             setHasClickedLike(true)
-            await useDeleteLike(postId, userId)
+            await deleteLike(postId, userId)
             setLikesByPost(params.postId)
             setHasClickedLike(false)
         } catch (error) {
@@ -104,8 +101,8 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
     const likeOrUnlike = () => {
         if (!contextUser?.user) return void contextUser?.openConnect()
 
-        let res = useIsLiked(contextUser.user.id, params.postId, likesByPost)
-        if (!res) {
+        const liked = isLiked(contextUser.user.id, params.postId, likesByPost)
+        if (!liked) {
             like()
         } else {
             likesByPost.forEach(like => {
@@ -117,13 +114,13 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
     }
 
     const deletePost = async () => {
-        let res = confirm('Are you sure you want to delete this post?')
+        const res = confirm('Are you sure you want to delete this post?')
         if (!res) return
 
         setIsDeleteing(true)
 
         try {
-            await useDeletePostById(params?.postId)
+            await deletePostById(params?.postId)
             router.push(`/profile/${params.userId}`)
             setIsDeleteing(false)
         } catch (error) {
@@ -142,7 +139,7 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
 
         try {
             setIsFollowLoading(true)
-            const nextState = await useToggleFollow(contextUser.user.id, post.user_id)
+            const nextState = await toggleFollow(contextUser.user.id, post.user_id)
             setIsFollowing(nextState)
         } catch (error) {
             console.error(error)
@@ -159,7 +156,15 @@ export default function CommentsHeader({ post, params }: CommentsHeaderCompTypes
                 <div className="flex items-center">
                     <Link href={`/profile/${post?.user_id}`}>
                         {post?.profile.image ? (
-                            <img className="rounded-full lg:mx-0 mx-auto" width="40" src={useCreateBucketUrl(post?.profile.image)} />
+                            <Image
+                                className="rounded-full object-cover lg:mx-0 mx-auto"
+                                width={40}
+                                height={40}
+                                src={createBucketUrl(post?.profile.image)}
+                                alt={`${post?.profile.name ?? "Creator"} avatar`}
+                                unoptimized
+                                loader={({ src }) => src}
+                            />
                         ) : (
                             <div className="w-[40px] h-[40px] bg-gray-200 rounded-full dark:bg-white/10"></div>
                         )}

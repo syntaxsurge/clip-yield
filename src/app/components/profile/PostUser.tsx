@@ -2,7 +2,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai"
 import moment from "moment"
 import { useCallback, useRef } from "react"
 import Link from "next/link"
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import { PostUserCompTypes } from "@/app/types"
 
 export default function PostUser({ post }: PostUserCompTypes) {
@@ -45,7 +45,7 @@ export default function PostUser({ post }: PostUserCompTypes) {
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}
                             className="aspect-[3/4] object-cover rounded-md" 
-                            src={useCreateBucketUrl(post.video_url, "")}
+                            src={createBucketUrl(post.video_url, "")}
                         />
                     </Link>
                 )}

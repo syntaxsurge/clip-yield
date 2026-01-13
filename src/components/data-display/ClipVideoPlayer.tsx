@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { FiVolume, FiVolume1, FiVolume2, FiVolumeX } from "react-icons/fi";
+import Image from "next/image";
 import { useGeneralStore } from "@/app/stores/general";
 import { cn } from "@/lib/utils";
 import { VideoStatusOverlay } from "./VideoStatusOverlay";
@@ -132,7 +133,11 @@ export function ClipVideoPlayer({
   const togglePlayback = () => {
     const video = videoRef.current;
     if (!video) return;
-    video.paused ? safePlay() : video.pause();
+    if (video.paused) {
+      safePlay();
+      return;
+    }
+    video.pause();
   };
 
   const handleKeyToggle = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -309,10 +314,13 @@ export function ClipVideoPlayer({
         </div>
 
         {showLogo ? (
-          <img
+          <Image
             className={cn("absolute right-2 bottom-10 w-[84px]", logoClassName)}
             src="/images/clip-yield-logo.png"
             alt="ClipYield"
+            width={84}
+            height={84}
+            sizes="84px"
           />
         ) : null}
       </div>

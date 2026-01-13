@@ -8,12 +8,12 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/app/context/user";
 import ClientOnly from "@/app/components/ClientOnly";
 import { useGeneralStore } from "@/app/stores/general";
-import useGetFollowingProfiles from "@/app/hooks/useGetFollowingProfiles";
+import getFollowingProfiles from "@/app/hooks/useGetFollowingProfiles";
 import type { RandomUsers } from "@/app/types";
 
 export default function SideNavMain() {
 
-    let { setRandomUsers, randomUsers} = useGeneralStore()
+    const { setRandomUsers, randomUsers} = useGeneralStore()
     const [followingUsers, setFollowingUsers] = useState<RandomUsers[]>([])
     const [hasMounted, setHasMounted] = useState(false)
 
@@ -49,7 +49,7 @@ export default function SideNavMain() {
 
         const loadFollowing = async () => {
             try {
-                const result = await useGetFollowingProfiles(userId, 6)
+                const result = await getFollowingProfiles(userId, 6)
                 if (!isMounted) return
                 setFollowingUsers(result)
             } catch {

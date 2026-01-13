@@ -348,10 +348,10 @@ function MoveableOverlay() {
           if (!target) return;
           target.style.left = `${left}px`;
           target.style.top = `${top}px`;
-          updateSelected({
-            x: left / stateToCanvasScale,
-            y: top / stateToCanvasScale,
-          } as any);
+	          updateSelected({
+	            x: left / stateToCanvasScale,
+	            y: top / stateToCanvasScale,
+	          });
 
           const htmlTarget = target as HTMLElement;
           const width = htmlTarget.offsetWidth;
@@ -438,32 +438,32 @@ function MoveableOverlay() {
               (media.height ?? prevBoundsHeight) * scaleY,
             );
 
-            updateSelected({
-              width: nextWidth,
-              height: nextHeight,
-              crop: {
-                x: Math.round((prevCrop.x || 0) * scaleX),
+	            updateSelected({
+	              width: nextWidth,
+	              height: nextHeight,
+	              crop: {
+	                x: Math.round((prevCrop.x || 0) * scaleX),
                 y: Math.round((prevCrop.y || 0) * scaleY),
                 width: Math.round(nextBoundsWidth),
                 height: Math.round(nextBoundsHeight),
               },
-              ...(isFiniteNumber(drag?.left)
-                ? { x: drag.left / stateToCanvasScale }
-                : {}),
-              ...(isFiniteNumber(drag?.top) ? { y: drag.top / stateToCanvasScale } : {}),
-            } as any);
-            return;
-          }
+	              ...(isFiniteNumber(drag?.left)
+	                ? { x: drag.left / stateToCanvasScale }
+	                : {}),
+	              ...(isFiniteNumber(drag?.top) ? { y: drag.top / stateToCanvasScale } : {}),
+	            });
+	            return;
+	          }
 
-          updateSelected({
-            ...(isFiniteNumber(width) ? { width: width / stateToCanvasScale } : {}),
-            ...(isFiniteNumber(height) ? { height: height / stateToCanvasScale } : {}),
-            ...(isFiniteNumber(drag?.left)
-              ? { x: drag.left / stateToCanvasScale }
-              : {}),
-            ...(isFiniteNumber(drag?.top) ? { y: drag.top / stateToCanvasScale } : {}),
-          } as any);
-        }}
+	          updateSelected({
+	            ...(isFiniteNumber(width) ? { width: width / stateToCanvasScale } : {}),
+	            ...(isFiniteNumber(height) ? { height: height / stateToCanvasScale } : {}),
+	            ...(isFiniteNumber(drag?.left)
+	              ? { x: drag.left / stateToCanvasScale }
+	              : {}),
+	            ...(isFiniteNumber(drag?.top) ? { y: drag.top / stateToCanvasScale } : {}),
+	          });
+	        }}
         onResizeEnd={() => {
           scheduleHideGuides(1000);
           updateSelected.flush();
@@ -479,12 +479,12 @@ function MoveableOverlay() {
             typeof beforeRotate === "number" && Number.isFinite(beforeRotate)
               ? beforeRotate
               : 0;
-          target.style.transform = patchTransformRotation(
-            target.style.transform,
-            nextRotation,
-          );
-          updateSelected({ rotation: nextRotation } as any);
-        }}
+	          target.style.transform = patchTransformRotation(
+	            target.style.transform,
+	            nextRotation,
+	          );
+	          updateSelected({ rotation: nextRotation });
+	        }}
         onRotateEnd={() => {
           scheduleHideGuides(1000);
           updateSelected.flush();

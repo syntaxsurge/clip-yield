@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 import { Like } from '../types';
-import useGetLikesByPostId from '../hooks/useGetLikesByPostId';
+import getLikesByPostId from '../hooks/useGetLikesByPostId';
   
 interface LikeStore {
     likesByPost: Like[];
@@ -15,7 +15,7 @@ export const useLikeStore = create<LikeStore>()(
                 likesByPost: [],
 
                 setLikesByPost: async (postId: string) => {
-                    const result = await useGetLikesByPostId(postId)
+                    const result = await getLikesByPostId(postId)
                     set({ likesByPost: result });
                 },
             }),

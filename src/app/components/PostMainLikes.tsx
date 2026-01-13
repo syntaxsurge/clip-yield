@@ -1,18 +1,19 @@
 import { AiFillHeart } from "react-icons/ai"
 import { FaCommentDots, FaBolt, FaBullhorn } from "react-icons/fa"
 import { FiCheck, FiPlus } from "react-icons/fi"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useUser } from "../context/user"
 import { BiLoaderCircle } from "react-icons/bi"
 import { Comment, Like, PostMainLikesCompTypes } from "../types"
-import useGetCommentsByPostId from "../hooks/useGetCommentsByPostId"
-import useGetLikesByPostId from "../hooks/useGetLikesByPostId"
-import useIsLiked from "../hooks/useIsLiked"
-import useCreateLike from "../hooks/useCreateLike"
-import useDeleteLike from "../hooks/useDeleteLike"
-import useIsFollowing from "../hooks/useIsFollowing"
-import useToggleFollow from "../hooks/useToggleFollow"
+import getCommentsByPostId from "../hooks/useGetCommentsByPostId"
+import getLikesByPostId from "../hooks/useGetLikesByPostId"
+import isLiked from "../hooks/useIsLiked"
+import createLike from "../hooks/useCreateLike"
+import deleteLike from "../hooks/useDeleteLike"
+import getIsFollowing from "../hooks/useIsFollowing"
+import toggleFollow from "../hooks/useToggleFollow"
 import { cn } from "@/lib/utils"
 
 type PostMainLikesProps = PostMainLikesCompTypes & {
@@ -25,18 +26,32 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
 
     const contextUser = useUser()
     const [hasClickedLike, setHasClickedLike] = useState<boolean>(false)
-    const [userLiked, setUserLiked] = useState<boolean>(false)
     const [comments, setComments] = useState<Comment[]>([])
     const [likes, setLikes] = useState<Like[]>([])
     const [isFollowing, setIsFollowing] = useState(false)
     const [isFollowLoading, setIsFollowLoading] = useState(false)
 
-    useEffect(() => { 
-        getAllLikesByPost()
-        getAllCommentsByPost()
-    }, [post])
+    const getAllCommentsByPost = useCallback(async () => {
+        const result = await getCommentsByPostId(post?.id)
+        setComments(result)
+    }, [post?.id])
 
-    useEffect(() => { hasUserLikedPost() }, [likes, contextUser])
+    const getAllLikesByPost = useCallback(async () => {
+        const result = await getLikesByPostId(post?.id)
+        setLikes(result)
+    }, [post?.id])
+
+    useEffect(() => { 
+        void getAllLikesByPost()
+        void getAllCommentsByPost()
+    }, [getAllCommentsByPost, getAllLikesByPost])
+
+    const userLiked = useMemo(() => {
+        if (!contextUser?.user?.id) return false
+        if (!post?.id) return false
+        if (likes?.length < 1) return false
+        return isLiked(contextUser.user.id, post.id, likes)
+    }, [contextUser?.user?.id, likes, post?.id])
 
     useEffect(() => {
         let isMounted = true
@@ -48,7 +63,7 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
             }
 
             try {
-                const result = await useIsFollowing(contextUser.user.id, post.profile.user_id)
+                const result = await getIsFollowing(contextUser.user.id, post.profile.user_id)
                 if (!isMounted) return
                 setIsFollowing(result)
             } catch {
@@ -64,40 +79,17 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
         }
     }, [contextUser?.user?.id, post.profile.user_id])
 
-    const getAllCommentsByPost = async () => {
-        let result = await useGetCommentsByPostId(post?.id)
-        setComments(result)
-    }
-
-    const getAllLikesByPost = async () => {
-        let result = await useGetLikesByPostId(post?.id)
-        setLikes(result)
-    }
-
-    const hasUserLikedPost = () => {
-        if (!contextUser) return
-
-        if (likes?.length < 1 || !contextUser?.user?.id) {
-            setUserLiked(false)
-            return
-        }
-        let res = useIsLiked(contextUser?.user?.id, post?.id, likes)
-        setUserLiked(res ? true : false)
-    }
-
     const like = async () => {
         setHasClickedLike(true)
-        await useCreateLike(contextUser?.user?.id || '', post?.id)
+        await createLike(contextUser?.user?.id || '', post?.id)
         await getAllLikesByPost()
-        hasUserLikedPost()
         setHasClickedLike(false)
     }
 
     const unlike = async (postId: string, userId: string) => {
         setHasClickedLike(true)
-        await useDeleteLike(postId, userId)
+        await deleteLike(postId, userId)
         await getAllLikesByPost()
-        hasUserLikedPost()
         setHasClickedLike(false)
     }
 
@@ -107,9 +99,9 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
             return
         }
         
-        let res = useIsLiked(contextUser?.user?.id, post?.id, likes)
+        const liked = isLiked(contextUser?.user?.id, post?.id, likes)
 
-        if (!res) {
+        if (!liked) {
             like()
         } else {
             likes.forEach((like: Like) => {
@@ -129,7 +121,7 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
 
         try {
             setIsFollowLoading(true)
-            const nextState = await useToggleFollow(contextUser.user.id, post.profile.user_id)
+            const nextState = await toggleFollow(contextUser.user.id, post.profile.user_id)
             setIsFollowing(nextState)
         } catch (error) {
             console.error(error)
@@ -158,10 +150,14 @@ export default function PostMainLikes({ post, className, avatarUrl, profileUrl }
                             className="relative block h-12 w-12 overflow-hidden rounded-full border-2 border-white/80 shadow-lg"
                             aria-label="View creator profile"
                         >
-                            <img
-                                className="h-full w-full object-cover"
+                            <Image
+                                className="object-cover"
                                 src={avatarUrl}
-                                alt={post.profile.name}
+                                alt={`${post.profile.name} avatar`}
+                                fill
+                                sizes="48px"
+                                unoptimized
+                                loader={({ src }) => src}
                             />
                         </Link>
                         {showFollow && (

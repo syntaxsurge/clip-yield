@@ -15,7 +15,7 @@ import { formatShortHash } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
 import type { BoostPassEpoch, LeaderboardSnapshot } from "@/app/types";
 import { useBoostPass } from "@/features/boost-pass/hooks/useBoostPass";
-import useLogBoostPassClaim from "@/app/hooks/useLogBoostPassClaim";
+import logBoostPassClaim from "@/app/hooks/useLogBoostPassClaim";
 
 type BoostPassClaimCardProps = {
   snapshot: LeaderboardSnapshot | null;
@@ -86,7 +86,7 @@ export default function BoostPassClaimCard({
     if (loggedTx === txHash) return;
     setLoggedTx(txHash);
 
-    void useLogBoostPassClaim({
+    void logBoostPassClaim({
       epoch: claimEpoch,
       wallet: address,
       txHash,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -36,7 +36,7 @@ const FINAL_INQUIRY_STATUSES = new Set([
   "failed",
 ]);
 
-export default function KycStartPage() {
+function KycStartPageContent() {
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const searchParams = useSearchParams();
@@ -464,5 +464,23 @@ export default function KycStartPage() {
         </div>
       </div>
     </MainLayout>
+  );
+}
+
+export default function KycStartPage() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+            <div className="mx-auto max-w-xl">
+              <WalletGateSkeleton cards={2} />
+            </div>
+          </div>
+        </MainLayout>
+      }
+    >
+      <KycStartPageContent />
+    </Suspense>
   );
 }

@@ -10,7 +10,7 @@ import EmptyState from "@/components/feedback/EmptyState";
 import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
 import FeedNavButtons from "@/components/layout/FeedNavButtons";
 import { useScrollSnapNavigation } from "@/hooks/useScrollSnapNavigation";
-import useGetFollowingPostsPage from "@/app/hooks/useGetFollowingPostsPage";
+import getFollowingPostsPage from "@/app/hooks/useGetFollowingPostsPage";
 
 export default function FollowingPage() {
   const contextUser = useUser();
@@ -18,7 +18,6 @@ export default function FollowingPage() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("loading");
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const didInitialLoadRef = useRef(false);
   const isFetchingRef = useRef(false);
   const {
@@ -32,10 +31,9 @@ export default function FollowingPage() {
   const loadPage = useCallback(async () => {
     if (!contextUser?.user?.id || isFetchingRef.current || isDone) return;
     isFetchingRef.current = true;
-    setIsFetchingMore(true);
     setStatus("loading");
     try {
-      const result = await useGetFollowingPostsPage({
+      const result = await getFollowingPostsPage({
         wallet: contextUser.user.id,
         cursor,
         limit: 6,
@@ -51,7 +49,6 @@ export default function FollowingPage() {
     } catch {
       setStatus("error");
     } finally {
-      setIsFetchingMore(false);
       isFetchingRef.current = false;
     }
   }, [contextUser?.user?.id, cursor, isDone]);

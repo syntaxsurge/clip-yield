@@ -5,24 +5,25 @@ import { BiLoaderCircle } from "react-icons/bi"
 import { BsTrash3 } from "react-icons/bs"
 import { useCommentStore } from "@/app/stores/comment"
 import moment from "moment"
-import useDeleteComment from "@/app/hooks/useDeleteComment"
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import deleteComment from "@/app/hooks/useDeleteComment"
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import Image from "next/image"
 import { SingleCommentCompTypes } from "@/app/types"
 import { formatShortHash } from "@/lib/utils"
 
 export default function SingleComment({ comment, params }: SingleCommentCompTypes) {
 
     const contextUser = useUser()
-    let { setCommentsByPost } = useCommentStore()
+    const { setCommentsByPost } = useCommentStore()
     const [isDeleting, setIsDeleting] = useState(false)
 
     const deleteThisComment = async () => {
-        let res = confirm("Are you sure you weant to delete this comment?")
+        const res = confirm("Are you sure you weant to delete this comment?")
         if (!res) return
 
         try {
             setIsDeleting(true)
-            await useDeleteComment(comment?.id)
+            await deleteComment(comment?.id)
             setCommentsByPost(params?.postId)
             setIsDeleting(false)
         } catch (error) {
@@ -35,10 +36,14 @@ export default function SingleComment({ comment, params }: SingleCommentCompType
             <div id="SingleComment" className="flex items-center justify-between px-8 mt-4 text-gray-900 dark:text-white">
                 <div className="flex items-center relative w-full">
                     <Link href={`/profile/${comment.profile.user_id}`}>
-                        <img 
-                            className="absolute top-0 rounded-full lg:mx-0 mx-auto" 
-                            width="40" 
-                            src={useCreateBucketUrl(comment.profile.image)}
+                        <Image
+                            className="absolute top-0 rounded-full object-cover lg:mx-0 mx-auto"
+                            width={40}
+                            height={40}
+                            src={createBucketUrl(comment.profile.image)}
+                            alt={`${comment.profile.name ?? "User"} avatar`}
+                            unoptimized
+                            loader={({ src }) => src}
                         />
                     </Link>
                     <div className="ml-14 pt-0.5 w-full">

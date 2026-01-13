@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ type KycStatusResponse = {
   error?: string;
 };
 
-export default function KycCompletePage() {
+function KycCompletePageContent() {
   const searchParams = useSearchParams();
   const inquiryId = searchParams.get("inquiry-id");
   const referenceId =
@@ -268,5 +268,26 @@ export default function KycCompletePage() {
         </div>
       </div>
     </MainLayout>
+  );
+}
+
+export default function KycCompletePage() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <div className="w-full px-4 pb-24 pt-[100px] lg:pr-0">
+            <div className="mx-auto max-w-xl space-y-4">
+              <Alert variant="info">
+                <AlertTitle>Loading...</AlertTitle>
+                <AlertDescription>Preparing your KYC status.</AlertDescription>
+              </Alert>
+            </div>
+          </div>
+        </MainLayout>
+      }
+    >
+      <KycCompletePageContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { useAccount, useChainId, useReadContract } from "wagmi";
 import { Address, getAddress } from "viem";
 import MainLayout from "@/app/layouts/MainLayout";
@@ -176,11 +176,31 @@ export default function SettingsPage() {
     </Card>
   );
 
+  const openAiFallback = (
+    <Card>
+      <CardHeader className="space-y-2">
+        <Skeleton className="h-5 w-56" />
+        <Skeleton className="h-4 w-72" />
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+    </Card>
+  );
+
   const allSections = [
     { id: "account", node: accountCard },
     { id: "playback", node: playbackCard },
     { id: "appearance", node: appearanceCard },
-    { id: "openai", node: <OpenAIKeyCard /> },
+    {
+      id: "openai",
+      node: (
+        <Suspense fallback={openAiFallback}>
+          <OpenAIKeyCard />
+        </Suspense>
+      ),
+    },
     { id: "ai-tips", node: aiTipsCard },
   ];
 

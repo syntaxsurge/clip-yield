@@ -12,10 +12,15 @@ interface SequenceItemOptions {
   currentTime?: number;
 }
 
-export const SequenceItem: Record<
-  string,
-  (item: any, options: SequenceItemOptions) => JSX.Element
-> = {
+type SequenceItemRenderers = {
+  video: (item: MediaFile, options: SequenceItemOptions) => JSX.Element;
+  text: (item: TextElement, options: SequenceItemOptions) => JSX.Element;
+  image: (item: MediaFile, options: SequenceItemOptions) => JSX.Element;
+  audio: (item: MediaFile, options: SequenceItemOptions) => JSX.Element;
+  unknown: (item: MediaFile, options: SequenceItemOptions) => JSX.Element;
+};
+
+export const SequenceItem: SequenceItemRenderers = {
   video: (item: MediaFile, options: SequenceItemOptions) => {
     return <VideoSequenceItem item={item} options={options} />;
   },
@@ -27,5 +32,8 @@ export const SequenceItem: Record<
   },
   audio: (item: MediaFile, options: SequenceItemOptions) => {
     return <AudioSequenceItem item={item} options={options} />;
+  },
+  unknown: () => {
+    return <></>;
   },
 };

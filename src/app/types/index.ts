@@ -180,7 +180,21 @@ export interface ProjectState {
   exportSettings: ExportConfig;
 }
 
-export type ProjectHistoryEntry = Omit<ProjectState, "history" | "future">;
+export type ProjectHistoryEntry = Omit<
+  ProjectState,
+  | "history"
+  | "future"
+  | "historyLockDepth"
+  | "currentTime"
+  | "isPlaying"
+  | "isMuted"
+  | "timelineZoom"
+  | "enableMarkerTracking"
+  | "activeSection"
+  | "activeElement"
+  | "activeElementIndex"
+  | "soraJobs"
+>;
 
 export type SoraModel = import("@/features/ai/sora/capabilities").SoraModel;
 export type SoraSeconds = import("@/features/ai/sora/capabilities").SoraSeconds;

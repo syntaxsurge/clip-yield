@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/app/store";
@@ -87,7 +87,7 @@ function formatLocalDate(iso: string) {
   });
 }
 
-export default function Projects() {
+function ProjectsPageContent() {
   const { ready, authenticated, user } = usePrivy();
   const { address } = useAccount();
   const walletAddress = address ?? user?.wallet?.address ?? null;
@@ -162,7 +162,7 @@ export default function Projects() {
           const storedProjects = await listProjects(ownerWallet);
           dispatch(rehydrateProjects(storedProjects));
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to load projects");
       } finally {
         setIsLoading(false);
@@ -641,5 +641,33 @@ export default function Projects() {
         </AlertDialog>
       </TooltipProvider>
     </MainLayout>
+  );
+}
+
+export default function Projects() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <main
+            id="main"
+            className="mx-auto mt-[80px] w-full max-w-6xl space-y-8 px-3 pb-16 pt-8 sm:px-6"
+          >
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-10 w-48" />
+              <Skeleton className="h-4 w-80" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-[164px] rounded-2xl" />
+              ))}
+            </div>
+          </main>
+        </MainLayout>
+      }
+    >
+      <ProjectsPageContent />
+    </Suspense>
   );
 }

@@ -31,35 +31,27 @@ const createTrack = (index: number): TimelineTrack => ({
   name: `Layer ${index}`,
 });
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
 const normalizeTracks = (value: unknown): TimelineTrack[] => {
-  const raw = Array.isArray(value) ? (value as unknown[]) : [];
-  const sanitized: TimelineTrack[] = raw
-    .filter(
-      (track) =>
-        track &&
-        typeof track === "object" &&
-        typeof (track as any).id === "string",
-    )
-    .map((track, idx) => ({
-      id: String((track as any).id),
+  const raw = Array.isArray(value) ? value : [];
+  const sanitized: TimelineTrack[] = [];
+
+  for (const track of raw) {
+    if (!isRecord(track)) continue;
+    const id = track.id;
+    if (typeof id !== "string") continue;
+
+    sanitized.push({
+      id,
       kind: "layer" as TrackKind,
-      name:
-        typeof (track as any).name === "string"
-          ? String((track as any).name)
-          : `Layer ${idx + 1}`,
-      muted:
-        typeof (track as any).muted === "boolean"
-          ? (track as any).muted
-          : undefined,
-      locked:
-        typeof (track as any).locked === "boolean"
-          ? (track as any).locked
-          : undefined,
-      hidden:
-        typeof (track as any).hidden === "boolean"
-          ? (track as any).hidden
-          : undefined,
-    }));
+      name: typeof track.name === "string" ? track.name : `Layer ${sanitized.length + 1}`,
+      muted: typeof track.muted === "boolean" ? track.muted : undefined,
+      locked: typeof track.locked === "boolean" ? track.locked : undefined,
+      hidden: typeof track.hidden === "boolean" ? track.hidden : undefined,
+    });
+  }
 
   const withMinimum =
     sanitized.length >= 2
@@ -75,24 +67,25 @@ const normalizeTracks = (value: unknown): TimelineTrack[] => {
 };
 
 const normalizeMarkers = (value: unknown): TimelineMarker[] => {
-  const raw = Array.isArray(value) ? (value as TimelineMarker[]) : [];
-  const markers = raw
-    .filter(
-      (marker) =>
-        marker &&
-        typeof marker === "object" &&
-        typeof marker.id === "string" &&
-        typeof (marker as any).time === "number" &&
-        Number.isFinite((marker as any).time),
-    )
-    .map((marker) => ({
-      id: marker.id,
-      time: Math.max(0, marker.time),
+  const raw = Array.isArray(value) ? value : [];
+  const markers: TimelineMarker[] = [];
+
+  for (const marker of raw) {
+    if (!isRecord(marker)) continue;
+    const id = marker.id;
+    const time = marker.time;
+    if (typeof id !== "string") continue;
+    if (typeof time !== "number" || !Number.isFinite(time)) continue;
+
+    markers.push({
+      id,
+      time: Math.max(0, time),
       label: typeof marker.label === "string" ? marker.label : undefined,
       color: typeof marker.color === "string" ? marker.color : undefined,
-    }))
-    .sort((a, b) => a.time - b.time);
+    });
+  }
 
+  markers.sort((a, b) => a.time - b.time);
   return markers;
 };
 
@@ -146,27 +139,31 @@ export const createProjectState = (
     },
   };
   next.tracks = normalizeTracks(next.tracks);
-  next.markers = normalizeMarkers((next as any).markers);
+  next.markers = normalizeMarkers(next.markers);
   return next;
 };
 
+const HISTORY_SNAPSHOT_OMIT_KEYS: Array<keyof ProjectState> = [
+  "history",
+  "future",
+  "historyLockDepth",
+  "currentTime",
+  "isPlaying",
+  "isMuted",
+  "timelineZoom",
+  "enableMarkerTracking",
+  "activeSection",
+  "activeElement",
+  "activeElementIndex",
+  "soraJobs",
+];
+
 const snapshotState = (state: ProjectState): ProjectHistoryEntry => {
-  const {
-    history,
-    future,
-    historyLockDepth,
-    currentTime,
-    isPlaying,
-    isMuted,
-    timelineZoom,
-    enableMarkerTracking,
-    activeSection,
-    activeElement,
-    activeElementIndex,
-    soraJobs,
-    ...rest
-  } = state;
-  return JSON.parse(JSON.stringify(rest));
+  const clone = JSON.parse(JSON.stringify(state)) as Record<string, unknown>;
+  for (const key of HISTORY_SNAPSHOT_OMIT_KEYS) {
+    delete clone[key];
+  }
+  return clone as unknown as ProjectHistoryEntry;
 };
 
 const pushHistory = (state: ProjectState) => {
@@ -495,13 +492,13 @@ const projectStateSlice = createSlice({
         ...action.payload.exportSettings,
       };
 
-      const rawActiveSection = (action.payload as any).activeSection as unknown;
+      const rawActiveSection: unknown = action.payload.activeSection;
       next.activeSection =
         rawActiveSection === null ||
         rawActiveSection === "media" ||
         rawActiveSection === "text" ||
         rawActiveSection === "export"
-          ? (rawActiveSection as any)
+          ? rawActiveSection
           : "media";
       next.isPlaying = false;
       next.currentTime =
@@ -509,70 +506,73 @@ const projectStateSlice = createSlice({
           ? Math.max(0, next.currentTime)
           : 0;
       next.historyLockDepth = 0;
-      next.soraJobs = Array.isArray((action.payload as any).soraJobs)
-        ? ((action.payload as any).soraJobs as unknown[])
-            .filter((job) => job && typeof job === "object")
+      const isSoraSize = (value: unknown): value is SoraSize =>
+        value === "720x1280" ||
+        value === "1280x720" ||
+        value === "1024x1792" ||
+        value === "1792x1024";
+
+      const isSoraSeconds = (value: unknown): value is SoraSeconds =>
+        value === 4 || value === 8 || value === 12;
+
+      const isSoraJobStatus = (value: unknown): value is SoraJobStatus =>
+        value === "queued" ||
+        value === "creating" ||
+        value === "polling" ||
+        value === "downloading" ||
+        value === "completed" ||
+        value === "failed";
+
+      const rawSoraJobs: unknown = action.payload.soraJobs;
+      next.soraJobs = Array.isArray(rawSoraJobs)
+        ? rawSoraJobs
+            .filter(isRecord)
             .map((job) => {
-              const size: SoraSize =
-                (job as any).size === "720x1280" ||
-                (job as any).size === "1280x720" ||
-                (job as any).size === "1024x1792" ||
-                (job as any).size === "1792x1024"
-                  ? (job as any).size
-                  : SORA_DEFAULTS.size;
+              const rawSize = job.size;
+              const size: SoraSize = isSoraSize(rawSize) ? rawSize : SORA_DEFAULTS.size;
 
-              const seconds: SoraSeconds =
-                (job as any).seconds === 4 ||
-                (job as any).seconds === 8 ||
-                (job as any).seconds === 12
-                  ? (job as any).seconds
-                  : SORA_DEFAULTS.seconds;
+              const rawSeconds = job.seconds;
+              const seconds: SoraSeconds = isSoraSeconds(rawSeconds)
+                ? rawSeconds
+                : SORA_DEFAULTS.seconds;
 
-              const rawModel = (job as any).model as unknown;
+              const rawModel = job.model;
+              const candidateModel: SoraModel | null =
+                rawModel === "sora-2" || rawModel === "sora-2-pro" ? rawModel : null;
               const model: SoraModel =
-                rawModel === "sora-2" || rawModel === "sora-2-pro"
-                  ? rawModel
+                candidateModel && isSoraSizeAllowed(candidateModel, size)
+                  ? candidateModel
                   : isSoraSizeAllowed(SORA_DEFAULTS.model, size)
                     ? SORA_DEFAULTS.model
                     : "sora-2-pro";
 
+              const createdAt =
+                typeof job.createdAt === "string" ? job.createdAt : new Date().toISOString();
+              const updatedAt =
+                typeof job.updatedAt === "string" ? job.updatedAt : new Date().toISOString();
+
               return {
-                id: typeof (job as any).id === "string" ? (job as any).id : crypto.randomUUID(),
-                jobId: typeof (job as any).jobId === "string" ? (job as any).jobId : undefined,
+                id: typeof job.id === "string" ? job.id : crypto.randomUUID(),
+                jobId: typeof job.jobId === "string" ? job.jobId : undefined,
                 model,
-                prompt: typeof (job as any).prompt === "string" ? (job as any).prompt : "",
+                prompt: typeof job.prompt === "string" ? job.prompt : "",
                 seconds,
                 size,
-                status:
-                  (job as any).status === "queued" ||
-                  (job as any).status === "creating" ||
-                  (job as any).status === "polling" ||
-                  (job as any).status === "downloading" ||
-                  (job as any).status === "completed" ||
-                  (job as any).status === "failed"
-                    ? (job as any).status
-                    : "failed",
-                createdAt:
-                  typeof (job as any).createdAt === "string"
-                    ? (job as any).createdAt
-                    : new Date().toISOString(),
-                updatedAt:
-                  typeof (job as any).updatedAt === "string"
-                    ? (job as any).updatedAt
-                    : new Date().toISOString(),
-                message: typeof (job as any).message === "string" ? (job as any).message : undefined,
-                error: typeof (job as any).error === "string" ? (job as any).error : undefined,
-                contentUrl:
-                  typeof (job as any).contentUrl === "string" ? (job as any).contentUrl : null,
-                fileId: typeof (job as any).fileId === "string" ? (job as any).fileId : undefined,
-                mediaId: typeof (job as any).mediaId === "string" ? (job as any).mediaId : undefined,
+                status: isSoraJobStatus(job.status) ? job.status : "failed",
+                createdAt,
+                updatedAt,
+                message: typeof job.message === "string" ? job.message : undefined,
+                error: typeof job.error === "string" ? job.error : undefined,
+                contentUrl: typeof job.contentUrl === "string" ? job.contentUrl : null,
+                fileId: typeof job.fileId === "string" ? job.fileId : undefined,
+                mediaId: typeof job.mediaId === "string" ? job.mediaId : undefined,
               };
             })
             .slice(0, 50)
         : [];
 
-      next.tracks = normalizeTracks((action.payload as any).tracks);
-      next.markers = normalizeMarkers((action.payload as any).markers);
+      next.tracks = normalizeTracks(action.payload.tracks);
+      next.markers = normalizeMarkers(action.payload.markers);
 
       const trackIds = new Set(next.tracks.map((t) => t.id));
       const baseTrackId = next.tracks[0]?.id ?? null;
@@ -651,55 +651,50 @@ const projectStateSlice = createSlice({
       pruneEmptyTracks(next as ProjectState);
 
       next.exports = next.exports.map((exp) => {
-        const publish = exp.publish as any;
-        if (!publish || typeof publish !== "object") return exp;
-        if (typeof publish.videoUrl === "string") return exp;
+        const publishRaw: unknown = exp.publish;
+        if (!isRecord(publishRaw)) return exp;
+        if (typeof publishRaw.videoUrl === "string") return exp;
 
-        const legacyVideo = publish.video as any;
-        if (
-          !legacyVideo ||
-          typeof legacyVideo !== "object" ||
-          (typeof legacyVideo.ipfsUri !== "string" &&
-            typeof legacyVideo.gatewayUrl !== "string")
-        ) {
+        const legacyVideoRaw = publishRaw.video;
+        if (!isRecord(legacyVideoRaw)) return exp;
+        const legacyIpfsUri = legacyVideoRaw.ipfsUri;
+        const legacyGatewayUrl = legacyVideoRaw.gatewayUrl;
+        if (typeof legacyIpfsUri !== "string" && typeof legacyGatewayUrl !== "string") {
           return exp;
         }
 
-        const legacyThumb = publish.thumbnail as any;
+        const legacyThumbRaw = publishRaw.thumbnail;
+        const legacyThumb = isRecord(legacyThumbRaw) ? legacyThumbRaw : null;
         const migrated: ProjectPublishRecord = {
-          ipId: String(publish.ipId ?? ""),
+          ipId: String(publishRaw.ipId ?? ""),
           licenseTermsId:
-            typeof publish.licenseTermsId === "string"
-              ? publish.licenseTermsId
+            typeof publishRaw.licenseTermsId === "string"
+              ? publishRaw.licenseTermsId
               : undefined,
-          txHash: typeof publish.txHash === "string" ? publish.txHash : undefined,
-          title: String(publish.title ?? ""),
-          summary: String(publish.summary ?? ""),
-          terms: String(publish.terms ?? ""),
+          txHash: typeof publishRaw.txHash === "string" ? publishRaw.txHash : undefined,
+          title: String(publishRaw.title ?? ""),
+          summary: String(publishRaw.summary ?? ""),
+          terms: String(publishRaw.terms ?? ""),
           videoUrl:
-            typeof legacyVideo.ipfsUri === "string"
-              ? legacyVideo.ipfsUri
-              : legacyVideo.gatewayUrl,
+            typeof legacyIpfsUri === "string" ? legacyIpfsUri : String(legacyGatewayUrl),
           thumbnailUrl:
-            legacyThumb && typeof legacyThumb === "object"
+            legacyThumb
               ? typeof legacyThumb.ipfsUri === "string"
                 ? legacyThumb.ipfsUri
                 : typeof legacyThumb.gatewayUrl === "string"
                   ? legacyThumb.gatewayUrl
                   : undefined
               : undefined,
-          ipMetadataUri: String(publish.ipMetadataUri ?? ""),
-          nftMetadataUri: String(publish.nftMetadataUri ?? ""),
-          createdAt: String(publish.createdAt ?? new Date().toISOString()),
+          ipMetadataUri: String(publishRaw.ipMetadataUri ?? ""),
+          nftMetadataUri: String(publishRaw.nftMetadataUri ?? ""),
+          createdAt: String(publishRaw.createdAt ?? new Date().toISOString()),
         };
 
         return { ...exp, publish: migrated };
       });
       return next;
     },
-    createNewProject: (state) => {
-      return createProjectState();
-    },
+    createNewProject: () => createProjectState(),
     undoState: (state) => {
       const last = state.history[state.history.length - 1];
       if (!last) return;

@@ -4,6 +4,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import projectStateReducer from "./slices/projectSlice";
 import projectsReducer from "./slices/projectsSlice";
 import toast from "react-hot-toast";
+import type { MediaFile, ProjectHistoryEntry, ProjectState } from "@/app/types";
 
 // Create IndexedDB database for files and projects
 const setupDB = async () => {
@@ -33,16 +34,6 @@ export const loadState = () => {
 };
 
 // Save state to localStorage
-const saveState = (state: any) => {
-  if (typeof window === "undefined") return;
-  try {
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem("clipyield-state", serializedState);
-  } catch (error) {
-    console.error("Error saving state to localStorage:", error);
-  }
-};
-
 // File storage functions
 export const storeFile = async (file: File, fileId: string) => {
   if (typeof window === "undefined") return null;
@@ -106,42 +97,26 @@ export const listFiles = async () => {
   }
 };
 
-const stripMediaSrc = (media: any) => {
-  if (!media || typeof media !== "object") return media;
-  const { src: _src, ...rest } = media;
-  return rest;
+const stripMediaSrc = (media: MediaFile): MediaFile => {
+  const sanitized = { ...media };
+  delete sanitized.src;
+  return sanitized;
 };
 
-const sanitizeProjectForStorage = (project: any) => {
-  if (!project || typeof project !== "object") return project;
+const sanitizeProjectForStorage = (project: ProjectState): ProjectState => {
+  const sanitized: ProjectState = { ...project };
 
-  const sanitized = { ...project };
+  sanitized.mediaFiles = project.mediaFiles.map(stripMediaSrc);
 
-  if (Array.isArray(sanitized.mediaFiles)) {
-    sanitized.mediaFiles = sanitized.mediaFiles.map(stripMediaSrc);
-  }
+  sanitized.history = (project.history ?? []).map((entry: ProjectHistoryEntry) => ({
+    ...entry,
+    mediaFiles: entry.mediaFiles.map(stripMediaSrc),
+  }));
 
-  if (Array.isArray(sanitized.history)) {
-    sanitized.history = sanitized.history.map((entry: any) => {
-      if (!entry || typeof entry !== "object") return entry;
-      const nextEntry = { ...entry };
-      if (Array.isArray(nextEntry.mediaFiles)) {
-        nextEntry.mediaFiles = nextEntry.mediaFiles.map(stripMediaSrc);
-      }
-      return nextEntry;
-    });
-  }
-
-  if (Array.isArray(sanitized.future)) {
-    sanitized.future = sanitized.future.map((entry: any) => {
-      if (!entry || typeof entry !== "object") return entry;
-      const nextEntry = { ...entry };
-      if (Array.isArray(nextEntry.mediaFiles)) {
-        nextEntry.mediaFiles = nextEntry.mediaFiles.map(stripMediaSrc);
-      }
-      return nextEntry;
-    });
-  }
+  sanitized.future = (project.future ?? []).map((entry: ProjectHistoryEntry) => ({
+    ...entry,
+    mediaFiles: entry.mediaFiles.map(stripMediaSrc),
+  }));
 
   return sanitized;
 };
@@ -152,8 +127,10 @@ const normalizeWallet = (wallet?: string | null) => {
   return trimmed ? trimmed.toLowerCase() : undefined;
 };
 
-const ensureProjectOwner = (project: any, ownerWallet?: string | null) => {
-  if (!project || typeof project !== "object") return project;
+const ensureProjectOwner = (
+  project: ProjectState,
+  ownerWallet?: string | null,
+): ProjectState => {
   const normalizedOwner = normalizeWallet(ownerWallet);
   const existingOwner = normalizeWallet(project.ownerWallet);
   const nextOwner = normalizedOwner ?? existingOwner;
@@ -161,7 +138,7 @@ const ensureProjectOwner = (project: any, ownerWallet?: string | null) => {
   return { ...project, ownerWallet: nextOwner };
 };
 
-const matchesOwner = (project: any, ownerWallet?: string | null) => {
+const matchesOwner = (project: ProjectState, ownerWallet?: string | null) => {
   const normalizedOwner = normalizeWallet(ownerWallet);
   if (!normalizedOwner) return true;
   const projectOwner = normalizeWallet(project?.ownerWallet);
@@ -170,7 +147,7 @@ const matchesOwner = (project: any, ownerWallet?: string | null) => {
 
 // Project storage functions
 export const storeProject = async (
-  project: any,
+  project: ProjectState,
   ownerWallet?: string | null,
 ) => {
   if (typeof window === "undefined") return null;
@@ -201,7 +178,7 @@ export const getProject = async (
   try {
     const db = await setupDB();
     if (!db) return null;
-    const project = await db.get("projects", projectId);
+    const project = (await db.get("projects", projectId)) as ProjectState | undefined;
     if (!project) return null;
     const sanitized = sanitizeProjectForStorage(project);
     const normalizedOwner = normalizeWallet(ownerWallet);
@@ -236,10 +213,8 @@ export const listProjects = async (_ownerWallet?: string | null) => {
   try {
     const db = await setupDB();
     if (!db) return [];
-    const projects = await db.getAll("projects");
-    const sanitized = Array.isArray(projects)
-      ? projects.map((project) => sanitizeProjectForStorage(project))
-      : [];
+    const projects = (await db.getAll("projects")) as ProjectState[];
+    const sanitized = projects.map((project) => sanitizeProjectForStorage(project));
     const normalizedOwner = normalizeWallet(_ownerWallet);
     if (!normalizedOwner) return [];
     return sanitized.filter((project) => matchesOwner(project, normalizedOwner));
@@ -250,7 +225,7 @@ export const listProjects = async (_ownerWallet?: string | null) => {
 };
 
 type StoredProjectBundle = {
-  project: any;
+  project: ProjectState;
   files: {
     id: string;
     name: string;
@@ -303,12 +278,7 @@ export const exportProjectBundle = async (
   }
 
   const sanitizedProject = {
-    ...project,
-    mediaFiles:
-      project.mediaFiles?.map((media: any) => {
-        const { src, ...rest } = media;
-        return rest;
-      }) ?? [],
+    ...sanitizeProjectForStorage(project),
   };
 
   return {
@@ -335,7 +305,7 @@ export const importProjectBundle = async (
   }
 
   const newProjectId = crypto.randomUUID();
-  const clonedMedia = (bundle.project.mediaFiles || []).map((media: any) => {
+  const clonedMedia = bundle.project.mediaFiles.map((media) => {
     const updatedFileId = fileIdMap.get(media.fileId) ?? media.fileId;
     return {
       ...media,

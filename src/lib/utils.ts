@@ -71,7 +71,7 @@ export function getCanvaDesignUrl(
 export function stableJsonStringify(value: unknown) {
   const seen = new WeakSet<object>();
 
-  const normalize = (input: any): any => {
+  const normalize = (input: unknown): unknown => {
     if (input === null || typeof input !== "object") return input;
     if (input instanceof Date) return input.toISOString();
 
@@ -84,10 +84,11 @@ export function stableJsonStringify(value: unknown) {
       return input.map((item) => normalize(item));
     }
 
-    const keys = Object.keys(input).sort();
-    const out: Record<string, any> = {};
+    const record = input as Record<string, unknown>;
+    const keys = Object.keys(record).sort();
+    const out: Record<string, unknown> = {};
     for (const key of keys) {
-      const v = (input as Record<string, any>)[key];
+      const v = record[key];
       if (typeof v === "undefined") continue;
       out[key] = normalize(v);
     }

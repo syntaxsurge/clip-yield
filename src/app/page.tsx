@@ -7,7 +7,7 @@ import PostMain from "./components/PostMain"
 import EmptyState from "@/components/feedback/EmptyState"
 import FeedNavButtons from "@/components/layout/FeedNavButtons"
 import { useScrollSnapNavigation } from "@/hooks/useScrollSnapNavigation"
-import useGetAllPostsPage from "@/app/hooks/useGetAllPostsPage"
+import getAllPostsPage from "@/app/hooks/useGetAllPostsPage"
 import type { PostWithProfile } from "@/app/types"
 
 export default function Home() {
@@ -15,16 +15,14 @@ export default function Home() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const didInitialLoadRef = useRef(false);
   const isFetchingRef = useRef(false);
 
   const loadPage = useCallback(async () => {
     if (isFetchingRef.current || isDone) return;
     isFetchingRef.current = true;
-    setIsFetchingMore(true);
     try {
-      const result = await useGetAllPostsPage({ cursor, limit: 6 });
+      const result = await getAllPostsPage({ cursor, limit: 6 });
       setPosts((prev) => {
         const seen = new Set(prev.map((post) => post.id));
         const nextPage = result.page.filter((post) => !seen.has(post.id));
@@ -36,7 +34,6 @@ export default function Home() {
     } catch {
       setStatus("error");
     } finally {
-      setIsFetchingMore(false);
       isFetchingRef.current = false;
     }
   }, [cursor, isDone]);

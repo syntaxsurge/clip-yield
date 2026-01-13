@@ -4,8 +4,8 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { getAddress, isAddress } from "viem";
 import MainLayout from "@/app/layouts/MainLayout";
-import useGetCreatorVaultByWallet from "@/app/hooks/useGetCreatorVaultByWallet";
-import useGetProfileByUserId from "@/app/hooks/useGetProfileByUserId";
+import getCreatorVaultByWallet from "@/app/hooks/useGetCreatorVaultByWallet";
+import getProfileByUserId from "@/app/hooks/useGetProfileByUserId";
 import type { CreatorVaultRecord, Profile } from "@/app/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -47,8 +47,8 @@ export default function BoostPage({ params }: BoostPageProps) {
     (async () => {
       try {
         const [profileResult, vaultResult] = await Promise.all([
-          useGetProfileByUserId(creatorId),
-          useGetCreatorVaultByWallet(creatorId),
+          getProfileByUserId(creatorId),
+          getCreatorVaultByWallet(creatorId),
         ]);
 
         if (!isMounted) return;

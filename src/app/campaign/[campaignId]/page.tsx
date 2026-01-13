@@ -2,7 +2,7 @@
 
 import { use, useEffect, useMemo, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
-import useGetCampaignReceiptById from "@/app/hooks/useGetCampaignReceiptById";
+import getCampaignReceiptById from "@/app/hooks/useGetCampaignReceiptById";
 import type { CampaignReceipt } from "@/app/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -46,7 +46,7 @@ export default function CampaignReceiptPage({ params }: CampaignPageProps) {
     (async () => {
       try {
         if (!campaignId) throw new Error("Missing campaign receipt.");
-        const result = await useGetCampaignReceiptById(campaignId);
+        const result = await getCampaignReceiptById(campaignId);
         if (!result) throw new Error("Campaign receipt not found.");
         if (!isMounted) return;
         setReceipt(result);

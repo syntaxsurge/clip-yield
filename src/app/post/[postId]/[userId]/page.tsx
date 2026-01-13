@@ -3,6 +3,7 @@
 import Comments from "@/app/components/post/Comments"
 import CommentsHeader from "@/app/components/post/CommentsHeader"
 import Link from "next/link"
+import Image from "next/image"
 import { use, useCallback, useEffect, useMemo, useRef } from "react"
 import { AiOutlineClose } from "react-icons/ai"
 import { useRouter } from "nextjs-toploader/app"
@@ -11,16 +12,16 @@ import { PostPageTypes } from "@/app/types"
 import { usePostStore } from "@/app/stores/post"
 import { useLikeStore } from "@/app/stores/like"
 import { useCommentStore } from "@/app/stores/comment"
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import FeedNavButtons from "@/components/layout/FeedNavButtons"
 import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer"
 
 export default function Post({ params }: PostPageTypes) {
     const { postId, userId } = use(params)
 
-    let { postById, postsByUser, setPostById, setPostsByUser } = usePostStore()
-    let { setLikesByPost } = useLikeStore()
-    let { setCommentsByPost } = useCommentStore()
+    const { postById, postsByUser, setPostById, setPostsByUser } = usePostStore()
+    const { setLikesByPost } = useLikeStore()
+    const { setCommentsByPost } = useCommentStore()
 
     const router = useRouter()
     const videoPanelRef = useRef<HTMLDivElement>(null)
@@ -77,7 +78,11 @@ export default function Post({ params }: PostPageTypes) {
 
             scrollLockRef.current = true
             const direction = event.deltaY > 0 ? 1 : -1
-            direction > 0 ? goNext() : goPrev()
+            if (direction > 0) {
+                goNext()
+            } else {
+                goPrev()
+            }
 
             window.setTimeout(() => {
                 scrollLockRef.current = false
@@ -114,10 +119,13 @@ export default function Post({ params }: PostPageTypes) {
                         />
                     ) : null}
 
-                    <img 
-                        className="absolute z-20 top-[18px] left-[70px] h-10 w-auto lg:mx-0 mx-auto" 
+                    <Image
+                        className="absolute z-20 top-[18px] left-[70px] h-10 w-10 lg:mx-0 mx-auto"
                         src="/images/clip-yield-logo.png"
                         alt="ClipYield"
+                        width={40}
+                        height={40}
+                        sizes="40px"
                     />
 
                     <ClientOnly>
@@ -125,7 +133,7 @@ export default function Post({ params }: PostPageTypes) {
                             {postById?.video_url ? (
                                 <div className="relative w-full max-w-[440px]">
                                     <ClipVideoPlayer
-                                        src={useCreateBucketUrl(postById.video_url, "")}
+                                        src={createBucketUrl(postById.video_url, "")}
                                         autoPlay
                                         loop
                                         showLogo={false}

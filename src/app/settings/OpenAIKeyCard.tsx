@@ -135,7 +135,7 @@ export function OpenAIKeyCard() {
           <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
         </div>
         <CardDescription>
-          Enter your OpenAI API key to enable Sora generation. It's stored on this
+          Enter your OpenAI API key to enable Sora generation. It is stored on this
           device as an encrypted, HTTP-only cookie.
         </CardDescription>
       </CardHeader>

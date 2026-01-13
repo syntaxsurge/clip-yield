@@ -1,7 +1,8 @@
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl"
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl"
 import { MenuItemFollowCompTypes } from "@/app/types"
 import { formatShortHash } from "@/lib/utils"
 import Link from "next/link"
+import Image from "next/image"
 import { AiOutlineCheck } from "react-icons/ai"
 
 export default function MenuItemFollow({ user }: MenuItemFollowCompTypes) {
@@ -12,10 +13,14 @@ export default function MenuItemFollow({ user }: MenuItemFollowCompTypes) {
                 href={`/profile/${user?.id}`}
                 className="flex items-center rounded-md w-full py-1.5 px-2 hover:bg-gray-100 dark:hover:bg-white/10"
             >
-                <img 
-                    className="rounded-full lg:mx-0 mx-auto" 
-                    width="35" 
-                    src={useCreateBucketUrl(user?.image)}
+                <Image
+                    className="rounded-full object-cover lg:mx-0 mx-auto"
+                    width={35}
+                    height={35}
+                    src={createBucketUrl(user?.image)}
+                    alt={`${user?.name ?? "User"} avatar`}
+                    unoptimized
+                    loader={({ src }) => src}
                 />
                 <div className="lg:pl-2.5 lg:block hidden">
                     <div className="flex items-center">

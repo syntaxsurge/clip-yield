@@ -93,16 +93,16 @@ export default function FfmpegRender({
         const audioDelays: string[] = [];
 
         const loadFontForMeasurement = async (options: {
-          fontFamily: string;
-          fontSize: number;
-        }) => {
-          if (typeof document === "undefined") return;
-          const fonts = (document as any).fonts as FontFaceSet | undefined;
-          if (!fonts?.load) return;
-          try {
-            await fonts.load(`${options.fontSize}px "${options.fontFamily}"`);
-          } catch {
-            // best effort
+	          fontFamily: string;
+	          fontSize: number;
+	        }) => {
+	          if (typeof document === "undefined") return;
+	          const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+	          if (!fonts?.load) return;
+	          try {
+	            await fonts.load(`${options.fontSize}px "${options.fontFamily}"`);
+	          } catch {
+	            // best effort
           }
         };
 

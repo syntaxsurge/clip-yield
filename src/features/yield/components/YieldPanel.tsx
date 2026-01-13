@@ -26,9 +26,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { VaultTxReceiptCard } from "@/components/data-display/VaultTxReceiptCard";
 import WalletGateSkeleton from "@/components/feedback/WalletGateSkeleton";
-import useCreateVaultTx from "@/app/hooks/useCreateVaultTx";
-import useGetLatestVaultTx from "@/app/hooks/useGetLatestVaultTx";
-import useGetVaultTxByHash from "@/app/hooks/useGetVaultTxByHash";
+import createVaultTx from "@/app/hooks/useCreateVaultTx";
+import getLatestVaultTx from "@/app/hooks/useGetLatestVaultTx";
+import getVaultTxByHash from "@/app/hooks/useGetVaultTxByHash";
 import type { VaultTxKind } from "@/app/types";
 import { cn, formatShortHash } from "@/lib/utils";
 import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
@@ -392,10 +392,10 @@ export default function YieldPanel({
     queryFn: async () => {
       if (!user) return null;
       if (lastDepositTxHash) {
-        const receipt = await useGetVaultTxByHash(lastDepositTxHash);
+        const receipt = await getVaultTxByHash(lastDepositTxHash);
         if (receipt) return receipt;
       }
-      return await useGetLatestVaultTx({
+      return await getLatestVaultTx({
         wallet: user,
         kind: receiptKind,
         creatorId: receiptCreatorId,
@@ -537,7 +537,7 @@ export default function YieldPanel({
 
     if (recordDeposit) {
       try {
-        await useCreateVaultTx({
+        await createVaultTx({
           kind: receiptKind,
           wallet: user,
           creatorId: receiptCreatorId,

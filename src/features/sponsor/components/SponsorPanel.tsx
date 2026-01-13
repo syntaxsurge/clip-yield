@@ -43,9 +43,9 @@ import sponsorHubAbi from "@/lib/contracts/abi/ClipYieldSponsorHub.json";
 import kycRegistryAbi from "@/lib/contracts/abi/KycRegistry.json";
 import { wmntAbi } from "@/lib/web3/wmnt";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
-import useCreateSponsorCampaign from "@/app/hooks/useCreateSponsorCampaign";
-import useCreateCampaignReceipt from "@/app/hooks/useCreateCampaignReceipt";
-import useCreateVaultTx from "@/app/hooks/useCreateVaultTx";
+import createSponsorCampaign from "@/app/hooks/useCreateSponsorCampaign";
+import createCampaignReceipt from "@/app/hooks/useCreateCampaignReceipt";
+import createVaultTx from "@/app/hooks/useCreateVaultTx";
 import type { SponsorCampaign } from "@/app/types";
 import { buildSponsorPackMessage } from "@/features/sponsor/message";
 import { isSponsorCampaignActive } from "@/features/sponsor/utils";
@@ -548,9 +548,9 @@ export default function SponsorPanel({
     let receiptId: string | null = null;
 
     try {
-      await useCreateSponsorCampaign(campaignInput);
+      await createSponsorCampaign(campaignInput);
 
-      receiptId = (await useCreateCampaignReceipt({
+      receiptId = (await createCampaignReceipt({
         postId,
         clipHash: postIdHash,
         creatorId: getAddress(creatorId),
@@ -578,7 +578,7 @@ export default function SponsorPanel({
     }
 
     try {
-      await useCreateVaultTx({
+      await createVaultTx({
         kind: "sponsorDeposit",
         wallet: user,
         creatorId: getAddress(creatorId),

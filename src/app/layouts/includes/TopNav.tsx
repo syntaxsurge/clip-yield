@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { debounce } from "debounce";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { useRouter } from "nextjs-toploader/app";
 import { BiChevronDown, BiSearch, BiUser } from "react-icons/bi";
 import { AiOutlineCopy, AiOutlinePlus } from "react-icons/ai";
@@ -10,9 +11,9 @@ import { FiCheck, FiLogOut, FiSettings } from "react-icons/fi";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useAccount } from "wagmi";
 import { useUser } from "@/app/context/user";
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
-import useSearchProfilesByName from "@/app/hooks/useSearchProfilesByName";
+import searchProfilesByName from "@/app/hooks/useSearchProfilesByName";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 import { isAdminAddress } from "@/lib/admin/adminAllowlist";
@@ -32,7 +33,7 @@ export default function TopNav() {
         () => isAdminAddress(address ?? userContext?.user?.id ?? null),
         [address, userContext?.user?.id],
     );
-    const profileImageUrl = useCreateBucketUrl(userContext?.user?.image || "");
+    const profileImageUrl = createBucketUrl(userContext?.user?.image || "");
     const walletAddress = userContext?.user?.id ?? "";
     const displayName = userContext?.user?.name?.trim() || "Creator";
     const userHandle = userContext?.user?.username
@@ -103,7 +104,7 @@ export default function TopNav() {
         if (event.target.value == "") return setSearchProfiles([]);
 
         try {
-            const result = await useSearchProfilesByName(event.target.value);
+            const result = await searchProfilesByName(event.target.value);
             if (result) return setSearchProfiles(result);
             setSearchProfiles([]);
         } catch (error) {
@@ -136,20 +137,23 @@ export default function TopNav() {
                 id="TopNav"
                 className="fixed left-0 top-0 z-30 flex h-[60px] w-full items-center border-b border-gray-200 bg-white dark:border-white/10 dark:bg-black"
             >
-                <div className="flex items-center justify-between gap-6 w-full px-4 mx-auto max-w-[1150px]">
-
-                    <Link href="/" className="flex items-center gap-2 shrink-0">
-                        <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white">
-                            <img
-                                className="h-full w-full object-cover"
-                                src="/images/clip-yield-logo.png"
-                                alt="ClipYield"
-                            />
-                        </span>
-                        <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
-                            ClipYield
-                        </span>
-                    </Link>
+	                    <div className="flex items-center justify-between gap-6 w-full px-4 mx-auto max-w-[1150px]">
+	
+	                        <Link href="/" className="flex items-center gap-2 shrink-0">
+	                            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg bg-white">
+	                            <Image
+	                                className="h-full w-full object-cover"
+	                                src="/images/clip-yield-logo.png"
+	                                alt="ClipYield"
+	                                width={44}
+	                                height={44}
+	                                sizes="44px"
+	                            />
+	                        </span>
+	                        <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
+	                            ClipYield
+	                        </span>
+	                    </Link>
 
                     <div className="relative hidden md:flex items-center justify-end rounded-full bg-[#F1F1F2] p-1 max-w-[430px] w-full dark:bg-white/10">
                             <input 
@@ -166,18 +170,26 @@ export default function TopNav() {
                                             ? `@${profile.username}`
                                             : `@${formatShortHash(profile?.id ?? "")}`;
                                         return (
-                                        <div className="p-1" key={index}>
-                                            <Link 
-                                                href={`/profile/${profile?.id}`}
-                                                className="group flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-ink)] dark:text-white"
-                                            >
-                                                <div className="flex items-center">
-                                                    <img className="rounded-md" width="40" src={useCreateBucketUrl(profile?.image)} />
-                                                    <div className="ml-2">
-                                                        <div className="truncate font-semibold">{ profile?.name }</div>
-                                                        <div className="text-xs text-gray-500 dark:text-white/60 group-hover:text-white/90">
-                                                            {handle}
-                                                        </div>
+	                                        <div className="p-1" key={index}>
+	                                            <Link 
+	                                                href={`/profile/${profile?.id}`}
+	                                                className="group flex items-center justify-between w-full cursor-pointer rounded-md p-1 px-2 text-gray-900 hover:bg-[color:var(--brand-accent)] hover:text-[color:var(--brand-ink)] dark:text-white"
+	                                            >
+	                                                <div className="flex items-center">
+	                                                    <Image
+	                                                        className="rounded-md object-cover"
+	                                                        width={40}
+	                                                        height={40}
+	                                                        src={createBucketUrl(profile?.image)}
+	                                                        alt={`${profile?.name ?? "Creator"} avatar`}
+	                                                        unoptimized
+	                                                        loader={({ src }) => src}
+	                                                    />
+	                                                    <div className="ml-2">
+	                                                        <div className="truncate font-semibold">{ profile?.name }</div>
+	                                                        <div className="text-xs text-gray-500 dark:text-white/60 group-hover:text-white/90">
+	                                                            {handle}
+	                                                        </div>
                                                     </div>
                                                 </div>
                                             </Link>
@@ -251,21 +263,26 @@ export default function TopNav() {
                                 />
                             ) : (
                                 <div className="flex items-center">
-                                    <div className="relative">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowMenu((prev) => !prev)}
-                                            aria-expanded={showMenu}
+	                                    <div className="relative">
+	                                        <button
+	                                            type="button"
+	                                            onClick={() => setShowMenu((prev) => !prev)}
+	                                            aria-expanded={showMenu}
                                             aria-haspopup="menu"
-                                            aria-label="Open account menu"
-                                            className="mt-1 rounded-full border border-gray-200 ring-1 ring-transparent transition hover:ring-gray-200 dark:border-white/10 dark:hover:ring-white/20"
-                                        >
-                                            <img
-                                                className="h-[35px] w-[35px] rounded-full"
-                                                src={profileImageUrl}
-                                                alt={`${displayName} avatar`}
-                                            />
-                                        </button>
+	                                            aria-label="Open account menu"
+	                                            className="mt-1 rounded-full border border-gray-200 ring-1 ring-transparent transition hover:ring-gray-200 dark:border-white/10 dark:hover:ring-white/20"
+	                                        >
+	                                            <Image
+	                                                className="h-[35px] w-[35px] rounded-full object-cover"
+	                                                src={profileImageUrl}
+	                                                alt={`${displayName} avatar`}
+	                                                width={35}
+	                                                height={35}
+	                                                sizes="35px"
+	                                                unoptimized
+	                                                loader={({ src }) => src}
+	                                            />
+	                                        </button>
 
                                         {showMenu ? (
                                             <div
@@ -273,17 +290,22 @@ export default function TopNav() {
                                                 className="absolute right-0 top-[48px] w-[280px] rounded-2xl border border-gray-200/80 bg-white/95 p-3 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-[#0f0f12]/95"
                                             >
                                                 <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-white to-[#F6F6F8] p-3 dark:border-white/10 dark:from-[#15151c] dark:to-[#0f0f12]">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-11 w-11 overflow-hidden rounded-full border border-white/70 bg-gray-100 dark:border-white/10 dark:bg-white/10">
-                                                            <img
-                                                                className="h-full w-full object-cover"
-                                                                src={profileImageUrl}
-                                                                alt={`${displayName} avatar`}
-                                                            />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <div className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-                                                                {displayName}
+	                                                    <div className="flex items-center gap-3">
+	                                                        <div className="h-11 w-11 overflow-hidden rounded-full border border-white/70 bg-gray-100 dark:border-white/10 dark:bg-white/10">
+	                                                            <Image
+	                                                                className="h-full w-full object-cover"
+	                                                                src={profileImageUrl}
+	                                                                alt={`${displayName} avatar`}
+	                                                                width={44}
+	                                                                height={44}
+	                                                                sizes="44px"
+	                                                                unoptimized
+	                                                                loader={({ src }) => src}
+	                                                            />
+	                                                        </div>
+	                                                        <div className="min-w-0">
+	                                                            <div className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+	                                                                {displayName}
                                                             </div>
                                                             <div className="truncate text-xs text-gray-500 dark:text-white/60">
                                                                 {userHandle}

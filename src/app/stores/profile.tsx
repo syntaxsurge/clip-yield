@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 import { Profile } from '../types';
-import useGetProfileByUserId from '../hooks/useGetProfileByUserId';
+import getProfileByUserId from '../hooks/useGetProfileByUserId';
   
 interface ProfileStore {
     currentProfile: Profile | null;
@@ -15,7 +15,7 @@ export const useProfileStore = create<ProfileStore>()(
                 currentProfile: null,
 
                 setCurrentProfile: async (userId: string) => {
-                    const result = await useGetProfileByUserId(userId)
+                    const result = await getProfileByUserId(userId)
                     set({ currentProfile: result });
                 },
             }),

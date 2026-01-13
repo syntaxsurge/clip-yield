@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 import { RandomUsers } from '../types';
-import useGetRandomUsers from '../hooks/useGetRandomUsers';
+import getRandomUsers from '../hooks/useGetRandomUsers';
   
 interface GeneralStore {
     isEditProfileOpen: boolean
@@ -50,7 +50,7 @@ export const useGeneralStore = create<GeneralStore>()(
                     }),
                 setIsAutoScrollEnabled: (val: boolean) => set({ isAutoScrollEnabled: val }),
                 setRandomUsers: async () => {
-                    const result = await useGetRandomUsers()
+                    const result = await getRandomUsers()
                     set({ randomUsers: result })
                 },
             }),

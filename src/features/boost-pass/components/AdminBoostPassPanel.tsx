@@ -28,8 +28,8 @@ import { mantleSepoliaContracts } from "@/lib/contracts/addresses";
 import boostPassAbi from "@/lib/contracts/abi/ClipYieldBoostPass.json";
 import { formatShortHash } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/web3/mantleConfig";
-import useGetLatestLeaderboard from "@/app/hooks/useGetLatestLeaderboard";
-import useLogBoostPassEpoch from "@/app/hooks/useLogBoostPassEpoch";
+import getLatestLeaderboard from "@/app/hooks/useGetLatestLeaderboard";
+import logBoostPassEpoch from "@/app/hooks/useLogBoostPassEpoch";
 import type { LeaderboardSnapshot } from "@/app/types";
 
 const boostPassAddress = mantleSepoliaContracts.boostPass as Address;
@@ -63,7 +63,7 @@ export default function AdminBoostPassPanel() {
 
     (async () => {
       try {
-        const result = await useGetLatestLeaderboard();
+        const result = await getLatestLeaderboard();
         if (!isMounted) return;
         setSnapshot(result);
         setStatus("ready");
@@ -134,7 +134,7 @@ export default function AdminBoostPassPanel() {
     if (loggedTxHash === txHash) return;
 
     setLoggedTxHash(txHash);
-    void useLogBoostPassEpoch({
+    void logBoostPassEpoch({
       epoch: publishedEpoch,
       publishedBy: address,
       txHash,

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
 import { useUser } from "@/app/context/user";
-import useGetRandomUsers from "@/app/hooks/useGetRandomUsers";
-import useGetFollowingProfiles from "@/app/hooks/useGetFollowingProfiles";
+import getRandomUsers from "@/app/hooks/useGetRandomUsers";
+import getFollowingProfiles from "@/app/hooks/useGetFollowingProfiles";
 import type { RandomUsers } from "@/app/types";
 import MenuItemFollow from "@/app/layouts/includes/MenuItemFollow";
 import EmptyState from "@/components/feedback/EmptyState";
@@ -28,7 +28,7 @@ export default function CreatorsPage() {
 
     const loadSuggested = async () => {
       try {
-        const result = await useGetRandomUsers(SUGGESTED_LIMIT);
+        const result = await getRandomUsers(SUGGESTED_LIMIT);
         if (!isMounted) return;
         setSuggested(result);
         setSuggestedStatus("ready");
@@ -58,7 +58,7 @@ export default function CreatorsPage() {
 
     const loadFollowing = async () => {
       try {
-        const result = await useGetFollowingProfiles(userId, FOLLOWING_LIMIT);
+        const result = await getFollowingProfiles(userId, FOLLOWING_LIMIT);
         if (!isMounted) return;
         setFollowing(result);
         setFollowingStatus("ready");

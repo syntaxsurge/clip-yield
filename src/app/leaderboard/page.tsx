@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import MainLayout from "@/app/layouts/MainLayout";
-import useGetLatestLeaderboard from "@/app/hooks/useGetLatestLeaderboard";
-import useGetLatestBoostPassEpoch from "@/app/hooks/useGetLatestBoostPassEpoch";
+import getLatestLeaderboard from "@/app/hooks/useGetLatestLeaderboard";
+import getLatestBoostPassEpoch from "@/app/hooks/useGetLatestBoostPassEpoch";
 import type { BoostPassEpoch, LeaderboardSnapshot } from "@/app/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,8 +28,8 @@ export default function LeaderboardPage() {
       setError(null);
       try {
         const [leaderboardResult, epochResult] = await Promise.all([
-          useGetLatestLeaderboard(),
-          useGetLatestBoostPassEpoch(),
+          getLatestLeaderboard(),
+          getLatestBoostPassEpoch(),
         ]);
         if (!isMounted) return;
         setSnapshot(leaderboardResult);

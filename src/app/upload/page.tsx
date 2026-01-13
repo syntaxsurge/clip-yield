@@ -8,22 +8,23 @@ import { PiKnifeLight } from 'react-icons/pi'
 import { useRouter } from "nextjs-toploader/app";
 import { useUser } from "@/app/context/user"
 import { UploadError } from "../types";
-import useCreatePost from "../hooks/useCreatePost";
+import createPost from "../hooks/useCreatePost";
 import { ClipVideoPlayer } from "@/components/data-display/ClipVideoPlayer";
+import Image from "next/image";
 
 export default function Upload() {
     const contextUser = useUser()
     const router = useRouter()
 
-    let [fileDisplay, setFileDisplay] = useState<string>('');
-    let [caption, setCaption] = useState<string>('');
-    let [file, setFile] = useState<File | null>(null);
-    let [error, setError] = useState<UploadError | null>(null);
-    let [isUploading, setIsUploading] = useState<boolean>(false);
+    const [fileDisplay, setFileDisplay] = useState<string>('');
+    const [caption, setCaption] = useState<string>('');
+    const [file, setFile] = useState<File | null>(null);
+    const [error, setError] = useState<UploadError | null>(null);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
 
     useEffect(() => {
         if (!contextUser?.user) router.push('/')
-    }, [contextUser])
+    }, [contextUser?.user, router])
 
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -62,13 +63,13 @@ export default function Upload() {
     }
 
     const createNewPost = async () => {
-        let isError = validate()
+        const isError = validate()
         if (isError) return
         if (!file || !contextUser?.user) return
         setIsUploading(true)
 
         try {
-            await useCreatePost(file, contextUser?.user?.id, caption)
+            await createPost(file, contextUser?.user?.id, caption)
             router.push(`/profile/${contextUser?.user?.id}`)
             setIsUploading(false)
         } catch (error) {
@@ -178,15 +179,20 @@ export default function Upload() {
                                     </div>
                                 ) : null}
                                 
-                                <img 
-                                    className="absolute z-20 pointer-events-none" 
+                                <Image
+                                    className="absolute z-20 pointer-events-none"
                                     src="/images/mobile-case.png"
+                                    alt=""
+                                    width={473}
+                                    height={990}
                                 />
-                                <img 
-                                    className="absolute right-4 bottom-6 z-20" 
-                                    width="90" 
+                                <Image
+                                    className="absolute right-4 bottom-6 z-20"
                                     src="/images/clip-yield-logo.png"
                                     alt="ClipYield"
+                                    width={90}
+                                    height={90}
+                                    sizes="90px"
                                 />
                                 <ClipVideoPlayer
                                     src={fileDisplay}

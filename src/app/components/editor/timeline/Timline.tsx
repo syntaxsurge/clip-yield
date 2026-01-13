@@ -430,19 +430,14 @@ export const Timeline = () => {
   );
 
   const handleSplit = () => {
-    let element = null;
-    let elements = null;
-    let setElements = null;
-
     if (!activeElement) {
       toast.error("No element selected.");
       return;
     }
 
     if (activeElement === "media") {
-      elements = [...mediaFiles];
-      element = elements[activeElementIndex];
-      setElements = setMediaFiles;
+      const elements = [...mediaFiles];
+      const element = elements[activeElementIndex];
 
       if (!element) {
         toast.error("No element selected.");
@@ -483,10 +478,15 @@ export const Timeline = () => {
       };
 
       elements.splice(activeElementIndex, 1, firstPart, secondPart);
-    } else if (activeElement === "text") {
-      elements = [...textElements];
-      element = elements[activeElementIndex];
-      setElements = setTextElements;
+      dispatch(setMediaFiles(elements));
+      dispatch(setActiveElement(null));
+      toast.success("Element split successfully.");
+      return;
+    }
+
+    if (activeElement === "text") {
+      const elements = [...textElements];
+      const element = elements[activeElementIndex];
 
       if (!element) {
         toast.error("No element selected.");
@@ -515,13 +515,13 @@ export const Timeline = () => {
       };
 
       elements.splice(activeElementIndex, 1, firstPart, secondPart);
-    }
-
-    if (elements && setElements) {
-      dispatch(setElements(elements as any));
+      dispatch(setTextElements(elements));
       dispatch(setActiveElement(null));
       toast.success("Element split successfully.");
+      return;
     }
+
+    toast.error("Split is only supported for media or text elements.");
   };
 
   const handleDuplicate = () => {
@@ -574,7 +574,7 @@ export const Timeline = () => {
         positionEnd: placement.end,
       };
 
-      shiftedMediaFiles.splice(activeElementIndex + 1, 0, duplicated as any);
+      shiftedMediaFiles.splice(activeElementIndex + 1, 0, duplicated);
 
       const shiftedTextElements = textElements.map((clip) => {
         const delta = placement.shifts[clip.id];
@@ -590,8 +590,8 @@ export const Timeline = () => {
 
       dispatch(
         applyTimelineEdit({
-          mediaFiles: shiftedMediaFiles as any,
-          textElements: shiftedTextElements as any,
+          mediaFiles: shiftedMediaFiles,
+          textElements: shiftedTextElements,
         }),
       );
       dispatch(setActiveElement(null));
@@ -639,7 +639,7 @@ export const Timeline = () => {
       positionEnd: placement.end,
     };
 
-    shiftedTextElements.splice(activeElementIndex + 1, 0, duplicated as any);
+    shiftedTextElements.splice(activeElementIndex + 1, 0, duplicated);
 
     const shiftedMediaFiles = mediaFiles.map((clip) => {
       const delta = placement.shifts[clip.id];
@@ -655,8 +655,8 @@ export const Timeline = () => {
 
     dispatch(
       applyTimelineEdit({
-        mediaFiles: shiftedMediaFiles as any,
-        textElements: shiftedTextElements as any,
+        mediaFiles: shiftedMediaFiles,
+        textElements: shiftedTextElements,
       }),
     );
     dispatch(setActiveElement(null));
@@ -674,34 +674,31 @@ export const Timeline = () => {
       return;
     }
 
-    let element: any = null;
-    let elements: any[] | null = null;
-    let setElements: ((payload: any) => any) | null = null;
-
     if (activeElement === "media") {
-      elements = [...mediaFiles];
-      element = elements[activeElementIndex];
-      setElements = setMediaFiles;
-    } else if (activeElement === "text") {
-      elements = [...textElements];
-      element = elements[activeElementIndex];
-      setElements = setTextElements;
-    }
-
-    if (!element) {
-      toast.error("No element selected.");
+      const element = mediaFiles[activeElementIndex];
+      if (!element) {
+        toast.error("No element selected.");
+        return;
+      }
+      dispatch(setMediaFiles(mediaFiles.filter((ele) => ele.id !== element.id)));
+      dispatch(setActiveElement(null));
+      toast.success("Element deleted successfully.");
       return;
     }
 
-    if (elements) {
-      elements = elements.filter((ele) => ele.id !== element.id);
-    }
-
-    if (elements && setElements) {
-      dispatch(setElements(elements as any));
+    if (activeElement === "text") {
+      const element = textElements[activeElementIndex];
+      if (!element) {
+        toast.error("No element selected.");
+        return;
+      }
+      dispatch(setTextElements(textElements.filter((ele) => ele.id !== element.id)));
       dispatch(setActiveElement(null));
       toast.success("Element deleted successfully.");
+      return;
     }
+
+    toast.error("Delete is only supported for media or text elements.");
   };
 
   const getTimeFromClientX = useCallback(

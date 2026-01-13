@@ -3,10 +3,10 @@
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import MainLayout from "@/app/layouts/MainLayout";
-import useGetPostById from "@/app/hooks/useGetPostById";
-import useGetCreatorVaultByWallet from "@/app/hooks/useGetCreatorVaultByWallet";
-import useGetSponsorCampaignByPostId from "@/app/hooks/useGetSponsorCampaignByPostId";
-import useCreateBucketUrl from "@/app/hooks/useCreateBucketUrl";
+import getPostById from "@/app/hooks/useGetPostById";
+import getCreatorVaultByWallet from "@/app/hooks/useGetCreatorVaultByWallet";
+import getSponsorCampaignByPostId from "@/app/hooks/useGetSponsorCampaignByPostId";
+import createBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import type { CreatorVaultRecord, PostWithProfile, SponsorCampaign } from "@/app/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -47,14 +47,14 @@ export default function SponsorPage({ params }: SponsorPageProps) {
           throw new Error("Missing post id.");
         }
 
-        const postResult = await useGetPostById(postId);
+        const postResult = await getPostById(postId);
         if (!postResult) {
           throw new Error("Post not found.");
         }
 
         const [vaultResult, campaignResult] = await Promise.all([
-          useGetCreatorVaultByWallet(postResult.user_id),
-          useGetSponsorCampaignByPostId(postId),
+          getCreatorVaultByWallet(postResult.user_id),
+          getSponsorCampaignByPostId(postId),
         ]);
 
         if (!isMounted) return;
@@ -132,7 +132,7 @@ export default function SponsorPage({ params }: SponsorPageProps) {
                   </CardHeader>
                   <CardContent className="space-y-4">
                   <ClipVideoPlayer
-                    src={useCreateBucketUrl(post.video_url, "")}
+                    src={createBucketUrl(post.video_url, "")}
                     showLogo={false}
                     className="mb-12 aspect-[9/16] w-full"
                     videoClassName="object-cover"

@@ -4,12 +4,12 @@ import { useUser } from "@/app/context/user"
 import { BiLoaderCircle } from "react-icons/bi"
 import ClientOnly from "../ClientOnly"
 import { useCommentStore } from "@/app/stores/comment"
-import useCreateComment from '@/app/hooks/useCreateComment' 
+import createComment from "@/app/hooks/useCreateComment"
 import { CommentsCompTypes } from "@/app/types"
 
 export default function Comments({ params }: CommentsCompTypes) {
 
-    let { commentsByPost, setCommentsByPost } = useCommentStore()
+    const { commentsByPost, setCommentsByPost } = useCommentStore()
 
     const contextUser = useUser()
     const [comment, setComment] = useState<string>('')
@@ -21,7 +21,7 @@ export default function Comments({ params }: CommentsCompTypes) {
 
         try {
             setIsUploading(true)
-            await useCreateComment(contextUser?.user?.id, params?.postId, comment)
+            await createComment(contextUser?.user?.id, params?.postId, comment)
             setCommentsByPost(params?.postId)
             setComment('')
             setIsUploading(false)
