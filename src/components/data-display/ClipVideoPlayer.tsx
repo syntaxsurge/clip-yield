@@ -83,7 +83,15 @@ export function ClipVideoPlayer({
         try {
           await video.play();
         } catch (retryError) {
-          if (retryError?.name !== "AbortError") {
+          const retryName =
+            typeof retryError === "object" &&
+            retryError !== null &&
+            "name" in retryError &&
+            typeof (retryError as { name?: unknown }).name === "string"
+              ? (retryError as { name: string }).name
+              : null;
+
+          if (retryName !== "AbortError") {
             console.warn(retryError);
           }
         }
