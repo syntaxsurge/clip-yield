@@ -92,6 +92,164 @@ export default function FfmpegRender({
         const inputs: string[] = [];
         const audioDelays: string[] = [];
 
+        const loadFontForMeasurement = async (options: {
+          fontFamily: string;
+          fontSize: number;
+        }) => {
+          if (typeof document === "undefined") return;
+          const fonts = (document as any).fonts as FontFaceSet | undefined;
+          if (!fonts?.load) return;
+          try {
+            await fonts.load(`${options.fontSize}px "${options.fontFamily}"`);
+          } catch {
+            // best effort
+          }
+        };
+
+        const getTextMeasurer = (() => {
+          let ctx: CanvasRenderingContext2D | null = null;
+          const cache = new Map<string, (value: string) => number>();
+          return (options: { fontFamily: string; fontSize: number }) => {
+            const key = `${options.fontFamily}::${options.fontSize}`;
+            const cached = cache.get(key);
+            if (cached) return cached;
+
+            if (!ctx && typeof document !== "undefined") {
+              ctx = document.createElement("canvas").getContext("2d");
+            }
+
+            const measure = (value: string) => {
+              if (!ctx) return value.length * options.fontSize * 0.6;
+              ctx.font = `${options.fontSize}px "${options.fontFamily}"`;
+              return ctx.measureText(value).width;
+            };
+
+            cache.set(key, measure);
+            return measure;
+          };
+        })();
+
+        const getLineHeightPx = (() => {
+          const cache = new Map<string, number>();
+          return (options: { fontFamily: string; fontSize: number }) => {
+            const key = `${options.fontFamily}::${options.fontSize}`;
+            const cached = cache.get(key);
+            if (typeof cached === "number") return cached;
+            if (typeof document === "undefined") return Math.round(options.fontSize * 1.2);
+
+            const span = document.createElement("span");
+            span.textContent = "Hg";
+            span.style.position = "fixed";
+            span.style.left = "-9999px";
+            span.style.top = "0";
+            span.style.whiteSpace = "pre";
+            span.style.fontFamily = `"${options.fontFamily}"`;
+            span.style.fontSize = `${options.fontSize}px`;
+            document.body.appendChild(span);
+
+            try {
+              const rect = span.getBoundingClientRect();
+              const height = rect.height;
+              const lineHeight =
+                typeof height === "number" && Number.isFinite(height) && height > 0
+                  ? height
+                  : options.fontSize * 1.2;
+              cache.set(key, lineHeight);
+              return lineHeight;
+            } finally {
+              span.remove();
+            }
+          };
+        })();
+
+        const wrapTextToLines = (value: string, options: {
+          fontFamily: string;
+          fontSize: number;
+          maxWidth: number;
+        }) => {
+          const input = (value ?? "").replace(/\r\n/g, "\n");
+          const maxWidth = Number.isFinite(options.maxWidth)
+            ? Math.max(1, options.maxWidth)
+            : 1;
+          const measure = getTextMeasurer({
+            fontFamily: options.fontFamily,
+            fontSize: options.fontSize,
+          });
+
+          const lines: string[] = [];
+          const paragraphs = input.split("\n");
+
+          const pushLine = (line: string) => {
+            lines.push(line);
+          };
+
+          const breakLongToken = (token: string) => {
+            let remaining = token;
+            while (remaining.length > 0) {
+              let slice = "";
+              for (const ch of remaining) {
+                const next = slice + ch;
+                if (slice.length > 0 && measure(next) > maxWidth) break;
+                slice = next;
+              }
+              if (slice.length === 0) {
+                slice = remaining.slice(0, 1);
+              }
+              pushLine(slice);
+              remaining = remaining.slice(slice.length);
+            }
+          };
+
+          for (const paragraph of paragraphs) {
+            if (paragraph.length === 0) {
+              pushLine("");
+              continue;
+            }
+
+            const tokens = paragraph.split(/(\s+)/);
+            let current = "";
+
+            for (const token of tokens) {
+              if (token.length === 0) continue;
+
+              const candidate = current + token;
+              if (current.length === 0) {
+                if (measure(token) <= maxWidth) {
+                  current = token;
+                } else {
+                  breakLongToken(token);
+                }
+                continue;
+              }
+
+              if (measure(candidate) <= maxWidth) {
+                current = candidate;
+                continue;
+              }
+
+              pushLine(current.trimEnd());
+              const nextToken = token.trimStart();
+              if (nextToken.length === 0) {
+                current = "";
+                continue;
+              }
+              if (measure(nextToken) <= maxWidth) {
+                current = nextToken;
+              } else {
+                breakLongToken(nextToken);
+                current = "";
+              }
+            }
+
+            if (current.length > 0) {
+              pushLine(current.trimEnd());
+            }
+          }
+
+          if (lines.length === 0) return [""];
+          return lines;
+        };
+
         type OverlayEntry = {
           label: string;
           x: number;
@@ -134,7 +292,6 @@ export default function FfmpegRender({
         const escapeDrawtext = (value: string) =>
           value
             .replace(/\\/g, "\\\\")
-            .replace(/\n/g, "\\n")
             .replace(/:/g, "\\:")
             .replace(/'/g, "\\\\'");
 
@@ -315,6 +472,9 @@ export default function FfmpegRender({
               return raw === "Arial" || raw === "Inter" || raw === "Lato" ? raw : "Inter";
             })();
 
+            const fontSizePx = Math.max(1, Math.round(safeNumber(text.fontSize, 24)));
+            await loadFontForMeasurement({ fontFamily: font, fontSize: fontSizePx });
+
             const align = text.align || "left";
             const xExpr =
               align === "center"
@@ -323,16 +483,40 @@ export default function FfmpegRender({
                   ? "(w-text_w)"
                   : "0";
 
-            const escapedText = escapeDrawtext(text.text ?? "");
-            if (escapedText.trim().length > 0) {
+            const wrappedLines = wrapTextToLines(text.text ?? "", {
+              fontFamily: font,
+              fontSize: fontSizePx,
+              maxWidth: baseWidth,
+            });
+            const lineHeight = getLineHeightPx({
+              fontFamily: font,
+              fontSize: fontSizePx,
+            });
+
+            let drawCurrent = srcLabel;
+            let drewText = false;
+            for (let lineIndex = 0; lineIndex < wrappedLines.length; lineIndex++) {
+              const rawLine = wrappedLines[lineIndex] ?? "";
+              const escapedLine = escapeDrawtext(rawLine);
+              if (escapedLine.trim().length === 0) continue;
+
+              const nextLabel =
+                lineIndex === wrappedLines.length - 1
+                  ? drawLabel
+                  : `${drawLabel}_${lineIndex}`;
+              const yPx = Math.max(0, Math.round(lineIndex * lineHeight));
+
               filters.push(
-                `[${srcLabel}]drawtext=fontfile=font${font}.ttf:text='${escapedText}':x=${xExpr}:y=0:fontsize=${Math.max(
-                  1,
-                  Math.round(safeNumber(text.fontSize, 24)),
-                )}:fontcolor=${textHex}[${drawLabel}]`,
+                `[${drawCurrent}]drawtext=fontfile=font${font}.ttf:text='${escapedLine}':x=${xExpr}:y=${yPx}:fontsize=${fontSizePx}:fontcolor=${textHex}[${nextLabel}]`,
               );
-            } else {
+              drawCurrent = nextLabel;
+              drewText = true;
+            }
+
+            if (!drewText) {
               filters.push(`[${srcLabel}]null[${drawLabel}]`);
+            } else if (drawCurrent !== drawLabel) {
+              filters.push(`[${drawCurrent}]null[${drawLabel}]`);
             }
 
             let current = drawLabel;
