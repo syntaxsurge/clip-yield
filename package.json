@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "node scripts/copy-ffmpeg-core.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -16,13 +17,14 @@
     "convex:deploy": "npx convex deploy -y",
     "convex:redeploy": "pnpm run convex:deploy && pnpm run convex:dev",
     "convex:reset": "dotenv -e .env -e .env.local -- tsx scripts/reset-convex.ts",
+    "ffmpeg:sync-core": "node scripts/copy-ffmpeg-core.mjs",
     "build:contracts": "pnpm --filter blockchain-hardhat run compile",
     "contracts:sync": "tsx scripts/sync-contracts.ts"
   },
   "dependencies": {
     "@diffusionstudio/core": "^4.0.3",
+    "@ffmpeg/core": "0.12.10",
     "@ffmpeg/ffmpeg": "^0.12.13",
-    "@ffmpeg/util": "^0.12.1",
     "@mantleio/viem": "0.0.1-alpha.1",
     "@privy-io/react-auth": "^3.10.1",
     "@privy-io/wagmi": "^2.1.3",
