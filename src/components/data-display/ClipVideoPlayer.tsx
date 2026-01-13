@@ -55,9 +55,12 @@ export function ClipVideoPlayer({
   const { feedVolume, setFeedVolume } = useGeneralStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const pauseIntentRef = useRef<"auto" | "user" | null>(null);
+  const userPausedRef = useRef(false);
   const [isBuffering, setIsBuffering] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
+  const [isVisible, setIsVisible] = useState(() => !observeVisibility);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -67,14 +70,29 @@ export function ClipVideoPlayer({
     const video = videoRef.current;
     if (!video) return;
     const playPromise = video.play();
-    if (playPromise) {
-      playPromise.catch((error) => {
-        if (error?.name !== "AbortError") {
-          console.warn(error);
+    if (!playPromise) return;
+    playPromise.catch(async (error) => {
+      if (error?.name === "AbortError") return;
+
+      if (error?.name === "NotAllowedError") {
+        if (!video.muted) {
+          video.muted = true;
+          video.volume = 0;
+          setFeedVolume(0);
         }
-      });
-    }
-  }, []);
+        try {
+          await video.play();
+        } catch (retryError) {
+          if (retryError?.name !== "AbortError") {
+            console.warn(retryError);
+          }
+        }
+        return;
+      }
+
+      console.warn(error);
+    });
+  }, [setFeedVolume]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -84,9 +102,8 @@ export function ClipVideoPlayer({
   }, [feedVolume]);
 
   useEffect(() => {
-    if (!autoPlay) return;
-    safePlay();
-  }, [autoPlay, safePlay]);
+    setIsVisible(!observeVisibility);
+  }, [observeVisibility]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -96,12 +113,20 @@ export function ClipVideoPlayer({
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry?.isIntersecting) {
-          if (video.paused) {
-            safePlay();
+        const ratio = entry?.intersectionRatio ?? 0;
+        const nextVisible = ratio >= 0.6;
+        setIsVisible(nextVisible);
+
+        if (!nextVisible) {
+          if (!video.paused) {
+            pauseIntentRef.current = "auto";
+            video.pause();
           }
-        } else if (!video.paused) {
-          video.pause();
+          return;
+        }
+
+        if (!userPausedRef.current) {
+          safePlay();
         }
       },
       { threshold: [0.6] },
@@ -111,12 +136,23 @@ export function ClipVideoPlayer({
     return () => observer.disconnect();
   }, [observeVisibility, safePlay]);
 
+  const shouldAutoplay = autoPlay || (observeVisibility && isVisible);
+  const shouldPlay = shouldAutoplay && !userPausedRef.current;
+  const isAutoplayContext = autoPlay || observeVisibility;
+
+  useEffect(() => {
+    if (!shouldPlay) return;
+    safePlay();
+  }, [safePlay, shouldPlay]);
+
   useEffect(() => {
     setIsBuffering(true);
     setIsPaused(false);
     setHasPlayed(false);
     setDuration(0);
     setCurrentTime(0);
+    pauseIntentRef.current = null;
+    userPausedRef.current = false;
   }, [src]);
 
   useEffect(() => {
@@ -134,9 +170,11 @@ export function ClipVideoPlayer({
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
+      userPausedRef.current = false;
       safePlay();
       return;
     }
+    pauseIntentRef.current = "user";
     video.pause();
   };
 
@@ -191,7 +229,9 @@ export function ClipVideoPlayer({
     setIsVolumeDragging(true);
   };
 
-  const showPausedOverlay = hasPlayed && isPaused;
+  const showPausedOverlay = hasPlayed && isPaused && userPausedRef.current;
+  const showLoadingOverlay =
+    isBuffering || (isAutoplayContext && shouldPlay && (isPaused || !hasPlayed));
   const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 
   const volumeIcon = useMemo(() => {
@@ -222,15 +262,38 @@ export function ClipVideoPlayer({
           loop={loop}
           playsInline
           autoPlay={autoPlay}
+          muted={feedVolume === 0}
+          preload={observeVisibility ? "metadata" : "auto"}
           className={cn("h-full w-full object-contain", videoClassName)}
           src={src}
           onPlay={() => {
+            userPausedRef.current = false;
             setHasPlayed(true);
             setIsPaused(false);
           }}
-          onPause={() => setIsPaused(true)}
+          onPause={() => {
+            setIsPaused(true);
+            const intent = pauseIntentRef.current;
+            pauseIntentRef.current = null;
+
+            if (intent === "user") {
+              userPausedRef.current = true;
+              return;
+            }
+
+            if (!intent && shouldPlay) {
+              safePlay();
+            }
+          }}
+          onLoadStart={() => setIsBuffering(true)}
           onWaiting={() => setIsBuffering(true)}
-          onCanPlay={() => setIsBuffering(false)}
+          onStalled={() => setIsBuffering(true)}
+          onCanPlay={() => {
+            setIsBuffering(false);
+            if (shouldPlay) {
+              safePlay();
+            }
+          }}
           onPlaying={() => {
             setIsBuffering(false);
             setIsPaused(false);
@@ -243,7 +306,10 @@ export function ClipVideoPlayer({
           }}
         />
 
-        <VideoStatusOverlay isBuffering={isBuffering} isPaused={showPausedOverlay} />
+        <VideoStatusOverlay
+          isBuffering={showLoadingOverlay}
+          isPaused={showPausedOverlay}
+        />
 
         {meta && showMeta ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">

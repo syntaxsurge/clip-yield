@@ -11,6 +11,12 @@ Creator-first short-video platform where sponsorships are tokenized as on-chain 
 - **Demo runbook:** `docs/youtube-demo-script.md`
 - **Optional redirects:** `/demo-video` (set `DEMO_VIDEO_URL`) and `/pitch-deck` (set `PITCH_DECK_URL`)
 
+### Project Links
+
+- **Live demo app:** https://clipyield.com/
+- **Demo video:** https://www.youtube.com/watch?v=J651SsaVtJY
+- **Repository:** https://github.com/syntaxsurge/clip-yield
+
 ## What ClipYield Builds
 
 ClipYield turns sponsorship spend into auditable, compliant on-chain cash-flow primitives:
