@@ -6,54 +6,95 @@ import { toBlobURL } from "@ffmpeg/util";
 const localBaseURL = "/ffmpeg";
 const remoteBaseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
 const loadTimeoutMs = 60000;
+const classWorkerURL = "/ffmpeg/ffmpeg-worker.js";
 
 export async function createLoadedFfmpeg(options?: {
   onLog?: (message: string) => void;
+  onLoadProgress?: (event: {
+    phase: "core" | "wasm";
+    url: string;
+    total: number;
+    received: number;
+    delta: number;
+    done: boolean;
+  }) => void;
 }) {
-  const ffmpeg = new FFmpeg();
+  const createInstance = () => {
+    const ffmpeg = new FFmpeg();
+    if (options?.onLog) {
+      ffmpeg.on("log", ({ message }) => {
+        options.onLog?.(message);
+      });
+    }
+    return ffmpeg;
+  };
 
-  if (options?.onLog) {
-    ffmpeg.on("log", ({ message }) => {
-      options.onLog?.(message);
-    });
-  }
-
-  const loadFromBase = async (baseURL: string) => {
+  const loadFromBase = async (
+    ffmpeg: FFmpeg,
+    baseURL: string,
+    signal: AbortSignal,
+  ) => {
     const coreURL = await toBlobURL(
       `${baseURL}/ffmpeg-core.js`,
       "text/javascript",
+      Boolean(options?.onLoadProgress),
+      (event) =>
+        options?.onLoadProgress?.({
+          phase: "core",
+          url: String(event.url),
+          total: event.total,
+          received: event.received,
+          delta: event.delta,
+          done: event.done,
+        }),
     );
     const wasmURL = await toBlobURL(
       `${baseURL}/ffmpeg-core.wasm`,
       "application/wasm",
+      Boolean(options?.onLoadProgress),
+      (event) =>
+        options?.onLoadProgress?.({
+          phase: "wasm",
+          url: String(event.url),
+          total: event.total,
+          received: event.received,
+          delta: event.delta,
+          done: event.done,
+        }),
     );
-    await ffmpeg.load({ coreURL, wasmURL });
+
+    await ffmpeg.load({ classWorkerURL, coreURL, wasmURL }, { signal });
   };
 
-  const loadWithTimeout = async (label: string, loader: () => Promise<void>) => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    const timeout = new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(new Error(`Timed out while loading FFmpeg from ${label}.`));
-      }, loadTimeoutMs);
-    });
+  const loadWithTimeout = async (label: string, baseURL: string) => {
+    const ffmpeg = createInstance();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, loadTimeoutMs);
 
     try {
-      await Promise.race([loader(), timeout]);
+      await loadFromBase(ffmpeg, baseURL, controller.signal);
+      return ffmpeg;
+    } catch (error) {
+      try {
+        ffmpeg.terminate();
+      } catch {
+        // Ignore termination failures.
+      }
+
+      const message =
+        error instanceof Error ? error.message : "Unknown error.";
+      throw new Error(`Failed to load FFmpeg from ${label}. ${message}`);
     } finally {
-      if (timeoutId) clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
     }
   };
 
   try {
-    await loadWithTimeout("CDN", () => loadFromBase(remoteBaseURL));
+    return await loadWithTimeout("the CDN", remoteBaseURL);
   } catch (error) {
-    console.warn(
-      "Failed to load FFmpeg core from CDN, falling back to local.",
-      error,
-    );
-    await loadWithTimeout("local assets", () => loadFromBase(localBaseURL));
+    console.warn("FFmpeg CDN load failed, trying local assets.", error);
+    return await loadWithTimeout("local assets", localBaseURL);
   }
-
-  return ffmpeg;
 }
