@@ -2,6 +2,8 @@
 
 Creator-first short-video platform where sponsorships are tokenized as on-chain invoice receipts and protocol fees stream into KYC-gated yield vaults on Mantle.
 
+[![ClipYield demo](public/images/clip-yield-demo.png)](https://clipyield.com/demo-video)
+
 ## Mantle Global Hackathon 2025 (Submission)
 
 - **Primary track:** RWA / RealFi
