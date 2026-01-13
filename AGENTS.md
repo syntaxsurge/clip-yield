@@ -365,6 +365,8 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - `/perks/boost-pass` Boost Pass remix pack downloads + project import
 - `/projects` editor project list + import/export
 - `/projects/[id]` timeline editor + preview/export
+- `/demo-video` redirect to the demo video URL
+- `/pitch-deck` redirect to the pitch deck URL
 
 ## API endpoints
 - `/api/kyc/start` creates or resumes a Persona inquiry and returns the hosted flow URL
@@ -394,6 +396,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Persona hosted-flow KYC uses `/api/kyc/start` for hosted flow links and `/api/kyc/sync` polling to write verification status on-chain in `KycRegistry`
 - Admin KYC console at `/admin/kyc` updates on-chain verification using `KycRegistry` AccessControl roles
 - Boost Pass epochs publish on-chain automatically on a fixed cadence via a Convex cron using `BOOST_PASS_MANAGER_PRIVATE_KEY` and `BOOST_PASS_EPOCH_INTERVAL_HOURS`
+- Demo video and pitch deck redirects resolve from `DEMO_VIDEO_URL` and `PITCH_DECK_URL`
 
 ## Core Commands
 - `pnpm dev`
