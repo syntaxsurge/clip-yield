@@ -11,8 +11,12 @@ const nextConfig = {
     ],
   },
   async redirects() {
-    const demoVideo = process.env.DEMO_VIDEO_URL || "https://www.youtube.com/";
-    const pitchDeck = process.env.PITCH_DECK_URL || "https://example.com/";
+    const demoVideo =
+      process.env.DEMO_VIDEO_URL ||
+      "https://www.youtube.com/watch?v=J651SsaVtJY";
+    const pitchDeck =
+      process.env.PITCH_DECK_URL ||
+      "https://github.com/syntaxsurge/clip-yield";
 
     return [
       {
