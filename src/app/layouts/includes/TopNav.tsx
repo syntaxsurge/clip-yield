@@ -9,7 +9,8 @@ import { BiChevronDown, BiSearch, BiUser } from "react-icons/bi";
 import { AiOutlineCopy, AiOutlinePlus } from "react-icons/ai";
 import { FiCheck, FiLogOut, FiSettings } from "react-icons/fi";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance, useChainId } from "wagmi";
+import { getAddress, isAddress } from "viem";
 import { useUser } from "@/app/context/user";
 import createBucketUrl from "@/app/hooks/useCreateBucketUrl";
 import { RandomUsers } from "@/app/types";
@@ -18,12 +19,14 @@ import ThemeToggle from "@/components/ui/theme-toggle";
 import { PrivyConnectButton } from "@/components/ui/PrivyConnectButton";
 import { isAdminAddress } from "@/lib/admin/adminAllowlist";
 import { copyToClipboard, formatShortHash } from "@/lib/utils";
+import { mantleConfig } from "@/lib/web3/mantleConfig";
 
 export default function TopNav() {
     const userContext = useUser();
     const router = useRouter();
     const pathname = usePathname();
     const { address } = useAccount();
+    const chainId = useChainId();
     const [searchProfiles, setSearchProfiles] = useState<RandomUsers[]>([]);
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [showNavMenu, setShowNavMenu] = useState<boolean>(false);
@@ -35,6 +38,36 @@ export default function TopNav() {
     );
     const profileImageUrl = createBucketUrl(userContext?.user?.image || "");
     const walletAddress = userContext?.user?.id ?? "";
+    const normalizedWalletAddress = useMemo(() => {
+        if (!walletAddress) return null;
+        if (!isAddress(walletAddress)) return null;
+        return getAddress(walletAddress);
+    }, [walletAddress]);
+    const isOnMantle = chainId === mantleConfig.chainId;
+    const balancesEnabled = Boolean(showMenu && normalizedWalletAddress && isOnMantle);
+    const nativeBalance = useBalance({
+        address: normalizedWalletAddress ?? undefined,
+        query: { enabled: balancesEnabled },
+    });
+    const wmntBalance = useBalance({
+        address: normalizedWalletAddress ?? undefined,
+        token: mantleConfig.wmntAddress,
+        query: { enabled: balancesEnabled },
+    });
+    const mntBalanceLabel = !balancesEnabled
+        ? "—"
+        : nativeBalance.isLoading
+            ? "Loading…"
+            : nativeBalance.isError
+                ? "—"
+                : nativeBalance.data?.formatted ?? "0";
+    const wmntBalanceLabel = !balancesEnabled
+        ? "—"
+        : wmntBalance.isLoading
+            ? "Loading…"
+            : wmntBalance.isError
+                ? "—"
+                : wmntBalance.data?.formatted ?? "0";
     const displayName = userContext?.user?.name?.trim() || "Creator";
     const userHandle = userContext?.user?.username
         ? `@${userContext.user.username}`
@@ -334,6 +367,24 @@ export default function TopNav() {
                                                             title={walletAddress}
                                                         >
                                                             {walletAddress}
+                                                        </div>
+                                                        <div className="mt-2 space-y-1">
+                                                            <div className="flex items-center justify-between text-xs">
+                                                                <span className="text-gray-500 dark:text-white/60">
+                                                                    MNT balance
+                                                                </span>
+                                                                <span className="font-mono text-gray-700 dark:text-white/70">
+                                                                    {mntBalanceLabel}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center justify-between text-xs">
+                                                                <span className="text-gray-500 dark:text-white/60">
+                                                                    WMNT balance
+                                                                </span>
+                                                                <span className="font-mono text-gray-700 dark:text-white/70">
+                                                                    {wmntBalanceLabel}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
