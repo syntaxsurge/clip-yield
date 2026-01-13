@@ -10,25 +10,6 @@ const nextConfig = {
       },
     ],
   },
-  async headers() {
-    const crossOriginIsolationHeaders = [
-      {
-        key: "Cross-Origin-Opener-Policy",
-        value: "same-origin-allow-popups",
-      },
-      {
-        key: "Cross-Origin-Embedder-Policy",
-        value: "credentialless",
-      },
-    ];
-
-    return [
-      {
-        source: "/projects/:path*",
-        headers: crossOriginIsolationHeaders,
-      },
-    ];
-  },
   async redirects() {
     const demoVideo = process.env.DEMO_VIDEO_URL || "https://www.youtube.com/";
     const pitchDeck = process.env.PITCH_DECK_URL || "https://example.com/";

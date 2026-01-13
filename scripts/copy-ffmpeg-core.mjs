@@ -39,6 +39,27 @@ async function resolveCoreDistDir() {
   );
 }
 
+async function resolveFfmpegWorkerDistDir() {
+  const workerEntryPath = require.resolve("@ffmpeg/ffmpeg/worker");
+  const distDir = path.dirname(workerEntryPath);
+
+  const requiredFiles = ["worker.js", "const.js", "errors.js"];
+  for (const filename of requiredFiles) {
+    const fullPath = path.join(distDir, filename);
+    if (!(await pathExists(fullPath))) {
+      throw new Error(
+        [
+          "FFmpeg worker files not found.",
+          `Missing: ${fullPath}`,
+          "Ensure @ffmpeg/ffmpeg is installed and provides the worker export.",
+        ].join("\n"),
+      );
+    }
+  }
+
+  return distDir;
+}
+
 async function main() {
   const distDir = await resolveCoreDistDir();
   const outDir = path.join(process.cwd(), "public", "ffmpeg");
@@ -58,7 +79,22 @@ async function main() {
     }
   }
 
-  console.log(`[ffmpeg] Copied core assets from ${distDir} → ${outDir}`);
+  const workerDistDir = await resolveFfmpegWorkerDistDir();
+  const workerOutDir = path.join(outDir, "class-worker");
+
+  await fs.mkdir(workerOutDir, { recursive: true });
+
+  const workerFiles = ["worker.js", "const.js", "errors.js"];
+  for (const filename of workerFiles) {
+    await fs.copyFile(
+      path.join(workerDistDir, filename),
+      path.join(workerOutDir, filename),
+    );
+  }
+
+  console.log(
+    `[ffmpeg] Copied core assets from ${distDir} → ${outDir}; worker assets from ${workerDistDir} → ${workerOutDir}`,
+  );
 }
 
 main().catch((error) => {

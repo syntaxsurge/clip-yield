@@ -58,30 +58,6 @@ export default function ProjectClient({ projectId }: Props) {
   const { activeSection, activeElement } = projectState;
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const url = new URL(window.location.href);
-    const reloadParam = "__coi_reload";
-
-    if (window.crossOriginIsolated) {
-      if (url.searchParams.has(reloadParam)) {
-        url.searchParams.delete(reloadParam);
-        window.history.replaceState(null, "", url.toString());
-      }
-      return;
-    }
-
-    if (!url.searchParams.has(reloadParam)) {
-      url.searchParams.set(reloadParam, "1");
-      window.location.replace(url.toString());
-      return;
-    }
-
-    url.searchParams.delete(reloadParam);
-    window.history.replaceState(null, "", url.toString());
-  }, []);
-
-  useEffect(() => {
     let cancelled = false;
 
     const loadProject = async () => {

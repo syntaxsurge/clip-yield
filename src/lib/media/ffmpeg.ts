@@ -2,22 +2,13 @@
 
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 
-const loadTimeoutMs = 60000;
-
-let hasWarnedAboutIsolation = false;
+const loadTimeoutMs = 180000;
 
 export async function createLoadedFfmpeg(options?: {
   onLog?: (message: string) => void;
 }) {
   if (typeof window === "undefined") {
     throw new Error("FFmpeg can only be loaded in the browser.");
-  }
-
-  if (!window.crossOriginIsolated && !hasWarnedAboutIsolation) {
-    hasWarnedAboutIsolation = true;
-    console.warn(
-      "FFmpeg: cross-origin isolation is not enabled. Continuing with single-thread FFmpeg; multi-threaded FFmpeg requires COOP/COEP headers in a compatible browser.",
-    );
   }
 
   const ffmpeg = new FFmpeg();
@@ -34,9 +25,14 @@ export async function createLoadedFfmpeg(options?: {
   try {
     const coreURL = new URL("/ffmpeg/ffmpeg-core.js", window.location.origin);
     const wasmURL = new URL("/ffmpeg/ffmpeg-core.wasm", window.location.origin);
+    const classWorkerURL = new URL(
+      "/ffmpeg/class-worker/worker.js",
+      window.location.origin,
+    );
 
     await ffmpeg.load(
       {
+        classWorkerURL: classWorkerURL.toString(),
         coreURL: coreURL.toString(),
         wasmURL: wasmURL.toString(),
       },
@@ -52,10 +48,7 @@ export async function createLoadedFfmpeg(options?: {
     }
 
     const message = error instanceof Error ? error.message : "Unknown error.";
-    const isolationHint = window.crossOriginIsolated
-      ? ""
-      : " (Cross-origin isolation is disabled; if FFmpeg fails to load, use a COOP/COEP-enabled browser session.)";
-    throw new Error(`Failed to load FFmpeg. ${message}${isolationHint}`);
+    throw new Error(`Failed to load FFmpeg. ${message}`);
   } finally {
     clearTimeout(timeoutId);
   }
