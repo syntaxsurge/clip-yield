@@ -298,7 +298,7 @@ export default function StartWizard() {
               <Link href="/yield">Go to yield vault</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/feed">Browse feed</Link>
+              <Link href="/">Browse feed</Link>
             </Button>
           </CardContent>
         </Card>

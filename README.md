@@ -14,7 +14,7 @@ Creator-first short-video platform where sponsorships are tokenized as on-chain 
 ### Project Links
 
 - **Live demo app:** https://clipyield.com/
-- **Demo video:** https://www.youtube.com/watch?v=J651SsaVtJY
+- **Demo video:** https://clipyield.com/demo-video
 - **Repository:** https://github.com/syntaxsurge/clip-yield
 
 ## What ClipYield Builds
