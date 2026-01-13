@@ -567,7 +567,7 @@ export default function FfmpegRender({
           (mediaFiles.length === 0 && textElements.length === 0)
         }
       >
-        {((engine !== "gpu" && !loadFfmpeg) || isRendering) && (
+        {(((engine !== "gpu" && !loadFfmpeg) && !loadError) || isRendering) && (
           <span className="animate-spin mr-2">
             <svg
               viewBox="0 0 1024 1024"
@@ -589,7 +589,9 @@ export default function FfmpegRender({
               ? isRendering
                 ? "Rendering..."
                 : "Render"
-              : "Loading FFmpeg..."}
+              : loadError
+                ? "FFmpeg failed to load"
+                : "Loading FFmpeg..."}
         </p>
       </button>
       {!loadFfmpeg && loadError ? (
