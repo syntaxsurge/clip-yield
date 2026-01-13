@@ -385,7 +385,7 @@ Select **one** backend stack (Drizzle+Supabase or Convex) per project by default
 - Convex scheduled actions confirm Mantle tx hashes for campaign receipts and vault activity, with cron jobs for leaderboard recompute and Boost Pass epoch auto-publish
 - Editor stack in `src/app/components/editor` + `src/lib/media` using Remotion, FFmpeg WASM, and Redux Toolkit with indexedDB persistence scoped to the connected wallet (`src/app/store`)
 - FFmpeg WASM core assets live in `public/ffmpeg` and are synced from `@ffmpeg/core` via `scripts/copy-ffmpeg-core.mjs` (runs on `postinstall` and `pnpm ffmpeg:sync-core`)
-- Project editor routes under `/projects` run cross-origin isolated (COOP/COEP) for FFmpeg WASM support and trigger a one-time hard reload when entered from a non-isolated session
+- Project editor routes under `/projects` serve COOP/COEP headers and trigger a one-time hard reload when entered from a non-isolated session to enable `window.crossOriginIsolated` when supported
 - AI generation uses Sora BYOK keys stored via encrypted cookies (`OPENAI_BYOK_COOKIE_SECRET`) and `/api/sora` routes, surfaced in the editor library AI Studio
 - Mantle Sepolia wallet stack uses Privy UI for email + external wallet connections with wagmi for on-chain interactions (`src/lib/web3/mantle.ts`, `src/lib/web3/mantleConfig.ts`, `src/components/ui/PrivyConnectButton.tsx`)
 - Admin routes are gated by an allowlist in `NEXT_PUBLIC_ADMIN_WALLET_ADDRESSES` and enforced via `src/app/admin/layout.tsx`

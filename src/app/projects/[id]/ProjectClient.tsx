@@ -71,15 +71,14 @@ export default function ProjectClient({ projectId }: Props) {
       return;
     }
 
-    if (url.searchParams.has(reloadParam)) {
-      toast.error(
-        "FFmpeg needs cross-origin isolation. Hard reload this page to enable it.",
-      );
+    if (!url.searchParams.has(reloadParam)) {
+      url.searchParams.set(reloadParam, "1");
+      window.location.replace(url.toString());
       return;
     }
 
-    url.searchParams.set(reloadParam, "1");
-    window.location.replace(url.toString());
+    url.searchParams.delete(reloadParam);
+    window.history.replaceState(null, "", url.toString());
   }, []);
 
   useEffect(() => {
