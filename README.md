@@ -17,7 +17,13 @@ Creator-first short-video platform where sponsorships are tokenized as on-chain 
 
 - **Live demo app:** https://clipyield.com/
 - **Demo video:** https://clipyield.com/demo-video
+- **Pitch deck:** https://www.canva.com/design/DAG-o-kOOrU/l0bBwQ5eGM5wVsTFP9LQLw/edit?utm_content=DAG-o-kOOrU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 - **Repository:** https://github.com/syntaxsurge/clip-yield
+
+### Team
+
+- **Jade Laurence Empleo:** Full-stack developer (architecture, smart contracts/backend, integrations, deployment, demo)
+- **Aira Jayoma:** Product & Pitch (pitch deck, product narrative, user flow, demo script, Q&A prep); UI/UX (Figma/wireframes + feedback/iterations sa UI)
 
 ## What ClipYield Builds
 
