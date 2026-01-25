@@ -18,6 +18,7 @@ Creator-first short-video platform where sponsorships are tokenized as on-chain 
 - **Live demo app:** https://clipyield.com/
 - **Demo video:** https://clipyield.com/demo-video
 - **Pitch deck:** https://www.canva.com/design/DAG-o-kOOrU/l0bBwQ5eGM5wVsTFP9LQLw/edit?utm_content=DAG-o-kOOrU&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+- **Pitch deck video presentation:** https://www.youtube.com/watch?v=Zy4Eje28EyQ
 - **Repository:** https://github.com/syntaxsurge/clip-yield
 
 ### Team
